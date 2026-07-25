@@ -1,0 +1,9 @@
+## Atalho: "bob"
+
+Quando o usuário disser "usa o bob", isso significa usar o conjunto de agents e skills do ECC instalados em `~/.claude/agents/` e `~/.claude/skills/ecc/`:
+
+**Agents:** architect, code-architect, code-reviewer, code-simplifier, security-reviewer, performance-optimizer, refactor-cleaner, tdd-guide, react-reviewer, react-build-resolver, typescript-reviewer, vue-reviewer, fastapi-reviewer, django-reviewer, database-reviewer, a11y-architect, build-error-resolver, planner.
+
+**Skills:** frontend-patterns, frontend-design-direction, frontend-a11y, design-system, react-patterns, react-performance, react-testing, vue-patterns, nextjs-turbopack, nuxt4-patterns, backend-patterns, api-design, database-migrations, postgres-patterns, redis-patterns, fastapi-patterns, django-patterns, nestjs-patterns, security-review, security-scan, coding-standards, error-handling, tdd-workflow, e2e-testing, git-workflow, motion-foundations, motion-patterns, motion-ui, liquid-glass-design, ui-demo, accessibility.
+
+Para site/feature nova: planner/architect → design-system/frontend-design-direction → patterns da stack → code-reviewer/security-reviewer/a11y-architect no final.

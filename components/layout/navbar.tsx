@@ -51,11 +51,11 @@ export function Navbar() {
       <nav className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/#inicio" className="flex items-center gap-2">
           <Image
-            src="/images/logo-pousada-cabana.jpeg"
+            src="/images/logo-pousada-cabana.png"
             alt="Pousada Cabana"
-            width={44}
+            width={40}
             height={44}
-            className="size-11 rounded-full object-cover"
+            className="h-11 w-auto object-contain"
             priority
           />
           <span

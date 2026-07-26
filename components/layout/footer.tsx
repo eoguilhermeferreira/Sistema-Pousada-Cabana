@@ -20,11 +20,11 @@ export function Footer() {
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/logo-pousada-cabana.jpeg"
+              src="/images/logo-pousada-cabana.png"
               alt="Pousada Cabana"
-              width={48}
+              width={43}
               height={48}
-              className="size-12 rounded-full object-cover"
+              className="h-12 w-auto object-contain"
             />
             <span className="font-display text-lg font-semibold">
               Pousada Cabana

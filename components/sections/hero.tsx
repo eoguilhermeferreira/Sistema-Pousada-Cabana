@@ -47,12 +47,12 @@ export function Hero() {
       >
         <motion.div variants={item} className="mb-6">
           <Image
-            src="/images/logo-pousada-cabana.jpeg"
+            src="/images/logo-pousada-cabana.png"
             alt="Pousada Cabana"
-            width={120}
-            height={120}
+            width={126}
+            height={140}
             priority
-            className="size-30 rounded-full object-cover shadow-lg"
+            className="h-35 w-auto object-contain drop-shadow-lg"
           />
         </motion.div>
 

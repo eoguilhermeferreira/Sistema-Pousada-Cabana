@@ -24,19 +24,19 @@ export function Hero() {
       id="inicio"
       className="relative flex min-h-[92svh] items-center justify-center overflow-hidden bg-primary-dark"
     >
-      {/*
-        Vídeo placeholder: quando o vídeo profissional da pousada chegar,
-        troque este bloco por:
-        <video autoPlay muted loop playsInline className="absolute inset-0 size-full object-cover">
-          <source src="/videos/hero.mp4" type="video/mp4" />
-        </video>
-      */}
-      <motion.div
+      <motion.video
         initial={{ opacity: 0, scale: 1.05 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary to-primary-dark"
-      />
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster="/videos/hero-poster.jpg"
+        className="absolute inset-0 size-full object-cover"
+      >
+        <source src="/videos/hero.mp4" type="video/mp4" />
+      </motion.video>
       <div className="absolute inset-0 bg-black/45" />
 
       <motion.div

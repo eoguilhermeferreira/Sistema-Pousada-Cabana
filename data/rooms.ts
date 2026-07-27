@@ -11,7 +11,7 @@ export const rooms: Room[] = [
     maxGuests: 2,
     beds: 1,
     description:
-      "Um quarto aconchegante pensado para casais, com todo o conforto essencial para uma estadia tranquila em meio à natureza.",
+      "Um quarto aconchegante pensado para casais, com todo o conforto essencial para uma estadia tranquila.",
     amenities: ["cama-casal", "ar-condicionado", "wifi", "tv", "banheiro-privativo"],
     images: [],
   },

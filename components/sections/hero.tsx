@@ -67,8 +67,8 @@ export function Hero() {
           variants={item}
           className="mt-5 max-w-xl text-base text-white/85 sm:text-lg"
         >
-          Conforto, natureza e atendimento familiar em cada detalhe da sua
-          estadia.
+          Conforto, tranquilidade e atendimento familiar em cada detalhe da
+          sua estadia.
         </motion.p>
 
         <motion.div

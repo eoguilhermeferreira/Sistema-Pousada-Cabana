@@ -31,7 +31,7 @@ export function Footer() {
             </span>
           </div>
           <p className="max-w-xs text-sm text-white/70">
-            Seu refúgio de tranquilidade em Avaré. Conforto, natureza e
+            Seu refúgio de tranquilidade em Avaré. Conforto, cuidado e
             atendimento familiar em cada detalhe.
           </p>
           <div className="flex gap-3 pt-2">

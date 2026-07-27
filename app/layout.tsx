@@ -20,7 +20,7 @@ const playfairDisplay = Playfair_Display({
 export const metadata: Metadata = {
   title: "Pousada Cabana | Seu refúgio de tranquilidade em Avaré",
   description:
-    "Conheça a Pousada Cabana: conforto, natureza e atendimento familiar em Avaré. Confira nossos quartos e reserve sua estadia.",
+    "Conheça a Pousada Cabana: conforto, tranquilidade e atendimento familiar em Avaré. Confira nossos quartos e reserve sua estadia.",
 };
 
 export default function RootLayout({

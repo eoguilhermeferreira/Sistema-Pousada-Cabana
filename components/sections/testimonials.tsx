@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 import { testimonials } from "@/data/testimonials";
@@ -23,6 +23,16 @@ export function Testimonials() {
 
   function goTo(next: number) {
     setIndex((next + testimonials.length) % testimonials.length);
+  }
+
+  function handleDragEnd(
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo,
+  ) {
+    const threshold = 60;
+    if (info.offset.x < -threshold) goTo(index + 1);
+    else if (info.offset.x > threshold) goTo(index - 1);
+    setPaused(false);
   }
 
   const current = testimonials[index];
@@ -53,15 +63,21 @@ export function Testimonials() {
             <ChevronLeft className="size-5" />
           </button>
 
-          <div className="relative min-h-[420px] flex-1 sm:min-h-[320px]">
+          <div className="relative flex-1 touch-pan-y">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.figure
                 key={index}
+                layout
                 initial={{ opacity: 0, scale: 0.95, y: 24 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.92, y: -24 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute inset-0 flex flex-col items-center gap-4 rounded-2xl bg-white p-8 text-center shadow-lg sm:p-10"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.7}
+                onDragStart={() => setPaused(true)}
+                onDragEnd={handleDragEnd}
+                className="flex min-h-[220px] cursor-grab flex-col items-center justify-center gap-4 rounded-2xl bg-white p-8 text-center shadow-lg active:cursor-grabbing sm:p-10"
               >
                 <div className="flex gap-0.5 text-primary">
                   {Array.from({ length: current.rating }).map((_, i) => (
@@ -76,7 +92,7 @@ export function Testimonials() {
                 <blockquote className="text-sm leading-relaxed text-gray-text sm:text-base">
                   &ldquo;{current.quote}&rdquo;
                 </blockquote>
-                <figcaption className="mt-auto">
+                <figcaption>
                   <p className="text-sm font-semibold text-primary-dark">
                     {current.name}
                   </p>

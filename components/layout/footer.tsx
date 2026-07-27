@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Phone, Clock } from "lucide-react";
 
-import { contact, buildWhatsappUrl } from "@/data/contact";
+import { contact, buildWhatsappUrl, nodexInstagramUrl } from "@/data/contact";
 import { FacebookIcon, InstagramIcon } from "@/components/icons/social";
 
 const quickLinks = [
@@ -115,8 +115,15 @@ export function Footer() {
       <div className="border-t border-white/10 py-6">
         <p className="text-center text-xs text-white/60">
           Desenvolvido por{" "}
-          <span className="font-semibold text-white/80">NODEX</span> | Agência
-          de Marketing Digital
+          <Link
+            href={nodexInstagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-white/80 underline underline-offset-2 hover:text-white"
+          >
+            NODEX
+          </Link>{" "}
+          | Agência de Marketing Digital
         </p>
       </div>
     </footer>

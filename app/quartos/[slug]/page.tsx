@@ -47,7 +47,8 @@ export default async function RoomPage({
   if (!room) notFound();
 
   const isPlus = room.badge.toLowerCase().includes("plus");
-  const isPremium = room.category === "premium";
+  const showGuestTools =
+    room.category === "premium" || room.category === "cabana-prime";
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:px-8">
@@ -106,7 +107,7 @@ export default async function RoomPage({
             </div>
           </div>
 
-          {isPremium && (
+          {showGuestTools && (
             <div className="mt-8">
               <ChildrenPolicyNotice />
             </div>
@@ -169,7 +170,7 @@ export default async function RoomPage({
             </p>
           </aside>
 
-          {isPremium && <GuestCalculator room={room} />}
+          {showGuestTools && <GuestCalculator room={room} />}
         </div>
       </div>
     </div>

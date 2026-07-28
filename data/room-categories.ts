@@ -26,6 +26,12 @@ export const roomCategories: RoomCategory[] = [
     description:
       "Quartos Premium com ar-condicionado, frigobar e mais conforto para sua hospedagem.",
   },
+  {
+    slug: "cabana-prime",
+    label: "Cabana Prime",
+    description:
+      "Nossa categoria mais completa, com ar-condicionado, Wi-Fi gratuito e o máximo em conforto para uma hospedagem inesquecível na Pousada Cabana.",
+  },
 ];
 
 export function getRoomCategory(slug: string) {

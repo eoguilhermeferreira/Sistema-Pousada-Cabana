@@ -25,13 +25,38 @@ export function Hero() {
   React.useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
     // React doesn't always emit the `muted` HTML attribute during SSR, and
     // browsers only allow autoplay on videos that are muted at the moment
     // playback is requested — so we force it here before calling play().
     video.muted = true;
-    video.play().catch(() => {
-      // Autoplay was blocked (e.g. low-power mode); the poster stays visible.
+
+    const tryPlay = () => video.play().catch(() => {});
+
+    // Some mobile browsers (Data Saver / low-power modes, in-app browsers)
+    // reject the first play() attempt until the video has actually buffered
+    // data, or block programmatic autoplay entirely until the user
+    // interacts with the page — so we retry on those signals too, instead
+    // of leaving the poster frozen after a single failed attempt.
+    tryPlay();
+    video.addEventListener("loadeddata", tryPlay);
+    document.addEventListener("visibilitychange", tryPlay);
+
+    const resumeOnInteraction = () => {
+      if (video.paused) tryPlay();
+    };
+    document.addEventListener("touchstart", resumeOnInteraction, {
+      once: true,
+      passive: true,
     });
+    document.addEventListener("click", resumeOnInteraction, { once: true });
+
+    return () => {
+      video.removeEventListener("loadeddata", tryPlay);
+      document.removeEventListener("visibilitychange", tryPlay);
+      document.removeEventListener("touchstart", resumeOnInteraction);
+      document.removeEventListener("click", resumeOnInteraction);
+    };
   }, []);
 
   return (
@@ -48,6 +73,7 @@ export function Hero() {
         muted
         loop
         playsInline
+        webkit-playsinline="true"
         preload="auto"
         poster="/videos/hero-poster.jpg"
         className="absolute inset-0 size-full object-cover"

@@ -9,6 +9,8 @@ import {
   Coffee,
   Car,
   Bath,
+  Waves,
+  ChefHat,
   DoorOpen,
   type LucideIcon,
 } from "lucide-react";
@@ -26,5 +28,7 @@ export const amenityMeta: Record<RoomAmenity, { label: string; icon: LucideIcon 
   "cafe-da-manha": { label: "Café da manhã", icon: Coffee },
   estacionamento: { label: "Estacionamento", icon: Car },
   banheira: { label: "Banheira", icon: Bath },
+  "banheira-hidromassagem": { label: "Banheira de hidromassagem", icon: Waves },
+  cozinha: { label: "Cozinha", icon: ChefHat },
   sacada: { label: "Sacada", icon: DoorOpen },
 };

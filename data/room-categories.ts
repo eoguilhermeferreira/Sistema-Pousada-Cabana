@@ -4,9 +4,9 @@ export interface RoomCategory {
   description: string;
 }
 
-// Cadastro por categoria. Ao criar a próxima etapa (Premium, Cabana Prime),
-// basta adicionar a categoria aqui e os quartos correspondentes em
-// data/rooms.ts — nenhum componente precisa mudar.
+// Cadastro por categoria. Ao criar a próxima etapa (Cabana Prime), basta
+// adicionar a categoria aqui e os quartos correspondentes em data/rooms.ts —
+// nenhum componente precisa mudar.
 export const roomCategories: RoomCategory[] = [
   {
     slug: "simples",
@@ -19,6 +19,12 @@ export const roomCategories: RoomCategory[] = [
     label: "Quartos Standard",
     description:
       "Quartos ideais para hóspedes que procuram mais conforto, oferecendo ar-condicionado, banheiro privativo e um ambiente aconchegante para toda a família.",
+  },
+  {
+    slug: "premium",
+    label: "Quartos Premium",
+    description:
+      "Quartos Premium com ar-condicionado, frigobar e mais conforto para sua hospedagem.",
   },
 ];
 

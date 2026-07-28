@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Star, Users } from "lucide-react";
 
 import { getRoomBySlug, getStartingPrice, rooms } from "@/data/rooms";
 import { buildWhatsappUrl } from "@/data/contact";
@@ -10,6 +10,8 @@ import { formatBeds } from "@/lib/beds";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
+import { ChildrenPolicyNotice } from "@/components/quartos/children-policy-notice";
+import { GuestCalculator } from "@/components/quartos/guest-calculator";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -45,6 +47,7 @@ export default async function RoomPage({
   if (!room) notFound();
 
   const isPlus = room.badge.toLowerCase().includes("plus");
+  const isPremium = room.category === "premium";
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:px-8">
@@ -60,7 +63,10 @@ export default async function RoomPage({
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_320px]">
         <div>
-          <Badge variant={isPlus ? "plus" : "default"}>{room.badge}</Badge>
+          <Badge variant={isPlus ? "plus" : "default"}>
+            {isPlus && <Star className="size-3" fill="currentColor" strokeWidth={0} />}
+            {room.badge}
+          </Badge>
           <h1 className="mt-3 font-display text-3xl font-semibold text-primary-dark sm:text-4xl">
             {room.name}
           </h1>
@@ -99,46 +105,72 @@ export default async function RoomPage({
               })}
             </div>
           </div>
+
+          {isPremium && (
+            <div className="mt-8">
+              <ChildrenPolicyNotice />
+            </div>
+          )}
         </div>
 
-        <aside className="h-fit rounded-2xl border border-gray-light bg-white p-6 shadow-sm lg:sticky lg:top-24">
-          <p className="text-xs text-gray-text">a partir de</p>
-          <p className="font-sans text-3xl font-semibold text-primary-dark">
-            {currency.format(getStartingPrice(room))}
-            <span className="text-sm font-normal text-gray-text"> /diária</span>
-          </p>
+        <div className="space-y-6">
+          <aside className="h-fit rounded-2xl border border-gray-light bg-white p-6 shadow-sm lg:sticky lg:top-24">
+            <p className="text-xs text-gray-text">a partir de</p>
+            <p className="font-sans text-3xl font-semibold text-primary-dark">
+              {currency.format(getStartingPrice(room))}
+              <span className="text-sm font-normal text-gray-text"> /diária</span>
+            </p>
 
-          <ul className="mt-4 space-y-2 border-t border-gray-light pt-4">
-            {room.pricing.map((tier) => (
-              <li
-                key={tier.label}
-                className="flex items-center justify-between text-sm"
+            <ul className="mt-4 space-y-2 border-t border-gray-light pt-4">
+              {room.pricing.map((tier) => (
+                <li
+                  key={tier.label}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span className="text-gray-text">{tier.label}</span>
+                  <span className="font-sans font-medium text-primary-dark">
+                    {tier.isIncrement ? "+ " : ""}
+                    {currency.format(tier.price)}
+                    {tier.isIncrement ? " / pessoa" : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            {room.addons && room.addons.length > 0 && (
+              <ul className="mt-2 space-y-2 border-t border-gray-light pt-2">
+                {room.addons.map((addon) => (
+                  <li
+                    key={addon.label}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="text-gray-text">{addon.label}</span>
+                    <span className="font-sans font-medium text-primary-dark">
+                      + {currency.format(addon.price)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <Button asChild size="lg" className="mt-6 w-full">
+              <Link
+                href={buildWhatsappUrl(
+                  `Olá! Tenho interesse em reservar o ${room.name}.`,
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <span className="text-gray-text">{tier.label}</span>
-                <span className="font-sans font-medium text-primary-dark">
-                  {tier.isIncrement ? "+ " : ""}
-                  {currency.format(tier.price)}
-                  {tier.isIncrement ? " / pessoa" : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
+                Reservar Agora
+              </Link>
+            </Button>
+            <p className="mt-3 text-center text-xs text-gray-text">
+              Você será direcionado ao WhatsApp para confirmar sua reserva.
+            </p>
+          </aside>
 
-          <Button asChild size="lg" className="mt-6 w-full">
-            <Link
-              href={buildWhatsappUrl(
-                `Olá! Tenho interesse em reservar o ${room.name}.`,
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Reservar Agora
-            </Link>
-          </Button>
-          <p className="mt-3 text-center text-xs text-gray-text">
-            Você será direcionado ao WhatsApp para confirmar sua reserva.
-          </p>
-        </aside>
+          {isPremium && <GuestCalculator room={room} />}
+        </div>
       </div>
     </div>
   );

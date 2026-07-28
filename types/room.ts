@@ -9,6 +9,8 @@ export type RoomAmenity =
   | "cafe-da-manha"
   | "estacionamento"
   | "banheira"
+  | "banheira-hidromassagem"
+  | "cozinha"
   | "sacada";
 
 export type BedType = "solteiro" | "casal";
@@ -38,5 +40,7 @@ export interface Room {
   description: string;
   amenities: RoomAmenity[];
   pricing: PricingTier[];
+  /** optional named extras shown separately from the base pricing (e.g. banheira de hidromassagem) */
+  addons?: PricingTier[];
   images: string[];
 }

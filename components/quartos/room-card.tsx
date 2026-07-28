@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Users } from "lucide-react";
+import { ArrowRight, Star, Users } from "lucide-react";
 
 import type { Room } from "@/types/room";
 import { getStartingPrice } from "@/data/rooms";
@@ -28,6 +28,7 @@ export function RoomCard({ room }: { room: Room }) {
           variant={isPlus ? "plus" : "solid"}
           className="absolute left-4 top-4"
         >
+          {isPlus && <Star className="size-3" fill="currentColor" strokeWidth={0} />}
           {room.badge}
         </Badge>
       </div>

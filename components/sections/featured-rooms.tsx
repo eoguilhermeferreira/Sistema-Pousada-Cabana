@@ -2,11 +2,22 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { rooms } from "@/data/rooms";
+import { roomCategories } from "@/data/room-categories";
 import { RoomCard } from "@/components/quartos/room-card";
 import { Button } from "@/components/ui/button";
 
 export function FeaturedRooms() {
-  const featured = rooms.slice(0, 3);
+  const featured = roomCategories
+    .map((category) => {
+      const roomsInCategory = rooms.filter(
+        (room) => room.category === category.slug,
+      );
+      return (
+        roomsInCategory.find((room) => room.badge.toLowerCase().includes("plus")) ??
+        roomsInCategory[0]
+      );
+    })
+    .filter((room): room is NonNullable<typeof room> => Boolean(room));
 
   return (
     <section className="bg-gray-light py-20 sm:py-28">
@@ -28,7 +39,7 @@ export function FeaturedRooms() {
           </Button>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((room) => (
             <RoomCard key={room.slug} room={room} />
           ))}

@@ -42,8 +42,8 @@ export function About() {
           <p className="mt-4 text-base leading-relaxed text-gray-text">
             A Pousada Cabana nasceu do desejo de oferecer um lugar simples e
             acolhedor para quem busca descanso de verdade. Cuidamos de cada
-            detalhe para que sua estadia seja tranquila, confortável e
-            memorável — do primeiro contato ao check-out.
+            detalhe, do primeiro contato ao check-out, para que sua estadia
+            seja tranquila, confortável e memorável.
           </p>
 
           <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">

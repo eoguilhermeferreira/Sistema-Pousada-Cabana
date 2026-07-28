@@ -55,7 +55,7 @@ export function RoomCard({ room }: { room: Room }) {
             <p className="text-xs text-gray-text">a partir de</p>
             <p className="font-sans text-xl font-semibold text-primary-dark">
               {currency.format(room.pricePerNight)}
-              <span className="text-sm font-normal text-gray-text"> /noite</span>
+              <span className="text-sm font-normal text-gray-text"> /diária</span>
             </p>
           </div>
           <Button asChild variant="ghost" size="sm">

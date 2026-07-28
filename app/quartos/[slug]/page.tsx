@@ -96,7 +96,7 @@ export default async function RoomPage({
           <p className="text-xs text-gray-text">a partir de</p>
           <p className="font-sans text-3xl font-semibold text-primary-dark">
             {currency.format(room.pricePerNight)}
-            <span className="text-sm font-normal text-gray-text"> /noite</span>
+            <span className="text-sm font-normal text-gray-text"> /diária</span>
           </p>
           <Button asChild size="lg" className="mt-6 w-full">
             <Link

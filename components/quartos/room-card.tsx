@@ -53,7 +53,7 @@ export function RoomCard({ room }: { room: Room }) {
         <div className="mt-auto flex items-center justify-between pt-2">
           <div>
             <p className="text-xs text-gray-text">a partir de</p>
-            <p className="font-display text-xl font-semibold text-primary-dark">
+            <p className="font-sans text-xl font-semibold text-primary-dark">
               {currency.format(room.pricePerNight)}
               <span className="text-sm font-normal text-gray-text"> /noite</span>
             </p>

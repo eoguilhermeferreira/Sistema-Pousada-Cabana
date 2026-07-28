@@ -94,7 +94,7 @@ export default async function RoomPage({
 
         <aside className="h-fit rounded-2xl border border-gray-light bg-white p-6 shadow-sm lg:sticky lg:top-24">
           <p className="text-xs text-gray-text">a partir de</p>
-          <p className="font-display text-3xl font-semibold text-primary-dark">
+          <p className="font-sans text-3xl font-semibold text-primary-dark">
             {currency.format(room.pricePerNight)}
             <span className="text-sm font-normal text-gray-text"> /noite</span>
           </p>

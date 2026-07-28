@@ -10,10 +10,10 @@ export interface RoomFiltersState {
 }
 
 const filterableAmenities: RoomAmenity[] = [
-  "ar-condicionado",
+  "banheiro-privativo",
+  "banheiro-compartilhado",
+  "ventilador",
   "frigobar",
-  "banheira",
-  "sacada",
 ];
 
 export function RoomFilters({
@@ -22,7 +22,7 @@ export function RoomFilters({
   state,
   onChange,
 }: {
-  categories: string[];
+  categories: { slug: string; label: string }[];
   priceRange: { min: number; max: number };
   state: RoomFiltersState;
   onChange: (next: RoomFiltersState) => void;
@@ -44,14 +44,13 @@ export function RoomFilters({
           Categoria
         </label>
         <div className="mt-2 flex flex-wrap gap-2">
-          {["Todas", ...categories].map((category) => {
-            const value = category === "Todas" ? "" : category;
-            const active = state.category === value;
+          {[{ slug: "", label: "Todas" }, ...categories].map((category) => {
+            const active = state.category === category.slug;
             return (
               <button
-                key={category}
+                key={category.slug || "todas"}
                 type="button"
-                onClick={() => onChange({ ...state, category: value })}
+                onClick={() => onChange({ ...state, category: category.slug })}
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-200",
                   active
@@ -59,7 +58,7 @@ export function RoomFilters({
                     : "border-gray-light text-gray-text hover:border-primary/40",
                 )}
               >
-                {category}
+                {category.label}
               </button>
             );
           })}

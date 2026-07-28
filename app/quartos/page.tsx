@@ -21,7 +21,7 @@ export default async function QuartosPage({
   const initialGuests = Number(guestsParam) > 0 ? Number(guestsParam) : 1;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:px-8">
       <div className="mb-10 max-w-2xl">
         <p className="text-sm font-medium uppercase tracking-wide text-primary">
           Acomodações

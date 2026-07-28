@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
@@ -19,12 +20,27 @@ const item: Variants = {
 };
 
 export function Hero() {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    // React doesn't always emit the `muted` HTML attribute during SSR, and
+    // browsers only allow autoplay on videos that are muted at the moment
+    // playback is requested — so we force it here before calling play().
+    video.muted = true;
+    video.play().catch(() => {
+      // Autoplay was blocked (e.g. low-power mode); the poster stays visible.
+    });
+  }, []);
+
   return (
     <section
       id="inicio"
       className="relative flex min-h-[92svh] items-center justify-center overflow-hidden bg-primary-dark"
     >
       <motion.video
+        ref={videoRef}
         initial={{ opacity: 0, scale: 1.05 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
@@ -32,9 +48,11 @@ export function Hero() {
         muted
         loop
         playsInline
+        preload="auto"
         poster="/videos/hero-poster.jpg"
         className="absolute inset-0 size-full object-cover"
       >
+        <source src="/videos/hero.webm" type="video/webm" />
         <source src="/videos/hero.mp4" type="video/mp4" />
       </motion.video>
       <div className="absolute inset-0 bg-black/45" />

@@ -137,6 +137,130 @@ export const rooms: Room[] = [
     pricing: [{ label: "1 Pessoa", price: 120 }],
     images: [],
   },
+  {
+    slug: "quarto-02",
+    roomNumber: "02",
+    name: "Quarto 02",
+    category: "standard",
+    badge: "Standard",
+    maxGuests: 3,
+    beds: [
+      { type: "casal", count: 1 },
+      { type: "solteiro", count: 1 },
+    ],
+    description:
+      "Quarto Standard com cama de casal e cama de solteiro, ar-condicionado e banheiro privativo — conforto de sobra para famílias pequenas.",
+    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    pricing: [
+      { label: "1 Pessoa", price: 130 },
+      { label: "2 Pessoas", price: 220 },
+      { label: "A partir da 3ª pessoa", price: 110, isIncrement: true },
+    ],
+    images: [],
+  },
+  {
+    slug: "quarto-04",
+    roomNumber: "04",
+    name: "Quarto 04",
+    category: "standard",
+    badge: "Standard",
+    maxGuests: 2,
+    beds: [{ type: "solteiro", count: 2 }],
+    description:
+      "Quarto Standard com duas camas de solteiro, ar-condicionado e banheiro privativo, ideal para quem busca mais conforto.",
+    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    pricing: [
+      { label: "1 Pessoa", price: 130 },
+      { label: "2 Pessoas", price: 220 },
+    ],
+    images: [],
+  },
+  {
+    slug: "quarto-05",
+    roomNumber: "05",
+    name: "Quarto 05",
+    category: "standard",
+    badge: "Standard",
+    maxGuests: 2,
+    beds: [{ type: "solteiro", count: 2 }],
+    description:
+      "Quarto Standard com duas camas de solteiro, ar-condicionado e banheiro privativo, ideal para quem busca mais conforto.",
+    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    pricing: [
+      { label: "1 Pessoa", price: 130 },
+      { label: "2 Pessoas", price: 220 },
+    ],
+    images: [],
+  },
+  {
+    slug: "quarto-11",
+    roomNumber: "11",
+    name: "Quarto 11",
+    category: "standard",
+    badge: "Standard",
+    maxGuests: 2,
+    beds: [{ type: "solteiro", count: 2 }],
+    description:
+      "Quarto Standard com duas camas de solteiro, ar-condicionado e banheiro privativo, ideal para quem busca mais conforto.",
+    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    pricing: [
+      { label: "1 Pessoa", price: 130 },
+      { label: "2 Pessoas", price: 220 },
+    ],
+    images: [],
+  },
+  {
+    slug: "quarto-12",
+    roomNumber: "12",
+    name: "Quarto 12",
+    category: "standard",
+    badge: "Standard",
+    maxGuests: 3,
+    beds: [{ type: "solteiro", count: 3 }],
+    description:
+      "Quarto Standard espaçoso com três camas de solteiro, ar-condicionado e banheiro privativo — ótima opção para grupos.",
+    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    pricing: [
+      { label: "1 Pessoa", price: 130 },
+      { label: "2 Pessoas", price: 220 },
+      { label: "A partir da 3ª pessoa", price: 110, isIncrement: true },
+    ],
+    images: [],
+  },
+  {
+    slug: "quarto-16",
+    roomNumber: "16",
+    name: "Quarto 16",
+    category: "standard",
+    badge: "Standard",
+    maxGuests: 2,
+    beds: [{ type: "casal", count: 1 }],
+    description:
+      "Quarto Standard com cama de casal, ar-condicionado e banheiro privativo, ideal para casais que procuram mais conforto.",
+    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    pricing: [
+      { label: "1 Pessoa", price: 130 },
+      { label: "2 Pessoas", price: 220 },
+    ],
+    images: [],
+  },
+  {
+    slug: "quarto-17",
+    roomNumber: "17",
+    name: "Quarto 17",
+    category: "standard",
+    badge: "Standard",
+    maxGuests: 2,
+    beds: [{ type: "casal", count: 1 }],
+    description:
+      "Quarto Standard com cama de casal, ar-condicionado e banheiro privativo, ideal para casais que procuram mais conforto.",
+    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    pricing: [
+      { label: "1 Pessoa", price: 130 },
+      { label: "2 Pessoas", price: 220 },
+    ],
+    images: [],
+  },
 ];
 
 export function getRoomBySlug(slug: string) {

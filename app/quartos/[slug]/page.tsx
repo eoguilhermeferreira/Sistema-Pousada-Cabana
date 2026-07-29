@@ -7,7 +7,6 @@ import { getRoomBySlug, getStartingPrice, rooms } from "@/data/rooms";
 import { buildWhatsappUrl } from "@/data/contact";
 import { amenityMeta } from "@/lib/amenities";
 import { formatBeds } from "@/lib/beds";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
@@ -49,6 +48,7 @@ export default async function RoomPage({
   if (!room) notFound();
 
   const isPlus = room.badge.toLowerCase().includes("plus");
+  const BreakfastIcon = amenityMeta["cafe-da-manha"].icon;
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:px-8">
@@ -91,27 +91,35 @@ export default async function RoomPage({
               Características
             </h2>
             <div className="mt-4 flex flex-col gap-3">
-              {room.amenities.map((amenity) => {
-                const meta = amenityMeta[amenity];
-                const Icon = meta.icon;
-                const isBreakfast = amenity === "cafe-da-manha";
-                return (
-                  <div
-                    key={amenity}
-                    className={cn(
-                      "flex w-fit items-center gap-2 text-sm",
-                      isBreakfast
-                        ? "rounded-full bg-primary-light px-3 py-1.5 font-medium text-primary-dark"
-                        : "text-gray-text",
-                    )}
-                  >
-                    <Icon className="size-4 text-primary" strokeWidth={1.75} />
-                    {meta.label}
-                  </div>
-                );
-              })}
+              {room.amenities
+                .filter((amenity) => amenity !== "cafe-da-manha")
+                .map((amenity) => {
+                  const meta = amenityMeta[amenity];
+                  const Icon = meta.icon;
+                  return (
+                    <div
+                      key={amenity}
+                      className="flex items-center gap-2 text-sm text-gray-text"
+                    >
+                      <Icon className="size-4 text-primary" strokeWidth={1.75} />
+                      {meta.label}
+                    </div>
+                  );
+                })}
             </div>
           </div>
+
+          {room.amenities.includes("cafe-da-manha") && (
+            <div className="mt-8">
+              <h2 className="font-display text-lg font-semibold text-primary-dark">
+                Incluso
+              </h2>
+              <div className="mt-4 flex w-fit items-center gap-2 rounded-full bg-primary-light px-3 py-1.5 text-sm font-medium text-primary-dark">
+                <BreakfastIcon className="size-4 text-primary" strokeWidth={1.75} />
+                {amenityMeta["cafe-da-manha"].label}
+              </div>
+            </div>
+          )}
 
           <div className="mt-8">
             <ChildrenPolicyNotice />

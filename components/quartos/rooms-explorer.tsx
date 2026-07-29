@@ -11,9 +11,11 @@ import { RoomFilters, type RoomFiltersState } from "@/components/quartos/room-fi
 export function RoomsExplorer({
   rooms,
   initialGuests,
+  guestsQueryString,
 }: {
   rooms: Room[];
   initialGuests: number;
+  guestsQueryString?: string;
 }) {
   const categories = React.useMemo(() => {
     const present = new Set(rooms.map((r) => r.category));
@@ -84,7 +86,11 @@ export function RoomsExplorer({
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {filteredRooms.map((room) => (
-              <RoomCard key={room.slug} room={room} />
+              <RoomCard
+                key={room.slug}
+                room={room}
+                guestsQueryString={guestsQueryString}
+              />
             ))}
           </div>
         )}

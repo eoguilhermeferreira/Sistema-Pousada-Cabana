@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Star, Users } from "lucide-react";
 
@@ -12,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
 import { RoomName } from "@/components/quartos/room-name";
 import { ChildrenPolicyNotice } from "@/components/quartos/children-policy-notice";
-import { GuestCalculator } from "@/components/quartos/guest-calculator";
+import { GuestSummary } from "@/components/quartos/guest-summary";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -182,7 +183,9 @@ export default async function RoomPage({
             </p>
           </aside>
 
-          <GuestCalculator room={room} />
+          <Suspense fallback={null}>
+            <GuestSummary room={room} />
+          </Suspense>
         </div>
       </div>
     </div>

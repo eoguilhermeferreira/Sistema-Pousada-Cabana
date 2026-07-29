@@ -20,6 +20,15 @@ export default async function QuartosPage({
     : params.guests;
   const initialGuests = Number(guestsParam) > 0 ? Number(guestsParam) : 1;
 
+  const adultsParam = Array.isArray(params.adults) ? params.adults[0] : params.adults;
+  const childrenParam = Array.isArray(params.children)
+    ? params.children[0]
+    : params.children;
+  const guestsQuery = new URLSearchParams();
+  if (adultsParam) guestsQuery.set("adults", adultsParam);
+  if (childrenParam) guestsQuery.set("children", childrenParam);
+  const guestsQueryString = guestsQuery.toString();
+
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:px-8">
       <div className="mb-10 max-w-2xl">
@@ -35,7 +44,11 @@ export default async function QuartosPage({
         </p>
       </div>
 
-      <RoomsExplorer rooms={rooms} initialGuests={initialGuests} />
+      <RoomsExplorer
+        rooms={rooms}
+        initialGuests={initialGuests}
+        guestsQueryString={guestsQueryString}
+      />
     </div>
   );
 }

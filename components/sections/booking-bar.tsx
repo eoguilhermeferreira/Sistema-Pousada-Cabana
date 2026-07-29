@@ -2,29 +2,42 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Search, Users } from "lucide-react";
+import { CalendarDays, ChevronDown, Search, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GuestPicker } from "@/components/quartos/guest-picker";
+import {
+  createGuest,
+  guestsToParams,
+  summarizeGuests,
+  type Guest,
+} from "@/lib/guest-composition";
 
 export function BookingBar() {
   const router = useRouter();
   const [checkIn, setCheckIn] = React.useState("");
   const [checkOut, setCheckOut] = React.useState("");
-  const [guests, setGuests] = React.useState("");
+  const [guests, setGuests] = React.useState<Guest[]>([createGuest("adulto")]);
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  const pickerRef = React.useRef<HTMLDivElement>(null);
 
-  function handleGuestsChange(e: React.ChangeEvent<HTMLInputElement>) {
-    // Strip leading zeros as the user types (e.g. clearing the field and
-    // typing "3" shouldn't leave a stray "0" turning it into "03").
-    setGuests(e.target.value.replace(/^0+(?=\d)/, ""));
-  }
+  React.useEffect(() => {
+    if (!pickerOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setPickerOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [pickerOpen]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    const params = new URLSearchParams();
+    const params = guestsToParams(guests);
     if (checkIn) params.set("checkin", checkIn);
     if (checkOut) params.set("checkout", checkOut);
-    if (guests) params.set("guests", guests);
     router.push(`/quartos?${params.toString()}`);
   }
 
@@ -58,19 +71,25 @@ export function BookingBar() {
           />
         </label>
 
-        <label className="flex-1 space-y-1.5">
+        <div ref={pickerRef} className="relative flex-1 space-y-1.5">
           <span className="flex items-center gap-1.5 text-xs font-medium text-gray-text">
             <Users className="size-3.5" /> Hóspedes
           </span>
-          <Input
-            type="number"
-            min={1}
-            max={12}
-            value={guests}
-            onChange={handleGuestsChange}
-            placeholder="Nº de hóspedes"
-          />
-        </label>
+          <button
+            type="button"
+            onClick={() => setPickerOpen((open) => !open)}
+            className="flex h-11 w-full items-center justify-between rounded-xl border border-gray-text/20 bg-white px-4 text-left text-sm text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            {summarizeGuests(guests)}
+            <ChevronDown className="size-4 shrink-0 text-gray-text" />
+          </button>
+
+          {pickerOpen && (
+            <div className="absolute left-0 top-full z-30 mt-2 w-72 rounded-2xl border border-gray-light bg-white p-4 shadow-xl">
+              <GuestPicker guests={guests} onChange={setGuests} />
+            </div>
+          )}
+        </div>
 
         <Button type="submit" size="lg" className="md:w-auto">
           <Search className="size-4" />

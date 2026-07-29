@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Star, Users } from "lucide-react";
 
 import type { Room } from "@/types/room";
@@ -17,12 +20,29 @@ const currency = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 0,
 });
 
-export function RoomCard({ room }: { room: Room }) {
+export function RoomCard({
+  room,
+  guestsQueryString,
+}: {
+  room: Room;
+  guestsQueryString?: string;
+}) {
+  const router = useRouter();
   const visibleAmenities = room.amenities.slice(0, 4);
   const isPlus = room.badge.toLowerCase().includes("plus");
+  const href = `/quartos/${room.slug}${guestsQueryString ? `?${guestsQueryString}` : ""}`;
 
   return (
-    <article className="group flex w-full flex-col overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
+    <article
+      onClick={() => router.push(href)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") router.push(href);
+      }}
+      role="link"
+      tabIndex={0}
+      aria-label={`Ver detalhes do ${room.name}`}
+      className="group flex w-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg"
+    >
       <div className="relative">
         <MediaPlaceholder className="aspect-4/3 w-full" />
         <Badge
@@ -71,9 +91,12 @@ export function RoomCard({ room }: { room: Room }) {
               <span className="text-sm font-normal text-gray-text"> /diária</span>
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div
+            className="grid grid-cols-2 gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Button asChild variant="ghost" size="sm">
-              <Link href={`/quartos/${room.slug}`}>
+              <Link href={href}>
                 Ver detalhes
                 <ArrowRight className="size-4" />
               </Link>

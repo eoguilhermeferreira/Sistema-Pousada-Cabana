@@ -1,3 +1,5 @@
+import * as React from "react";
+
 import { amenityMeta } from "@/lib/amenities";
 import type { RoomAmenity } from "@/types/room";
 import { cn } from "@/lib/utils";
@@ -27,6 +29,18 @@ export function RoomFilters({
   state: RoomFiltersState;
   onChange: (next: RoomFiltersState) => void;
 }) {
+  const [guestsInput, setGuestsInput] = React.useState(String(state.guests));
+
+  function handleGuestsChange(raw: string) {
+    // Strip leading zeros as the user types (e.g. clearing the field and
+    // typing "3" shouldn't leave a stray "0" turning it into "03").
+    const cleaned = raw.replace(/^0+(?=\d)/, "");
+    setGuestsInput(cleaned);
+    const parsed =
+      cleaned === "" ? 1 : Math.min(12, Math.max(1, Number(cleaned)));
+    onChange({ ...state, guests: parsed });
+  }
+
   function toggleAmenity(amenity: RoomAmenity) {
     const has = state.amenities.includes(amenity);
     onChange({
@@ -100,8 +114,8 @@ export function RoomFilters({
           type="number"
           min={1}
           max={12}
-          value={state.guests}
-          onChange={(e) => onChange({ ...state, guests: Number(e.target.value) })}
+          value={guestsInput}
+          onChange={(e) => handleGuestsChange(e.target.value)}
           className="mt-2 w-full rounded-xl border border-gray-light px-3 py-2 text-sm text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>

@@ -89,7 +89,7 @@ export default async function RoomPage({
             <h2 className="font-display text-lg font-semibold text-primary-dark">
               Características
             </h2>
-            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <div className="mt-4 flex flex-col gap-3">
               {room.amenities.map((amenity) => {
                 const meta = amenityMeta[amenity];
                 const Icon = meta.icon;

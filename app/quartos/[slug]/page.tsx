@@ -48,8 +48,6 @@ export default async function RoomPage({
   if (!room) notFound();
 
   const isPlus = room.badge.toLowerCase().includes("plus");
-  const showGuestTools =
-    room.category === "premium" || room.category === "cabana-prime";
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:px-8">
@@ -108,11 +106,9 @@ export default async function RoomPage({
             </div>
           </div>
 
-          {showGuestTools && (
-            <div className="mt-8">
-              <ChildrenPolicyNotice />
-            </div>
-          )}
+          <div className="mt-8">
+            <ChildrenPolicyNotice />
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -171,7 +167,7 @@ export default async function RoomPage({
             </p>
           </aside>
 
-          {showGuestTools && <GuestCalculator room={room} />}
+          <GuestCalculator room={room} />
         </div>
       </div>
     </div>

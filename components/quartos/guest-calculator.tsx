@@ -56,9 +56,12 @@ function calculateTotal(room: Room, guests: Guest[]) {
 
 export function GuestCalculator({ room }: { room: Room }) {
   const [guests, setGuests] = React.useState<Guest[]>([createGuest("adulto")]);
+  const atCapacity = guests.length >= room.maxGuests;
 
   function addGuest(type: GuestType) {
-    setGuests((current) => [...current, createGuest(type)]);
+    setGuests((current) =>
+      current.length >= room.maxGuests ? current : [...current, createGuest(type)],
+    );
   }
 
   function removeGuest(id: string) {
@@ -147,18 +150,26 @@ export function GuestCalculator({ room }: { room: Room }) {
         <button
           type="button"
           onClick={() => addGuest("adulto")}
-          className="flex items-center gap-1.5 rounded-full border border-gray-light px-3 py-1.5 text-xs font-medium text-primary-dark transition-colors duration-200 hover:border-primary/40"
+          disabled={atCapacity}
+          className="flex items-center gap-1.5 rounded-full border border-gray-light px-3 py-1.5 text-xs font-medium text-primary-dark transition-colors duration-200 hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-gray-light"
         >
           <Plus className="size-3.5" /> Adulto
         </button>
         <button
           type="button"
           onClick={() => addGuest("crianca")}
-          className="flex items-center gap-1.5 rounded-full border border-gray-light px-3 py-1.5 text-xs font-medium text-primary-dark transition-colors duration-200 hover:border-primary/40"
+          disabled={atCapacity}
+          className="flex items-center gap-1.5 rounded-full border border-gray-light px-3 py-1.5 text-xs font-medium text-primary-dark transition-colors duration-200 hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-gray-light"
         >
           <Plus className="size-3.5" /> Criança
         </button>
       </div>
+      {atCapacity && (
+        <p className="mt-2 text-xs text-gray-text">
+          Este quarto acomoda no máximo {room.maxGuests}{" "}
+          {room.maxGuests === 1 ? "hóspede" : "hóspedes"}.
+        </p>
+      )}
 
       <div className="mt-4 flex items-center justify-between border-t border-gray-light pt-4">
         <span className="text-sm text-gray-text">Total estimado</span>

@@ -1,9 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Home, Leaf, MapPin, Wifi, Car, Sparkles } from "lucide-react";
-
-import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 
 const highlights = [
   { icon: Home, label: "Atendimento Familiar" },
@@ -24,7 +23,15 @@ export function About() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <MediaPlaceholder className="aspect-4/3 w-full rounded-2xl" />
+          <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl">
+            <Image
+              src="/images/pousada-fachada.webp"
+              alt="Fachada da Pousada Cabana"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
         </motion.div>
 
         <motion.div

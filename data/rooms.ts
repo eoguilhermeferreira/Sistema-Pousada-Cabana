@@ -14,7 +14,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 1 }],
     description:
       "Quarto econômico e prático, ideal para quem viaja sozinho e busca conforto sem complicação.",
-    amenities: ["tv", "banheiro-privativo", "ventilador"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador"],
     pricing: [{ label: "1 Pessoa", price: 120 }],
     images: [],
   },
@@ -28,7 +28,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto econômico com cama de casal, ideal para casais que procuram praticidade e bom custo-benefício.",
-    amenities: ["tv", "banheiro-privativo", "ventilador"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador"],
     pricing: [
       { label: "1 Pessoa", price: 120 },
       { label: "2 Pessoas", price: 200 },
@@ -45,7 +45,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 4 }],
     description:
       "Quarto econômico e espaçoso, com quatro camas de solteiro — ótima opção para grupos de amigos.",
-    amenities: ["tv", "banheiro-privativo", "ventilador"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador"],
     pricing: [
       { label: "1 Pessoa", price: 120 },
       { label: "2 Pessoas", price: 200 },
@@ -63,7 +63,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 1 }],
     description:
       "Quarto econômico e prático, ideal para quem viaja sozinho e busca conforto sem complicação.",
-    amenities: ["tv", "banheiro-privativo", "ventilador"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador"],
     pricing: [{ label: "1 Pessoa", price: 120 }],
     images: [],
   },
@@ -80,7 +80,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto econômico com cama de casal e cama de solteiro, banheiro compartilhado — boa opção para famílias pequenas.",
-    amenities: ["tv", "banheiro-compartilhado", "ventilador"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-compartilhado", "ventilador"],
     pricing: [
       { label: "1 Pessoa", price: 120 },
       { label: "2 Pessoas", price: 200 },
@@ -98,7 +98,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto econômico com duas camas de solteiro e banheiro compartilhado, ideal para amigos viajando juntos.",
-    amenities: ["tv", "banheiro-compartilhado", "ventilador"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-compartilhado", "ventilador"],
     pricing: [
       { label: "1 Pessoa", price: 120 },
       { label: "2 Pessoas", price: 200 },
@@ -115,7 +115,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 4 }],
     description:
       "Nosso quarto simples com um toque a mais de conforto: além da estrutura econômica, conta com frigobar próprio.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "frigobar"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "frigobar"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -133,7 +133,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 1 }],
     description:
       "Quarto econômico e prático, ideal para quem viaja sozinho e busca conforto sem complicação.",
-    amenities: ["tv", "banheiro-privativo", "ventilador"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador"],
     pricing: [{ label: "1 Pessoa", price: 120 }],
     images: [],
   },
@@ -150,7 +150,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto Standard com cama de casal e cama de solteiro, ar-condicionado e banheiro privativo — conforto de sobra para famílias pequenas.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "ar-condicionado"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -168,7 +168,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Standard com duas camas de solteiro, ar-condicionado e banheiro privativo, ideal para quem busca mais conforto.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "ar-condicionado"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -185,7 +185,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Standard com duas camas de solteiro, ar-condicionado e banheiro privativo, ideal para quem busca mais conforto.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "ar-condicionado"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -202,7 +202,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Standard com duas camas de solteiro, ar-condicionado e banheiro privativo, ideal para quem busca mais conforto.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "ar-condicionado"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -219,7 +219,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 3 }],
     description:
       "Quarto Standard espaçoso com três camas de solteiro, ar-condicionado e banheiro privativo — ótima opção para grupos.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "ar-condicionado"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -237,7 +237,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Standard com cama de casal, ar-condicionado e banheiro privativo, ideal para casais que procuram mais conforto.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "ar-condicionado"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -254,7 +254,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Standard com cama de casal, ar-condicionado e banheiro privativo, ideal para casais que procuram mais conforto.",
-    amenities: ["tv", "banheiro-privativo", "ventilador", "ar-condicionado"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ventilador", "ar-condicionado"],
     pricing: [
       { label: "1 Pessoa", price: 130 },
       { label: "2 Pessoas", price: 220 },
@@ -271,7 +271,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Premium com duas camas de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito para uma estadia com mais conforto.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -291,7 +291,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto Premium com cama de casal e cama de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito — ótima opção para famílias.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -312,7 +312,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto Premium com cama de casal e cama de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito — ótima opção para famílias.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -330,7 +330,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -347,7 +347,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -364,7 +364,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -381,7 +381,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -398,7 +398,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -415,7 +415,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -435,7 +435,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto Premium com cama de casal e cama de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito — ótima opção para famílias.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -453,7 +453,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -470,7 +470,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -487,7 +487,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -504,7 +504,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -521,7 +521,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -538,7 +538,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Premium com duas camas de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito para uma estadia com mais conforto.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -555,7 +555,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -572,7 +572,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Premium com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais.",
-    amenities: ["tv", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "banheiro-privativo", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 140 },
       { label: "2 Pessoas", price: 240 },
@@ -591,6 +591,7 @@ export const rooms: Room[] = [
       "Nosso quarto Premium mais especial: cama de casal, ar-condicionado, frigobar, Wi-Fi gratuito e banheira de hidromassagem para um mergulho relaxante.",
     amenities: [
       "tv",
+      "cafe-da-manha",
       "banheiro-privativo",
       "ar-condicionado",
       "frigobar",
@@ -620,6 +621,7 @@ export const rooms: Room[] = [
       "Quarto Premium com cozinha própria, cama de casal e cama de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito — perfeito para estadias mais longas.",
     amenities: [
       "tv",
+      "cafe-da-manha",
       "banheiro-privativo",
       "ar-condicionado",
       "frigobar",
@@ -644,7 +646,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Cabana Prime com duas camas de solteiro, ar-condicionado e Wi-Fi gratuito, ideal para amigos ou familiares que viajam juntos.",
-    amenities: ["tv", "ar-condicionado", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },
@@ -664,7 +666,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto Cabana Prime com cama de casal e cama de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito, com espaço para até 3 hóspedes.",
-    amenities: ["tv", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },
@@ -682,7 +684,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Cabana Prime com duas camas de solteiro, ar-condicionado e Wi-Fi gratuito, perfeito para quem busca conforto e praticidade.",
-    amenities: ["tv", "ar-condicionado", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },
@@ -702,7 +704,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto Cabana Prime com cama de casal e cama de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito, com espaço para até 3 hóspedes.",
-    amenities: ["tv", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },
@@ -723,7 +725,7 @@ export const rooms: Room[] = [
     ],
     description:
       "Quarto Cabana Prime com cama de casal e cama de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito, com espaço para até 3 hóspedes.",
-    amenities: ["tv", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },
@@ -743,6 +745,7 @@ export const rooms: Room[] = [
       "Quarto Cabana Prime com duas camas de solteiro, sacada, ar-condicionado, frigobar e Wi-Fi gratuito para uma estadia com mais vista e conforto.",
     amenities: [
       "tv",
+      "cafe-da-manha",
       "ar-condicionado",
       "frigobar",
       "ventilador",
@@ -767,6 +770,7 @@ export const rooms: Room[] = [
       "Quarto Cabana Prime com cama de casal, sacada, ar-condicionado, frigobar e Wi-Fi gratuito, pensado para casais que buscam mais conforto.",
     amenities: [
       "tv",
+      "cafe-da-manha",
       "ar-condicionado",
       "frigobar",
       "ventilador",
@@ -791,6 +795,7 @@ export const rooms: Room[] = [
       "Quarto Cabana Prime com cama de casal, sacada, ar-condicionado, frigobar e Wi-Fi gratuito, pensado para casais que buscam mais conforto.",
     amenities: [
       "tv",
+      "cafe-da-manha",
       "ar-condicionado",
       "frigobar",
       "ventilador",
@@ -815,6 +820,7 @@ export const rooms: Room[] = [
       "Quarto Cabana Prime com cama de casal, sacada, ar-condicionado, frigobar e Wi-Fi gratuito, pensado para casais que buscam mais conforto.",
     amenities: [
       "tv",
+      "cafe-da-manha",
       "ar-condicionado",
       "frigobar",
       "ventilador",
@@ -837,7 +843,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Cabana Prime com duas camas de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito para uma hospedagem completa.",
-    amenities: ["tv", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },
@@ -854,7 +860,7 @@ export const rooms: Room[] = [
     beds: [{ type: "solteiro", count: 2 }],
     description:
       "Quarto Cabana Prime com duas camas de solteiro, ar-condicionado, frigobar e Wi-Fi gratuito para uma hospedagem completa.",
-    amenities: ["tv", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },
@@ -871,7 +877,7 @@ export const rooms: Room[] = [
     beds: [{ type: "casal", count: 1 }],
     description:
       "Quarto Cabana Prime com cama de casal, ar-condicionado, frigobar e Wi-Fi gratuito, ideal para casais que buscam mais comodidade.",
-    amenities: ["tv", "ar-condicionado", "frigobar", "ventilador", "wifi"],
+    amenities: ["tv", "cafe-da-manha", "ar-condicionado", "frigobar", "ventilador", "wifi"],
     pricing: [
       { label: "1 Pessoa", price: 165 },
       { label: "2 Pessoas", price: 260 },

@@ -7,6 +7,7 @@ import { getRoomBySlug, getStartingPrice, rooms } from "@/data/rooms";
 import { buildWhatsappUrl } from "@/data/contact";
 import { amenityMeta } from "@/lib/amenities";
 import { formatBeds } from "@/lib/beds";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
@@ -93,10 +94,16 @@ export default async function RoomPage({
               {room.amenities.map((amenity) => {
                 const meta = amenityMeta[amenity];
                 const Icon = meta.icon;
+                const isBreakfast = amenity === "cafe-da-manha";
                 return (
                   <div
                     key={amenity}
-                    className="flex items-center gap-2 text-sm text-gray-text"
+                    className={cn(
+                      "flex w-fit items-center gap-2 text-sm",
+                      isBreakfast
+                        ? "rounded-full bg-primary-light px-3 py-1.5 font-medium text-primary-dark"
+                        : "text-gray-text",
+                    )}
                   >
                     <Icon className="size-4 text-primary" strokeWidth={1.75} />
                     {meta.label}

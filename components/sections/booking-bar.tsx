@@ -11,14 +11,20 @@ export function BookingBar() {
   const router = useRouter();
   const [checkIn, setCheckIn] = React.useState("");
   const [checkOut, setCheckOut] = React.useState("");
-  const [guests, setGuests] = React.useState(2);
+  const [guests, setGuests] = React.useState("");
+
+  function handleGuestsChange(e: React.ChangeEvent<HTMLInputElement>) {
+    // Strip leading zeros as the user types (e.g. clearing the field and
+    // typing "3" shouldn't leave a stray "0" turning it into "03").
+    setGuests(e.target.value.replace(/^0+(?=\d)/, ""));
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     const params = new URLSearchParams();
     if (checkIn) params.set("checkin", checkIn);
     if (checkOut) params.set("checkout", checkOut);
-    params.set("guests", String(guests));
+    if (guests) params.set("guests", guests);
     router.push(`/quartos?${params.toString()}`);
   }
 
@@ -61,7 +67,8 @@ export function BookingBar() {
             min={1}
             max={12}
             value={guests}
-            onChange={(e) => setGuests(Number(e.target.value))}
+            onChange={handleGuestsChange}
+            placeholder="Nº de hóspedes"
           />
         </label>
 

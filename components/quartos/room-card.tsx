@@ -7,6 +7,7 @@ import { buildWhatsappUrl } from "@/data/contact";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RoomName } from "@/components/quartos/room-name";
 import { amenityMeta } from "@/lib/amenities";
 import { formatBeds } from "@/lib/beds";
 
@@ -36,7 +37,7 @@ export function RoomCard({ room }: { room: Room }) {
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-display text-lg font-semibold text-primary-dark">
-            {room.name}
+            <RoomName name={room.name} />
           </h3>
           <span className="flex shrink-0 items-center gap-1 text-xs text-gray-text">
             <Users className="size-3.5" />

@@ -10,6 +10,7 @@ import { formatBeds } from "@/lib/beds";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
+import { RoomName } from "@/components/quartos/room-name";
 import { ChildrenPolicyNotice } from "@/components/quartos/children-policy-notice";
 import { GuestCalculator } from "@/components/quartos/guest-calculator";
 
@@ -69,7 +70,7 @@ export default async function RoomPage({
             {room.badge}
           </Badge>
           <h1 className="mt-3 font-display text-3xl font-semibold text-primary-dark sm:text-4xl">
-            {room.name}
+            <RoomName name={room.name} />
           </h1>
 
           <div className="mt-4 flex flex-wrap gap-5 text-sm text-gray-text">

@@ -109,18 +109,75 @@ export type Database = {
       }
       hospedes: {
         Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
+          cpf: string
           created_at: string
+          data_nascimento: string | null
+          email: string | null
+          empresa: string | null
+          estado: string | null
+          foto_url: string | null
           id: string
+          nome: string
+          numero: string | null
+          observacoes: string | null
+          profissao: string | null
+          rua: string | null
+          sexo: Database["public"]["Enums"]["sexo_hospede"] | null
+          status: Database["public"]["Enums"]["status_hospede"]
+          telefone: string
+          telefone_secundario: string | null
           updated_at: string
         }
         Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf: string
           created_at?: string
+          data_nascimento?: string | null
+          email?: string | null
+          empresa?: string | null
+          estado?: string | null
+          foto_url?: string | null
           id?: string
+          nome: string
+          numero?: string | null
+          observacoes?: string | null
+          profissao?: string | null
+          rua?: string | null
+          sexo?: Database["public"]["Enums"]["sexo_hospede"] | null
+          status?: Database["public"]["Enums"]["status_hospede"]
+          telefone: string
+          telefone_secundario?: string | null
           updated_at?: string
         }
         Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf?: string
           created_at?: string
+          data_nascimento?: string | null
+          email?: string | null
+          empresa?: string | null
+          estado?: string | null
+          foto_url?: string | null
           id?: string
+          nome?: string
+          numero?: string | null
+          observacoes?: string | null
+          profissao?: string | null
+          rua?: string | null
+          sexo?: Database["public"]["Enums"]["sexo_hospede"] | null
+          status?: Database["public"]["Enums"]["status_hospede"]
+          telefone?: string
+          telefone_secundario?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -293,6 +350,8 @@ export type Database = {
     }
     Enums: {
       cargo_usuario: "administrador" | "recepcao" | "financeiro" | "limpeza"
+      sexo_hospede: "masculino" | "feminino" | "outro"
+      status_hospede: "ativo" | "inativo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -421,6 +480,8 @@ export const Constants = {
   public: {
     Enums: {
       cargo_usuario: ["administrador", "recepcao", "financeiro", "limpeza"],
+      sexo_hospede: ["masculino", "feminino", "outro"],
+      status_hospede: ["ativo", "inativo"],
     },
   },
 } as const

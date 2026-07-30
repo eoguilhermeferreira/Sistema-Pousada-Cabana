@@ -4,10 +4,30 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, Mail, TriangleAlert } from "lucide-react";
+import type { AuthError } from "@supabase/supabase-js";
 
 import { signInWithPassword } from "@/services/auth-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+// Supabase devolve tanto erros reais da API (credenciais inválidas,
+// e-mail não confirmado) quanto falhas de rede/conexão como o mesmo tipo
+// de erro. Sem `status`, é uma falha de rede — nunca deveria virar
+// "senha inválida" pro usuário, já que a tentativa nem chegou no servidor.
+function describeAuthError(error: AuthError): string {
+  const message = error.message?.toLowerCase() ?? "";
+
+  if (message.includes("invalid login credentials")) {
+    return "E-mail ou senha inválidos.";
+  }
+  if (message.includes("email not confirmed")) {
+    return "E-mail ainda não confirmado.";
+  }
+  if (!error.status) {
+    return "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.";
+  }
+  return `Erro ao entrar: ${error.message}`;
+}
 
 export function LoginForm() {
   const router = useRouter();
@@ -24,7 +44,7 @@ export function LoginForm() {
     const { error } = await signInWithPassword(email, password);
 
     if (error) {
-      setError("E-mail ou senha inválidos.");
+      setError(describeAuthError(error));
       setLoading(false);
       return;
     }

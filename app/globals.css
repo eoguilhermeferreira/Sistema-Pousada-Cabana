@@ -11,6 +11,19 @@
   --color-primary-light: #eaf3ff;
   --color-gray-light: #f8fafc;
   --color-gray-text: #475569;
+
+  /* Sistema administrativo */
+  --color-admin-bg: #f5f7fa;
+  --color-status-disponivel: #16a34a;
+  --color-status-disponivel-light: #e9f9ef;
+  --color-status-reservado: #0e4da4;
+  --color-status-reservado-light: #eaf3ff;
+  --color-status-ocupado: #dc2626;
+  --color-status-ocupado-light: #fdecec;
+  --color-status-limpeza: #ea580c;
+  --color-status-limpeza-light: #fef1e7;
+  --color-status-manutencao: #7c3aed;
+  --color-status-manutencao-light: #f3ecfe;
 }
 
 @theme inline {
@@ -22,6 +35,18 @@
   --color-primary-light: var(--color-primary-light);
   --color-gray-light: var(--color-gray-light);
   --color-gray-text: var(--color-gray-text);
+
+  --color-admin-bg: var(--color-admin-bg);
+  --color-status-disponivel: var(--color-status-disponivel);
+  --color-status-disponivel-light: var(--color-status-disponivel-light);
+  --color-status-reservado: var(--color-status-reservado);
+  --color-status-reservado-light: var(--color-status-reservado-light);
+  --color-status-ocupado: var(--color-status-ocupado);
+  --color-status-ocupado-light: var(--color-status-ocupado-light);
+  --color-status-limpeza: var(--color-status-limpeza);
+  --color-status-limpeza-light: var(--color-status-limpeza-light);
+  --color-status-manutencao: var(--color-status-manutencao);
+  --color-status-manutencao-light: var(--color-status-manutencao-light);
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-playfair);

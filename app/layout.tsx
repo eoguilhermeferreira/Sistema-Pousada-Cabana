@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { WhatsappButton } from "@/components/layout/whatsapp-button";
-
 import "./globals.css";
 
 const inter = Inter({
@@ -34,10 +30,7 @@ export default function RootLayout({
       className={`${inter.variable} ${playfairDisplay.variable} antialiased`}
     >
       <body className="flex min-h-screen flex-col bg-white text-foreground">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <WhatsappButton />
+        {children}
       </body>
     </html>
   );

@@ -255,7 +255,7 @@ export function QuartoCentralDrawer({
                     <span className="font-semibold text-primary-dark">
                       Total
                     </span>
-                    <span className="font-display text-base font-semibold text-primary-dark">
+                    <span className="font-sans text-base font-semibold text-primary-dark">
                       {currency.format(quarto.valor_diaria)}
                     </span>
                   </div>

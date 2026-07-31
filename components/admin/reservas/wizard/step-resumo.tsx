@@ -127,7 +127,7 @@ export function StepResumo({
         </div>
         <div className="flex items-center justify-between border-t border-gray-light pt-2 text-sm">
           <span className="font-semibold text-primary-dark">Valor total</span>
-          <span className="font-display text-base font-semibold text-primary-dark">
+          <span className="font-sans text-base font-semibold text-primary-dark">
             {currency.format(valores.valorTotal)}
           </span>
         </div>

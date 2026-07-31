@@ -32,7 +32,7 @@ export function WizardQuartoOption({
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="font-display text-base font-semibold text-primary-dark">
+          <p className="font-sans text-base font-semibold text-primary-dark">
             Quarto {quarto.numero}
           </p>
           <span
@@ -58,7 +58,7 @@ export function WizardQuartoOption({
           <Users className="size-4" />
           até {quarto.capacidade_maxima}
         </span>
-        <span className="font-display text-sm font-semibold text-primary-dark">
+        <span className="font-sans text-sm font-semibold text-primary-dark">
           {currency.format(quarto.valor_diaria)}
           <span className="text-xs font-normal text-gray-text">/noite</span>
         </span>

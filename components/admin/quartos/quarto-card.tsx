@@ -41,7 +41,7 @@ export function QuartoCard({
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="font-display text-lg font-semibold text-primary-dark">
+            <p className="font-sans text-lg font-semibold text-primary-dark">
               Quarto {quarto.numero}
             </p>
             <span
@@ -64,7 +64,7 @@ export function QuartoCard({
             até {quarto.capacidade_maxima}{" "}
             {quarto.capacidade_maxima === 1 ? "hóspede" : "hóspedes"}
           </span>
-          <span className="font-display text-base font-semibold text-primary-dark">
+          <span className="font-sans text-base font-semibold text-primary-dark">
             {currency.format(quarto.valor_diaria)}
             <span className="text-xs font-normal text-gray-text">/noite</span>
           </span>

@@ -28,6 +28,12 @@
   --color-status-checkin-light: #e8edf6;
   --color-status-checkout: #d97706;
   --color-status-checkout-light: #fdf1de;
+  --color-status-confirmada: #0891b2;
+  --color-status-confirmada-light: #e3f6fa;
+  --color-status-cancelada: #64748b;
+  --color-status-cancelada-light: #f1f5f9;
+  --color-status-noshow: #9f1239;
+  --color-status-noshow-light: #fce7ec;
 }
 
 @theme inline {
@@ -55,6 +61,12 @@
   --color-status-checkin-light: var(--color-status-checkin-light);
   --color-status-checkout: var(--color-status-checkout);
   --color-status-checkout-light: var(--color-status-checkout-light);
+  --color-status-confirmada: var(--color-status-confirmada);
+  --color-status-confirmada-light: var(--color-status-confirmada-light);
+  --color-status-cancelada: var(--color-status-cancelada);
+  --color-status-cancelada-light: var(--color-status-cancelada-light);
+  --color-status-noshow: var(--color-status-noshow);
+  --color-status-noshow-light: var(--color-status-noshow-light);
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-playfair);

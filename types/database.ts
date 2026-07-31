@@ -432,23 +432,144 @@ export type Database = {
         }
         Relationships: []
       }
-      reservas: {
+      reserva_historico: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          evento: string
+          id: string
+          reserva_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          evento: string
+          id?: string
+          reserva_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          evento?: string
+          id?: string
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_historico_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reserva_hospedes: {
         Row: {
           created_at: string
           id: string
-          updated_at: string
+          idade: number | null
+          nome: string | null
+          reserva_id: string
+          tipo: string
+          valor: number
         }
         Insert: {
           created_at?: string
           id?: string
-          updated_at?: string
+          idade?: number | null
+          nome?: string | null
+          reserva_id: string
+          tipo: string
+          valor?: number
         }
         Update: {
           created_at?: string
           id?: string
-          updated_at?: string
+          idade?: number | null
+          nome?: string | null
+          reserva_id?: string
+          tipo?: string
+          valor?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reserva_hospedes_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservas: {
+        Row: {
+          codigo: string
+          created_at: string
+          data_entrada: string
+          data_saida: string
+          hospede_principal_id: string
+          id: string
+          observacoes: string | null
+          quantidade_adultos: number
+          quantidade_criancas: number
+          quarto_id: string
+          status: Database["public"]["Enums"]["status_reserva"]
+          updated_at: string
+          valor_criancas: number
+          valor_diaria: number
+          valor_total: number
+        }
+        Insert: {
+          codigo?: string
+          created_at?: string
+          data_entrada: string
+          data_saida: string
+          hospede_principal_id: string
+          id?: string
+          observacoes?: string | null
+          quantidade_adultos?: number
+          quantidade_criancas?: number
+          quarto_id: string
+          status?: Database["public"]["Enums"]["status_reserva"]
+          updated_at?: string
+          valor_criancas?: number
+          valor_diaria: number
+          valor_total: number
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          data_entrada?: string
+          data_saida?: string
+          hospede_principal_id?: string
+          id?: string
+          observacoes?: string | null
+          quantidade_adultos?: number
+          quantidade_criancas?: number
+          quarto_id?: string
+          status?: Database["public"]["Enums"]["status_reserva"]
+          updated_at?: string
+          valor_criancas?: number
+          valor_diaria?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservas_hospede_principal_id_fkey"
+            columns: ["hospede_principal_id"]
+            isOneToOne: false
+            referencedRelation: "hospedes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usuarios: {
         Row: {
@@ -500,6 +621,13 @@ export type Database = {
         | "ocupado"
         | "limpeza"
         | "manutencao"
+      status_reserva:
+        | "reservada"
+        | "confirmada"
+        | "checkin_realizado"
+        | "checkout_realizado"
+        | "cancelada"
+        | "no_show"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -636,6 +764,14 @@ export const Constants = {
         "ocupado",
         "limpeza",
         "manutencao",
+      ],
+      status_reserva: [
+        "reservada",
+        "confirmada",
+        "checkin_realizado",
+        "checkout_realizado",
+        "cancelada",
+        "no_show",
       ],
     },
   },

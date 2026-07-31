@@ -1,14 +1,15 @@
 "use client";
 
-import { BedDouble, Sofa } from "lucide-react";
+import { BedDouble, Plus, Sofa } from "lucide-react";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { getDiaCalendario } from "@/data/calendario-mock";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   statusCalendarioBadgeClass,
   statusCalendarioDotClass,
   statusCalendarioLabels,
+  type DiaCalendario,
   type FiltrosCalendario,
   type ReservaResumo,
 } from "@/types/calendario";
@@ -101,18 +102,21 @@ interface DiaDetalheDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   day: Date | null;
+  dia: DiaCalendario | null;
   filtros: FiltrosCalendario;
+  onNovaReserva: () => void;
 }
 
 export function DiaDetalheDrawer({
   open,
   onOpenChange,
   day,
+  dia,
   filtros,
+  onNovaReserva,
 }: DiaDetalheDrawerProps) {
-  if (!day) return null;
+  if (!day || !dia) return null;
 
-  const dia = getDiaCalendario(day);
   const reservas = aplicarFiltros(dia.reservas, filtros);
   const checkins = aplicarFiltros(dia.checkins, filtros);
   const checkouts = aplicarFiltros(dia.checkouts, filtros);
@@ -124,6 +128,11 @@ export function DiaDetalheDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent title={tituloCapitalizado}>
         <div className="space-y-6 px-6 py-6">
+          <Button type="button" onClick={onNovaReserva} className="w-full">
+            <Plus className="size-4" />
+            Nova Reserva neste dia
+          </Button>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-3 rounded-xl border border-gray-light p-3.5">
               <span className="flex size-9 items-center justify-center rounded-lg bg-status-ocupado-light text-status-ocupado">

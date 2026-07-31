@@ -65,7 +65,7 @@ interface HospedeFormDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   hospede: Hospede | null;
-  onSaved: () => void;
+  onSaved: (hospede: Hospede) => void;
 }
 
 export function HospedeFormDrawer({
@@ -217,12 +217,13 @@ export function HospedeFormDrawer({
         ? await updateHospede(hospede.id, payload)
         : await createHospede(payload);
 
+      let finalSaved = saved;
       if (fotoFile) {
         const url = await uploadHospedeFoto(fotoFile, saved.id);
-        await updateHospede(saved.id, { foto_url: url });
+        finalSaved = await updateHospede(saved.id, { foto_url: url });
       }
 
-      onSaved();
+      onSaved(finalSaved);
       onOpenChange(false);
     } catch (error) {
       setFormError(

@@ -6,12 +6,12 @@ import { ListFilter, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { categoriasDisponiveis } from "@/data/calendario-mock";
 import {
   statusCalendarioLabels,
   type FiltrosCalendario,
   type StatusCalendario,
 } from "@/types/calendario";
+import type { CategoriaQuarto } from "@/types/quarto";
 
 const selectClass =
   "flex h-10 w-full rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
@@ -29,9 +29,14 @@ const statusOptions: StatusCalendario[] = [
 interface CalendarioFiltersProps {
   filtros: FiltrosCalendario;
   onChange: (filtros: FiltrosCalendario) => void;
+  categorias: CategoriaQuarto[];
 }
 
-export function CalendarioFilters({ filtros, onChange }: CalendarioFiltersProps) {
+export function CalendarioFilters({
+  filtros,
+  onChange,
+  categorias,
+}: CalendarioFiltersProps) {
   const activeFilters = Object.values(filtros).filter(Boolean).length;
 
   function setField<K extends keyof FiltrosCalendario>(
@@ -100,9 +105,9 @@ export function CalendarioFilters({ filtros, onChange }: CalendarioFiltersProps)
                 onChange={(e) => setField("categoria", e.target.value)}
               >
                 <option value="">Todas</option>
-                {categoriasDisponiveis.map((categoria) => (
-                  <option key={categoria} value={categoria}>
-                    {categoria}
+                {categorias.map((categoria) => (
+                  <option key={categoria.id} value={categoria.nome}>
+                    {categoria.nome}
                   </option>
                 ))}
               </select>

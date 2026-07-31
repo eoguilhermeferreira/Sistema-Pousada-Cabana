@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { UserCheck } from "lucide-react";
 
-import { ComingSoon } from "@/components/admin/coming-soon";
+import { CheckinCheckoutContent } from "@/components/admin/checkin-checkout/checkin-checkout-content";
 
 export const metadata: Metadata = {
   title: "Check-in / Check-out | Sistema Administrativo Pousada Cabana",
 };
 
 export default function CheckinCheckoutPage() {
-  return <ComingSoon icon={UserCheck} title="Check-in / Check-out" etapa="Etapa 6" />;
+  return <CheckinCheckoutContent />;
 }

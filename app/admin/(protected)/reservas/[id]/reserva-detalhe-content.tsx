@@ -63,6 +63,8 @@ const eventoLabels: Record<string, string> = {
   editada: "Reserva editada",
   cancelada: "Reserva cancelada",
   status_alterado: "Status alterado",
+  checkin_realizado: "Check-in realizado",
+  checkout_realizado: "Check-out realizado",
 };
 
 interface ReservaDetalheContentProps {

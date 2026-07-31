@@ -285,3 +285,61 @@ export async function atualizarStatusReserva(
     .eq("id", id);
   if (error) throw error;
 }
+
+export interface OperacaoCheckinCheckoutParams {
+  id: string;
+  quarto_id: string;
+  codigo: string;
+}
+
+export async function realizarCheckin({
+  id,
+  quarto_id,
+  codigo,
+}: OperacaoCheckinCheckoutParams) {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("reservas")
+    .update({ status: "checkin_realizado" })
+    .eq("id", id);
+  if (error) throw error;
+
+  const { error: quartoError } = await supabase
+    .from("quartos")
+    .update({ status: "ocupado" })
+    .eq("id", quarto_id);
+  if (quartoError) throw quartoError;
+
+  await supabase.from("reserva_historico").insert({
+    reserva_id: id,
+    evento: "checkin_realizado",
+    descricao: `Check-in da reserva ${codigo} realizado.`,
+  });
+}
+
+export async function realizarCheckout({
+  id,
+  quarto_id,
+  codigo,
+}: OperacaoCheckinCheckoutParams) {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("reservas")
+    .update({ status: "checkout_realizado" })
+    .eq("id", id);
+  if (error) throw error;
+
+  const { error: quartoError } = await supabase
+    .from("quartos")
+    .update({ status: "limpeza" })
+    .eq("id", quarto_id);
+  if (quartoError) throw quartoError;
+
+  await supabase.from("reserva_historico").insert({
+    reserva_id: id,
+    evento: "checkout_realizado",
+    descricao: `Check-out da reserva ${codigo} realizado.`,
+  });
+}

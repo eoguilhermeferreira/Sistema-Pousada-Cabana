@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Calendar } from "lucide-react";
 
-import { ComingSoon } from "@/components/admin/coming-soon";
+import { CalendarioPageContent } from "@/app/admin/(protected)/calendario/calendario-page-content";
 
 export const metadata: Metadata = {
   title: "Calendário | Sistema Administrativo Pousada Cabana",
 };
 
 export default function CalendarioPage() {
-  return <ComingSoon icon={Calendar} title="Calendário" etapa="Etapa 4" />;
+  return <CalendarioPageContent />;
 }

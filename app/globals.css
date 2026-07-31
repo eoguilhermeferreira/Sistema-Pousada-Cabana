@@ -24,6 +24,10 @@
   --color-status-limpeza-light: #fef1e7;
   --color-status-manutencao: #7c3aed;
   --color-status-manutencao-light: #f3ecfe;
+  --color-status-checkin: #0a3675;
+  --color-status-checkin-light: #e8edf6;
+  --color-status-checkout: #d97706;
+  --color-status-checkout-light: #fdf1de;
 }
 
 @theme inline {
@@ -47,6 +51,10 @@
   --color-status-limpeza-light: var(--color-status-limpeza-light);
   --color-status-manutencao: var(--color-status-manutencao);
   --color-status-manutencao-light: var(--color-status-manutencao-light);
+  --color-status-checkin: var(--color-status-checkin);
+  --color-status-checkin-light: var(--color-status-checkin-light);
+  --color-status-checkout: var(--color-status-checkout);
+  --color-status-checkout-light: var(--color-status-checkout-light);
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-playfair);

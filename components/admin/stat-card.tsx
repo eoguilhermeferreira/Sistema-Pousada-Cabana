@@ -5,8 +5,12 @@ import { cn } from "@/lib/utils";
 const accentClasses = {
   primary: "bg-primary-light text-primary",
   disponivel: "bg-status-disponivel-light text-status-disponivel",
+  reservado: "bg-status-reservado-light text-status-reservado",
   ocupado: "bg-status-ocupado-light text-status-ocupado",
   limpeza: "bg-status-limpeza-light text-status-limpeza",
+  manutencao: "bg-status-manutencao-light text-status-manutencao",
+  checkin: "bg-status-checkin-light text-status-checkin",
+  checkout: "bg-status-checkout-light text-status-checkout",
 } as const;
 
 export function StatCard({

@@ -609,7 +609,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      criar_reserva_site: {
+        Args: {
+          p_cpf: string
+          p_criancas?: Json
+          p_data_entrada: string
+          p_data_saida: string
+          p_email: string
+          p_nome: string
+          p_observacoes?: string
+          p_quantidade_adultos: number
+          p_quarto_id: string
+          p_telefone: string
+        }
+        Returns: {
+          codigo: string
+          id: string
+          valor_total: number
+        }[]
+      }
     }
     Enums: {
       cargo_usuario: "administrador" | "recepcao" | "financeiro" | "limpeza"

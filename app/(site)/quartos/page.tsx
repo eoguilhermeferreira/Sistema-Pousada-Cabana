@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
-import { rooms } from "@/data/rooms";
+import {
+  listQuartosDisponiveisSite,
+  listQuartosSite,
+} from "@/services/site-quartos-service";
 import { RoomsExplorer } from "@/components/quartos/rooms-explorer";
 
 export const metadata: Metadata = {
@@ -9,25 +12,38 @@ export const metadata: Metadata = {
     "Conheça todos os quartos da Pousada Cabana e encontre a acomodação perfeita para sua estadia em Avaré.",
 };
 
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default async function QuartosPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-  const guestsParam = Array.isArray(params.guests)
-    ? params.guests[0]
-    : params.guests;
+  const guestsParam = firstParam(params.guests);
   const initialGuests = Number(guestsParam) > 0 ? Number(guestsParam) : 1;
 
-  const adultsParam = Array.isArray(params.adults) ? params.adults[0] : params.adults;
-  const childrenParam = Array.isArray(params.children)
-    ? params.children[0]
-    : params.children;
+  const adultsParam = firstParam(params.adults);
+  const childrenParam = firstParam(params.children);
+  const checkinParam = firstParam(params.checkin);
+  const checkoutParam = firstParam(params.checkout);
+
   const guestsQuery = new URLSearchParams();
   if (adultsParam) guestsQuery.set("adults", adultsParam);
   if (childrenParam) guestsQuery.set("children", childrenParam);
+  if (checkinParam) guestsQuery.set("checkin", checkinParam);
+  if (checkoutParam) guestsQuery.set("checkout", checkoutParam);
   const guestsQueryString = guestsQuery.toString();
+
+  const hasValidDates = Boolean(
+    checkinParam && checkoutParam && checkoutParam > checkinParam,
+  );
+
+  const quartos = hasValidDates
+    ? await listQuartosDisponiveisSite(checkinParam!, checkoutParam!)
+    : await listQuartosSite();
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:px-8">
@@ -39,16 +55,30 @@ export default async function QuartosPage({
           Nossos quartos
         </h1>
         <p className="mt-3 text-gray-text">
-          Filtre por categoria, preço e comodidades para encontrar a
-          acomodação ideal para a sua estadia.
+          {hasValidDates
+            ? "Mostrando apenas os quartos disponíveis para o período pesquisado."
+            : "Filtre por categoria, preço e comodidades para encontrar a acomodação ideal para a sua estadia."}
         </p>
       </div>
 
-      <RoomsExplorer
-        rooms={rooms}
-        initialGuests={initialGuests}
-        guestsQueryString={guestsQueryString}
-      />
+      {quartos.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-light py-20 text-center">
+          <p className="font-display text-lg font-semibold text-primary-dark">
+            Nenhum quarto disponível
+          </p>
+          <p className="mt-2 max-w-sm text-sm text-gray-text">
+            {hasValidDates
+              ? "Não encontramos quartos livres para o período pesquisado. Tente outras datas."
+              : "Ainda não há quartos cadastrados."}
+          </p>
+        </div>
+      ) : (
+        <RoomsExplorer
+          quartos={quartos}
+          initialGuests={initialGuests}
+          guestsQueryString={guestsQueryString}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,3 @@
-import type { Room } from "@/types/room";
-import { childrenPolicy } from "@/lib/children-policy";
-
 export type GuestType = "adulto" | "crianca";
 
 export interface Guest {
@@ -15,32 +12,6 @@ export function createGuest(type: GuestType): Guest {
     type,
     age: type === "adulto" ? 30 : 7,
   };
-}
-
-export function calculateTotal(room: Room, guests: Guest[]) {
-  const payingGuests = guests.filter(
-    (g) => g.type === "adulto" || g.age >= childrenPolicy.payingMinAge,
-  );
-  const fixedChildren = guests.filter(
-    (g) =>
-      g.type === "crianca" &&
-      g.age >= childrenPolicy.fixedMinAge &&
-      g.age <= childrenPolicy.fixedMaxAge,
-  );
-
-  const count = payingGuests.length;
-  let base = 0;
-  if (count === 1) {
-    base = room.pricing[0]?.price ?? 0;
-  } else if (count === 2) {
-    base = room.pricing[1]?.price ?? room.pricing[0]?.price ?? 0;
-  } else if (count >= 3) {
-    const twoGuestsPrice = room.pricing[1]?.price ?? room.pricing[0]?.price ?? 0;
-    const incrementTier = room.pricing.find((tier) => tier.isIncrement);
-    base = twoGuestsPrice + (incrementTier ? incrementTier.price * (count - 2) : 0);
-  }
-
-  return base + fixedChildren.length * childrenPolicy.fixedPrice;
 }
 
 /** Encodes a guest composition into URL params shared between the home

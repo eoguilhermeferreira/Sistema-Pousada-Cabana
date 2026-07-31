@@ -1,30 +1,25 @@
 import * as React from "react";
 
-import { amenityMeta } from "@/lib/amenities";
-import type { RoomAmenity } from "@/types/room";
+import { getComodidadeIcon } from "@/types/quarto";
+import type { Comodidade } from "@/types/quarto";
 import { cn } from "@/lib/utils";
 
 export interface RoomFiltersState {
-  category: string;
+  categoriaId: string;
   maxPrice: number;
   guests: number;
-  amenities: RoomAmenity[];
+  comodidadeIds: string[];
 }
 
-const filterableAmenities: RoomAmenity[] = [
-  "banheiro-privativo",
-  "banheiro-compartilhado",
-  "ventilador",
-  "frigobar",
-];
-
 export function RoomFilters({
-  categories,
+  categorias,
+  comodidades,
   priceRange,
   state,
   onChange,
 }: {
-  categories: { slug: string; label: string }[];
+  categorias: { id: string; nome: string }[];
+  comodidades: Comodidade[];
   priceRange: { min: number; max: number };
   state: RoomFiltersState;
   onChange: (next: RoomFiltersState) => void;
@@ -41,13 +36,13 @@ export function RoomFilters({
     onChange({ ...state, guests: parsed });
   }
 
-  function toggleAmenity(amenity: RoomAmenity) {
-    const has = state.amenities.includes(amenity);
+  function toggleComodidade(id: string) {
+    const has = state.comodidadeIds.includes(id);
     onChange({
       ...state,
-      amenities: has
-        ? state.amenities.filter((a) => a !== amenity)
-        : [...state.amenities, amenity],
+      comodidadeIds: has
+        ? state.comodidadeIds.filter((c) => c !== id)
+        : [...state.comodidadeIds, id],
     });
   }
 
@@ -58,13 +53,13 @@ export function RoomFilters({
           Categoria
         </label>
         <div className="mt-2 flex flex-wrap gap-2">
-          {[{ slug: "", label: "Todas" }, ...categories].map((category) => {
-            const active = state.category === category.slug;
+          {[{ id: "", nome: "Todas" }, ...categorias].map((categoria) => {
+            const active = state.categoriaId === categoria.id;
             return (
               <button
-                key={category.slug || "todas"}
+                key={categoria.id || "todas"}
                 type="button"
-                onClick={() => onChange({ ...state, category: category.slug })}
+                onClick={() => onChange({ ...state, categoriaId: categoria.id })}
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-200",
                   active
@@ -72,7 +67,7 @@ export function RoomFilters({
                     : "border-gray-light text-gray-text hover:border-primary/40",
                 )}
               >
-                {category.label}
+                {categoria.nome}
               </button>
             );
           })}
@@ -120,33 +115,34 @@ export function RoomFilters({
         />
       </div>
 
-      <div>
-        <span className="text-xs font-medium uppercase tracking-wide text-gray-text">
-          Comodidades
-        </span>
-        <div className="mt-2 flex flex-col gap-2">
-          {filterableAmenities.map((amenity) => {
-            const meta = amenityMeta[amenity];
-            const Icon = meta.icon;
-            const checked = state.amenities.includes(amenity);
-            return (
-              <label
-                key={amenity}
-                className="flex cursor-pointer items-center gap-2 text-sm text-gray-text"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggleAmenity(amenity)}
-                  className="size-4 rounded border-gray-light accent-primary"
-                />
-                <Icon className="size-4 text-primary" strokeWidth={1.75} />
-                {meta.label}
-              </label>
-            );
-          })}
+      {comodidades.length > 0 && (
+        <div>
+          <span className="text-xs font-medium uppercase tracking-wide text-gray-text">
+            Comodidades
+          </span>
+          <div className="mt-2 flex flex-col gap-2">
+            {comodidades.map((comodidade) => {
+              const Icon = getComodidadeIcon(comodidade.icone);
+              const checked = state.comodidadeIds.includes(comodidade.id);
+              return (
+                <label
+                  key={comodidade.id}
+                  className="flex cursor-pointer items-center gap-2 text-sm text-gray-text"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleComodidade(comodidade.id)}
+                    className="size-4 rounded border-gray-light accent-primary"
+                  />
+                  <Icon className="size-4 text-primary" strokeWidth={1.75} />
+                  {comodidade.nome}
+                </label>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

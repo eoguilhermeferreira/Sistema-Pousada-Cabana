@@ -6,7 +6,7 @@ import { Gallery } from "@/components/sections/gallery";
 import { Testimonials } from "@/components/sections/testimonials";
 import { CtaFinal } from "@/components/sections/cta-final";
 
-export default function Home() {
+export default async function Home() {
   return (
     <>
       <Hero />

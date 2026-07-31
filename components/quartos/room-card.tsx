@@ -1,18 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Star, Users } from "lucide-react";
+import { ArrowRight, Users } from "lucide-react";
 
-import type { Room } from "@/types/room";
-import { getStartingPrice } from "@/data/rooms";
-import { buildWhatsappUrl } from "@/data/contact";
+import type { QuartoDetalhado } from "@/types/quarto";
+import { getComodidadeIcon } from "@/types/quarto";
+import { quartoSlug } from "@/lib/quarto-slug";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RoomName } from "@/components/quartos/room-name";
-import { amenityMeta } from "@/lib/amenities";
-import { formatBeds } from "@/lib/beds";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -21,16 +20,19 @@ const currency = new Intl.NumberFormat("pt-BR", {
 });
 
 export function RoomCard({
-  room,
+  quarto,
   guestsQueryString,
+  onReservar,
 }: {
-  room: Room;
+  quarto: QuartoDetalhado;
   guestsQueryString?: string;
+  onReservar?: (quarto: QuartoDetalhado) => void;
 }) {
   const router = useRouter();
-  const visibleAmenities = room.amenities.slice(0, 4);
-  const isPlus = room.badge.toLowerCase().includes("plus");
-  const href = `/quartos/${room.slug}${guestsQueryString ? `?${guestsQueryString}` : ""}`;
+  const slug = quartoSlug(quarto.numero);
+  const visibleAmenities = quarto.comodidades.slice(0, 4);
+  const capa = quarto.fotos[0]?.url;
+  const href = `/quartos/${slug}${guestsQueryString ? `?${guestsQueryString}` : ""}`;
 
   return (
     <article
@@ -40,41 +42,42 @@ export function RoomCard({
       }}
       role="link"
       tabIndex={0}
-      aria-label={`Ver detalhes do ${room.name}`}
+      aria-label={`Ver detalhes do Quarto ${quarto.numero}`}
       className="group flex w-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg"
     >
       <div className="relative">
-        <MediaPlaceholder className="aspect-4/3 w-full" />
-        <Badge
-          variant={isPlus ? "plus" : "solid"}
-          className="absolute left-4 top-4"
-        >
-          {isPlus && <Star className="size-3" fill="currentColor" strokeWidth={0} />}
-          {room.badge}
+        {capa ? (
+          <div className="relative aspect-4/3 w-full overflow-hidden">
+            <Image src={capa} alt={`Quarto ${quarto.numero}`} fill className="object-cover" />
+          </div>
+        ) : (
+          <MediaPlaceholder className="aspect-4/3 w-full" />
+        )}
+        <Badge variant="solid" className="absolute left-4 top-4">
+          {quarto.categoria.nome}
         </Badge>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-display text-lg font-semibold text-primary-dark">
-            <RoomName name={room.name} />
+            <RoomName name={`Quarto ${quarto.numero}`} />
           </h3>
           <span className="flex shrink-0 items-center gap-1 text-xs text-gray-text">
             <Users className="size-3.5" />
-            {room.maxGuests === 1 ? "1 hóspede" : `até ${room.maxGuests}`}
+            {quarto.capacidade_maxima === 1
+              ? "1 hóspede"
+              : `até ${quarto.capacidade_maxima}`}
           </span>
         </div>
 
-        <p className="text-xs text-gray-text">{formatBeds(room.beds)}</p>
-
         <div className="flex flex-wrap gap-3">
-          {visibleAmenities.map((amenity) => {
-            const meta = amenityMeta[amenity];
-            const Icon = meta.icon;
+          {visibleAmenities.map((comodidade) => {
+            const Icon = getComodidadeIcon(comodidade.icone);
             return (
               <span
-                key={amenity}
-                title={meta.label}
+                key={comodidade.id}
+                title={comodidade.nome}
                 className="flex items-center gap-1.5 text-xs text-gray-text"
               >
                 <Icon className="size-4 text-primary" strokeWidth={1.75} />
@@ -85,10 +88,9 @@ export function RoomCard({
 
         <div className="mt-auto space-y-3 pt-2">
           <div>
-            <p className="text-xs text-gray-text">a partir de</p>
+            <p className="text-xs text-gray-text">diária</p>
             <p className="font-sans text-xl font-semibold text-primary-dark">
-              {currency.format(getStartingPrice(room))}
-              <span className="text-sm font-normal text-gray-text"> /diária</span>
+              {currency.format(quarto.valor_diaria)}
             </p>
           </div>
           <div
@@ -101,16 +103,8 @@ export function RoomCard({
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
-            <Button asChild size="sm">
-              <Link
-                href={buildWhatsappUrl(
-                  `Olá! Tenho interesse em reservar o ${room.name}.`,
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Reservar
-              </Link>
+            <Button size="sm" onClick={() => onReservar?.(quarto)}>
+              Reservar
             </Button>
           </div>
         </div>

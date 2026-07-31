@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import * as React from "react";
 import { useSearchParams } from "next/navigation";
 
-import type { Room } from "@/types/room";
-import { buildWhatsappUrl } from "@/data/contact";
-import { calculateTotal, guestsFromParams } from "@/lib/guest-composition";
+import type { QuartoDetalhado } from "@/types/quarto";
+import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
 import { Button } from "@/components/ui/button";
+import { ReservationModal } from "@/components/quartos/reservation-modal";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -14,32 +14,31 @@ const currency = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 0,
 });
 
-export function GuestSummary({ room }: { room: Room }) {
+export function GuestSummary({ quarto }: { quarto: QuartoDetalhado }) {
   const searchParams = useSearchParams();
-  const guests = guestsFromParams({
-    adults: searchParams.get("adults"),
-    children: searchParams.get("children"),
+  const [open, setOpen] = React.useState(false);
+
+  const adults = Math.max(0, Math.trunc(Number(searchParams.get("adults"))) || 0);
+  const childrenAges = (searchParams.get("children") ?? "")
+    .split(",")
+    .map((value) => Number(value))
+    .filter((age) => Number.isFinite(age) && age >= 0);
+  const checkin = searchParams.get("checkin") ?? "";
+  const checkout = searchParams.get("checkout") ?? "";
+
+  if (adults === 0 && childrenAges.length === 0) return null;
+
+  const noites = calcularNoites(checkin, checkout);
+  const valores = calcularValores({
+    noites: noites || 1,
+    valorDiaria: quarto.valor_diaria,
+    criancas: childrenAges.map((idade) => ({ idade })),
   });
-
-  if (guests.length === 0) return null;
-
-  const total = calculateTotal(room, guests);
-  const adults = guests.filter((g) => g.type === "adulto").length;
-  const children = guests.filter((g) => g.type === "crianca");
 
   const summaryLines = [
     adults > 0 ? (adults === 1 ? "1 adulto" : `${adults} adultos`) : null,
-    ...children.map((child, index) => `Criança ${index + 1} (${child.age} anos)`),
+    ...childrenAges.map((age, index) => `Criança ${index + 1} (${age} anos)`),
   ].filter((line): line is string => Boolean(line));
-
-  const message = [
-    `Olá! Tenho interesse em reservar o ${room.name}.`,
-    "",
-    "Hóspedes:",
-    ...summaryLines,
-    "",
-    `Total estimado: ${currency.format(total)} /diária`,
-  ].join("\n");
 
   return (
     <div className="rounded-2xl border border-gray-light bg-white p-5">
@@ -53,18 +52,29 @@ export function GuestSummary({ room }: { room: Room }) {
       </ul>
 
       <div className="mt-4 flex items-center justify-between border-t border-gray-light pt-4">
-        <span className="text-sm text-gray-text">Total estimado</span>
+        <span className="text-sm text-gray-text">
+          {noites > 0
+            ? `Total (${noites} ${noites === 1 ? "diária" : "diárias"})`
+            : "Diária"}
+        </span>
         <span className="font-sans text-lg font-semibold text-primary-dark">
-          {currency.format(total)}
-          <span className="text-xs font-normal text-gray-text"> /diária</span>
+          {currency.format(noites > 0 ? valores.valorTotal : quarto.valor_diaria)}
         </span>
       </div>
 
-      <Button asChild className="mt-4 w-full">
-        <Link href={buildWhatsappUrl(message)} target="_blank" rel="noopener noreferrer">
-          Reservar com esses hóspedes
-        </Link>
+      <Button className="mt-4 w-full" onClick={() => setOpen(true)}>
+        Reservar com esses hóspedes
       </Button>
+
+      <ReservationModal
+        quarto={quarto}
+        open={open}
+        onOpenChange={setOpen}
+        initialDataEntrada={checkin}
+        initialDataSaida={checkout}
+        initialAdultos={adults || 1}
+        initialCriancasIdades={childrenAges}
+      />
     </div>
   );
 }

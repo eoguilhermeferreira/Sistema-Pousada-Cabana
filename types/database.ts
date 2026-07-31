@@ -1,6 +1,3 @@
-// Gerado a partir do schema do Supabase (projeto "Pousada Cabana").
-// Regenerar sempre que uma migration alterar o schema.
-
 export type Json =
   | string
   | number
@@ -35,6 +32,36 @@ export type Database = {
         }
         Relationships: []
       }
+      categorias_quarto: {
+        Row: {
+          cor: string
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          cor: string
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chatbot_conversas: {
         Row: {
           created_at: string
@@ -49,6 +76,33 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      comodidades: {
+        Row: {
+          created_at: string
+          icone: string
+          id: string
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icone: string
+          id?: string
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icone?: string
+          id?: string
+          nome?: string
+          ordem?: number
           updated_at?: string
         }
         Relationships: []
@@ -254,23 +308,111 @@ export type Database = {
         }
         Relationships: []
       }
-      quartos: {
+      quarto_comodidades: {
+        Row: {
+          comodidade_id: string
+          quarto_id: string
+        }
+        Insert: {
+          comodidade_id: string
+          quarto_id: string
+        }
+        Update: {
+          comodidade_id?: string
+          quarto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quarto_comodidades_comodidade_id_fkey"
+            columns: ["comodidade_id"]
+            isOneToOne: false
+            referencedRelation: "comodidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quarto_comodidades_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quarto_fotos: {
         Row: {
           created_at: string
           id: string
-          updated_at: string
+          ordem: number
+          quarto_id: string
+          url: string
         }
         Insert: {
           created_at?: string
           id?: string
-          updated_at?: string
+          ordem?: number
+          quarto_id: string
+          url: string
         }
         Update: {
           created_at?: string
           id?: string
-          updated_at?: string
+          ordem?: number
+          quarto_id?: string
+          url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quarto_fotos_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quartos: {
+        Row: {
+          capacidade_maxima: number
+          categoria_id: string
+          created_at: string
+          descricao: string | null
+          id: string
+          numero: string
+          status: Database["public"]["Enums"]["status_quarto"]
+          updated_at: string
+          valor_diaria: number
+        }
+        Insert: {
+          capacidade_maxima?: number
+          categoria_id: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          numero: string
+          status?: Database["public"]["Enums"]["status_quarto"]
+          updated_at?: string
+          valor_diaria?: number
+        }
+        Update: {
+          capacidade_maxima?: number
+          categoria_id?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          numero?: string
+          status?: Database["public"]["Enums"]["status_quarto"]
+          updated_at?: string
+          valor_diaria?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quartos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_quarto"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       relatorios: {
         Row: {
@@ -352,6 +494,12 @@ export type Database = {
       cargo_usuario: "administrador" | "recepcao" | "financeiro" | "limpeza"
       sexo_hospede: "masculino" | "feminino" | "outro"
       status_hospede: "ativo" | "inativo"
+      status_quarto:
+        | "disponivel"
+        | "reservado"
+        | "ocupado"
+        | "limpeza"
+        | "manutencao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -482,6 +630,13 @@ export const Constants = {
       cargo_usuario: ["administrador", "recepcao", "financeiro", "limpeza"],
       sexo_hospede: ["masculino", "feminino", "outro"],
       status_hospede: ["ativo", "inativo"],
+      status_quarto: [
+        "disponivel",
+        "reservado",
+        "ocupado",
+        "limpeza",
+        "manutencao",
+      ],
     },
   },
 } as const

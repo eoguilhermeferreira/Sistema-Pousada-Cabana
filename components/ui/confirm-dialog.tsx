@@ -1,27 +1,33 @@
 "use client";
 
+import type { ReactNode } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Loader2, TriangleAlert } from "lucide-react";
+import { Loader2, TriangleAlert, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Hospede } from "@/types/hospede";
 
-interface HospedeDeleteDialogProps {
+interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  hospede: Hospede | null;
-  deleting: boolean;
+  title: string;
+  description: ReactNode;
+  confirmLabel?: string;
+  loading?: boolean;
   onConfirm: () => void;
+  icon?: LucideIcon;
 }
 
-export function HospedeDeleteDialog({
+export function ConfirmDialog({
   open,
   onOpenChange,
-  hospede,
-  deleting,
+  title,
+  description,
+  confirmLabel = "Confirmar",
+  loading = false,
   onConfirm,
-}: HospedeDeleteDialogProps) {
+  icon: Icon = TriangleAlert,
+}: ConfirmDialogProps) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
@@ -36,32 +42,28 @@ export function HospedeDeleteDialog({
           )}
         >
           <div className="flex size-11 items-center justify-center rounded-full bg-status-ocupado-light">
-            <TriangleAlert className="size-5 text-status-ocupado" />
+            <Icon className="size-5 text-status-ocupado" />
           </div>
           <DialogPrimitive.Title className="mt-4 font-display text-lg font-semibold text-primary-dark">
-            Excluir hóspede
+            {title}
           </DialogPrimitive.Title>
           <DialogPrimitive.Description className="mt-2 text-sm text-gray-text">
-            Tem certeza que deseja excluir{" "}
-            <span className="font-medium text-primary-dark">
-              {hospede?.nome}
-            </span>
-            ? Esta ação não pode ser desfeita.
+            {description}
           </DialogPrimitive.Description>
           <div className="mt-6 flex justify-end gap-3">
             <DialogPrimitive.Close asChild>
-              <Button variant="ghost" disabled={deleting}>
+              <Button variant="ghost" disabled={loading}>
                 Cancelar
               </Button>
             </DialogPrimitive.Close>
             <Button
               type="button"
               onClick={onConfirm}
-              disabled={deleting}
+              disabled={loading}
               className="bg-status-ocupado text-white hover:bg-status-ocupado/90"
             >
-              {deleting && <Loader2 className="size-4 animate-spin" />}
-              Excluir
+              {loading && <Loader2 className="size-4 animate-spin" />}
+              {confirmLabel}
             </Button>
           </div>
         </DialogPrimitive.Content>

@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { BedDouble } from "lucide-react";
 
-import { ComingSoon } from "@/components/admin/coming-soon";
+import { QuartosPageContent } from "@/app/admin/(protected)/quartos/quartos-page-content";
 
 export const metadata: Metadata = {
   title: "Quartos | Sistema Administrativo Pousada Cabana",
 };
 
 export default function QuartosPage() {
-  return <ComingSoon icon={BedDouble} title="Quartos" etapa="Etapa 3" />;
+  return <QuartosPageContent />;
 }

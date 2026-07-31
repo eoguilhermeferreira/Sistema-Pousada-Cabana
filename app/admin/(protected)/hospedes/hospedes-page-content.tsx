@@ -9,7 +9,7 @@ import { HospedeFilters } from "@/components/admin/hospedes/hospede-filters";
 import { HospedesTable } from "@/components/admin/hospedes/hospedes-table";
 import { HospedeFormDrawer } from "@/components/admin/hospedes/hospede-form-drawer";
 import { HospedeView } from "@/components/admin/hospedes/hospede-view";
-import { HospedeDeleteDialog } from "@/components/admin/hospedes/hospede-delete-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { listHospedes, deleteHospede } from "@/services/hospedes-service";
 import type { Hospede, StatusHospede } from "@/types/hospede";
 
@@ -171,11 +171,21 @@ export function HospedesPageContent() {
         hospede={viewingHospede}
       />
 
-      <HospedeDeleteDialog
+      <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        hospede={deletingHospede}
-        deleting={deleting}
+        title="Excluir hóspede"
+        description={
+          <>
+            Tem certeza que deseja excluir{" "}
+            <span className="font-medium text-primary-dark">
+              {deletingHospede?.nome}
+            </span>
+            ? Esta ação não pode ser desfeita.
+          </>
+        }
+        confirmLabel="Excluir"
+        loading={deleting}
         onConfirm={handleConfirmDelete}
       />
     </div>

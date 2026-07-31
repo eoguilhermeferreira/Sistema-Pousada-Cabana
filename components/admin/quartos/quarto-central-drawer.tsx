@@ -5,8 +5,10 @@ import {
   History,
   ImageOff,
   Loader2,
+  Package,
   Pencil,
   Plus,
+  Trash2,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -15,12 +17,30 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { QuartoStatusBadge } from "@/components/admin/quartos/quarto-status-badge";
+import { AdicionarConsumoModal } from "@/components/admin/estoque/adicionar-consumo-modal";
 import { getQuartoById } from "@/services/quartos-service";
+import {
+  listConsumosPorQuarto,
+  listHistoricoPorQuarto,
+  removerConsumoQuarto,
+} from "@/services/consumo-service";
 import { getComodidadeIcon, type QuartoDetalhado } from "@/types/quarto";
+import type {
+  MovimentacaoComRelacoes,
+  QuartoConsumoComProduto,
+} from "@/types/produto";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
 });
 
 interface QuartoCentralDrawerProps {
@@ -39,6 +59,14 @@ export function QuartoCentralDrawer({
   const [quarto, setQuarto] = React.useState<QuartoDetalhado | null>(null);
   const [loading, setLoading] = React.useState(true);
 
+  const [consumos, setConsumos] = React.useState<QuartoConsumoComProduto[]>([]);
+  const [historico, setHistorico] = React.useState<MovimentacaoComRelacoes[]>(
+    [],
+  );
+  const [loadingConsumo, setLoadingConsumo] = React.useState(true);
+  const [adicionarConsumoOpen, setAdicionarConsumoOpen] = React.useState(false);
+  const [removingId, setRemovingId] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     if (!open || !quartoId) return;
     const timeout = setTimeout(async () => {
@@ -52,6 +80,48 @@ export function QuartoCentralDrawer({
     }, 0);
     return () => clearTimeout(timeout);
   }, [open, quartoId]);
+
+  const loadConsumo = React.useCallback(async () => {
+    if (!quartoId) return;
+    setLoadingConsumo(true);
+    try {
+      const [consumosData, historicoData] = await Promise.all([
+        listConsumosPorQuarto(quartoId),
+        listHistoricoPorQuarto(quartoId),
+      ]);
+      setConsumos(consumosData);
+      setHistorico(historicoData);
+    } finally {
+      setLoadingConsumo(false);
+    }
+  }, [quartoId]);
+
+  React.useEffect(() => {
+    if (!open || !quartoId) return;
+    const timeout = setTimeout(() => {
+      loadConsumo();
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [open, quartoId, loadConsumo]);
+
+  async function handleRemoverConsumo(consumoId: string) {
+    setRemovingId(consumoId);
+    try {
+      await removerConsumoQuarto(consumoId);
+      await loadConsumo();
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
+  const consumoQuantidadeTotal = consumos.reduce(
+    (total, item) => total + item.quantidade,
+    0,
+  );
+  const consumoValorTotal = consumos.reduce(
+    (total, item) => total + item.valor_total,
+    0,
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -194,41 +264,116 @@ export function QuartoCentralDrawer({
                   <p className="text-xs font-semibold uppercase tracking-wide text-gray-text">
                     Produtos consumidos
                   </p>
-                  <Button size="sm" disabled>
+                  <Button size="sm" onClick={() => setAdicionarConsumoOpen(true)}>
                     <Plus className="size-4" />
                     Adicionar Produto
                   </Button>
                 </div>
-                <div className="overflow-hidden rounded-2xl border border-gray-light">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-light bg-admin-bg/60">
-                        <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
-                          Produto
-                        </th>
-                        <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
-                          Qtd.
-                        </th>
-                        <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
-                          Valor unit.
-                        </th>
-                        <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
-                          Total
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="px-4 py-6 text-center text-gray-text" colSpan={4}>
-                          Nenhum consumo registrado.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+
+                {loadingConsumo ? (
+                  <div className="flex min-h-[20vh] items-center justify-center">
+                    <Loader2 className="size-5 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="overflow-hidden rounded-2xl border border-gray-light">
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-light bg-admin-bg/60">
+                          <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
+                            Produto
+                          </th>
+                          <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
+                            Qtd.
+                          </th>
+                          <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
+                            Valor unit.
+                          </th>
+                          <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text">
+                            Total
+                          </th>
+                          <th className="px-4 py-2.5" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {consumos.length === 0 ? (
+                          <tr>
+                            <td
+                              className="px-4 py-6 text-center text-gray-text"
+                              colSpan={5}
+                            >
+                              Nenhum consumo registrado.
+                            </td>
+                          </tr>
+                        ) : (
+                          consumos.map((item) => (
+                            <tr
+                              key={item.id}
+                              className="border-b border-gray-light last:border-0"
+                            >
+                              <td className="px-4 py-2.5 text-primary-dark">
+                                {item.produto.nome}
+                              </td>
+                              <td className="px-4 py-2.5 text-gray-text">
+                                {item.quantidade} {item.produto.unidade}
+                              </td>
+                              <td className="px-4 py-2.5 text-gray-text">
+                                {currency.format(item.valor_unitario)}
+                              </td>
+                              <td className="px-4 py-2.5 font-medium text-primary-dark">
+                                {currency.format(item.valor_total)}
+                              </td>
+                              <td className="px-4 py-2.5 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoverConsumo(item.id)}
+                                  disabled={removingId === item.id}
+                                  className="inline-flex size-7 items-center justify-center rounded-lg text-gray-text transition-colors duration-200 hover:bg-status-ocupado-light hover:text-status-ocupado disabled:opacity-50"
+                                  title="Remover"
+                                >
+                                  {removingId === item.id ? (
+                                    <Loader2 className="size-3.5 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="size-3.5" />
+                                  )}
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <div className="space-y-1.5 rounded-2xl border border-gray-light p-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-text">Quantidade total</span>
+                    <span className="font-medium text-primary-dark">
+                      {consumoQuantidadeTotal}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-text">Subtotal dos produtos</span>
+                    <span className="font-medium text-primary-dark">
+                      {currency.format(consumoValorTotal)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-gray-light pt-2 text-sm">
+                    <span className="font-semibold text-primary-dark">
+                      Valor total consumido
+                    </span>
+                    <span className="font-sans text-base font-semibold text-primary-dark">
+                      {currency.format(consumoValorTotal)}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-text">
-                  A integração com o módulo de Estoque será feita futuramente.
-                </p>
+
+                <AdicionarConsumoModal
+                  open={adicionarConsumoOpen}
+                  onOpenChange={setAdicionarConsumoOpen}
+                  quartoId={quarto.id}
+                  onAdicionado={loadConsumo}
+                />
               </TabsContent>
 
               <TabsContent value="pagamentos" className="space-y-4 px-6 py-6">
@@ -242,7 +387,7 @@ export function QuartoCentralDrawer({
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-text">Consumos</span>
                     <span className="font-medium text-primary-dark">
-                      {currency.format(0)}
+                      {currency.format(consumoValorTotal)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -256,22 +401,65 @@ export function QuartoCentralDrawer({
                       Total
                     </span>
                     <span className="font-sans text-base font-semibold text-primary-dark">
-                      {currency.format(quarto.valor_diaria)}
+                      {currency.format(quarto.valor_diaria + consumoValorTotal)}
                     </span>
                   </div>
                 </div>
                 <p className="text-xs text-gray-text">
-                  Valores ilustrativos. A integração com Reservas e Caixa será
-                  feita futuramente.
+                  Valor da hospedagem ilustrativo. A integração com Reservas e
+                  Caixa será feita futuramente.
                 </p>
               </TabsContent>
 
-              <TabsContent value="historico" className="px-6 py-6">
-                <EmptyTabState
-                  icon={History}
-                  message="Nenhum histórico disponível."
-                  hint="Reservas, check-ins, check-outs, consumos e pagamentos anteriores aparecerão aqui."
-                />
+              <TabsContent value="historico" className="space-y-4 px-6 py-6">
+                {loadingConsumo ? (
+                  <div className="flex min-h-[20vh] items-center justify-center">
+                    <Loader2 className="size-5 animate-spin text-primary" />
+                  </div>
+                ) : historico.length === 0 ? (
+                  <EmptyTabState
+                    icon={History}
+                    message="Nenhum histórico disponível."
+                    hint="Consumos lançados e removidos deste quarto aparecerão aqui."
+                  />
+                ) : (
+                  <ul className="space-y-3">
+                    {historico.map((evento) => (
+                      <li
+                        key={evento.id}
+                        className="flex items-start gap-3 rounded-xl border border-gray-light p-3"
+                      >
+                        <span
+                          className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
+                            evento.tipo === "consumo_quarto"
+                              ? "bg-status-checkout-light text-status-checkout"
+                              : "bg-status-disponivel-light text-status-disponivel"
+                          }`}
+                        >
+                          <Package className="size-4" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-primary-dark">
+                            {evento.tipo === "consumo_quarto"
+                              ? "Consumo lançado"
+                              : "Item removido / devolvido"}{" "}
+                            · {evento.produto.nome}
+                          </p>
+                          <p className="text-xs text-gray-text">
+                            {Math.abs(evento.quantidade)} un ·{" "}
+                            {evento.valor_total != null
+                              ? currency.format(evento.valor_total)
+                              : "-"}{" "}
+                            · {evento.usuario?.nome ?? "Usuário do sistema"}
+                          </p>
+                          <p className="text-xs text-gray-text/70">
+                            {dateTimeFormatter.format(new Date(evento.created_at))}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </TabsContent>
             </div>
           </Tabs>

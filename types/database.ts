@@ -32,6 +32,30 @@ export type Database = {
         }
         Relationships: []
       }
+      categorias_produto: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categorias_quarto: {
         Row: {
           cor: string
@@ -111,19 +135,75 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          motivo: string | null
+          produto_id: string
+          quantidade: number
+          quarto_id: string | null
+          reserva_id: string | null
+          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
           updated_at: string
+          usuario_id: string | null
+          valor_total: number | null
+          valor_unitario: number | null
         }
         Insert: {
           created_at?: string
           id?: string
+          motivo?: string | null
+          produto_id: string
+          quantidade: number
+          quarto_id?: string | null
+          reserva_id?: string | null
+          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
           updated_at?: string
+          usuario_id?: string | null
+          valor_total?: number | null
+          valor_unitario?: number | null
         }
         Update: {
           created_at?: string
           id?: string
+          motivo?: string | null
+          produto_id?: string
+          quantidade?: number
+          quarto_id?: string | null
+          reserva_id?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
           updated_at?: string
+          usuario_id?: string | null
+          valor_total?: number | null
+          valor_unitario?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "estoque_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       financeiro: {
         Row: {
@@ -292,21 +372,68 @@ export type Database = {
       }
       produtos: {
         Row: {
+          ativo: boolean
+          categoria_id: string
+          codigo: string
           created_at: string
+          descricao: string | null
+          estoque_minimo: number
+          fornecedor: string | null
           id: string
+          imagem_url: string | null
+          nome: string
+          observacoes: string | null
+          quantidade: number
+          unidade: string
           updated_at: string
+          valor_custo: number
+          valor_venda: number
         }
         Insert: {
+          ativo?: boolean
+          categoria_id: string
+          codigo: string
           created_at?: string
+          descricao?: string | null
+          estoque_minimo?: number
+          fornecedor?: string | null
           id?: string
+          imagem_url?: string | null
+          nome: string
+          observacoes?: string | null
+          quantidade?: number
+          unidade?: string
           updated_at?: string
+          valor_custo?: number
+          valor_venda?: number
         }
         Update: {
+          ativo?: boolean
+          categoria_id?: string
+          codigo?: string
           created_at?: string
+          descricao?: string | null
+          estoque_minimo?: number
+          fornecedor?: string | null
           id?: string
+          imagem_url?: string | null
+          nome?: string
+          observacoes?: string | null
+          quantidade?: number
+          unidade?: string
           updated_at?: string
+          valor_custo?: number
+          valor_venda?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "produtos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_produto"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quarto_comodidades: {
         Row: {
@@ -334,6 +461,74 @@ export type Database = {
             columns: ["quarto_id"]
             isOneToOne: false
             referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quarto_consumos: {
+        Row: {
+          created_at: string
+          id: string
+          produto_id: string
+          quantidade: number
+          quarto_id: string
+          reserva_id: string | null
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          produto_id: string
+          quantidade: number
+          quarto_id: string
+          reserva_id?: string | null
+          updated_at?: string
+          usuario_id?: string | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          produto_id?: string
+          quantidade?: number
+          quarto_id?: string
+          reserva_id?: string | null
+          updated_at?: string
+          usuario_id?: string | null
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quarto_consumos_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quarto_consumos_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quarto_consumos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quarto_consumos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -628,6 +823,52 @@ export type Database = {
           valor_total: number
         }[]
       }
+      registrar_consumo_quarto: {
+        Args: {
+          p_produto_id: string
+          p_quantidade: number
+          p_quarto_id: string
+          p_reserva_id?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          produto_id: string
+          quantidade: number
+          quarto_id: string
+          reserva_id: string | null
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number
+          valor_unitario: number
+        }
+      }
+      registrar_movimentacao_estoque: {
+        Args: {
+          p_motivo?: string
+          p_produto_id: string
+          p_quantidade: number
+          p_tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
+        }
+        Returns: {
+          created_at: string
+          id: string
+          motivo: string | null
+          produto_id: string
+          quantidade: number
+          quarto_id: string | null
+          reserva_id: string | null
+          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number | null
+          valor_unitario: number | null
+        }
+      }
+      remover_consumo_quarto: {
+        Args: { p_consumo_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       cargo_usuario: "administrador" | "recepcao" | "financeiro" | "limpeza"
@@ -646,6 +887,13 @@ export type Database = {
         | "checkout_realizado"
         | "cancelada"
         | "no_show"
+      tipo_movimentacao_estoque:
+        | "entrada"
+        | "saida"
+        | "ajuste"
+        | "perda"
+        | "consumo_quarto"
+        | "devolucao_quarto"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -790,6 +1038,14 @@ export const Constants = {
         "checkout_realizado",
         "cancelada",
         "no_show",
+      ],
+      tipo_movimentacao_estoque: [
+        "entrada",
+        "saida",
+        "ajuste",
+        "perda",
+        "consumo_quarto",
+        "devolucao_quarto",
       ],
     },
   },

@@ -121,6 +121,9 @@ export function ReservaWizardModal({
       const valores = calcularValores({
         noites,
         valorDiaria: quarto.valor_diaria,
+        valorCasal: quarto.valor_casal,
+        valorPessoaAdicional: quarto.valor_pessoa_adicional,
+        adultos,
         criancas: criancasValidas.map((c) => ({ idade: c.idadeNum })),
       });
 

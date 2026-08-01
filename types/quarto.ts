@@ -103,6 +103,8 @@ export interface QuartoFormValues {
   descricao: string;
   capacidade_maxima: string;
   valor_diaria: string;
+  valor_casal: string;
+  valor_pessoa_adicional: string;
   status: StatusQuarto;
   comodidade_ids: string[];
 }
@@ -113,6 +115,8 @@ export const emptyQuartoForm: QuartoFormValues = {
   descricao: "",
   capacidade_maxima: "2",
   valor_diaria: "",
+  valor_casal: "",
+  valor_pessoa_adicional: "",
   status: "disponivel",
   comodidade_ids: [],
 };
@@ -127,6 +131,11 @@ export function quartoToFormValues(
     descricao: quarto.descricao ?? "",
     capacidade_maxima: String(quarto.capacidade_maxima),
     valor_diaria: String(quarto.valor_diaria),
+    valor_casal: quarto.valor_casal != null ? String(quarto.valor_casal) : "",
+    valor_pessoa_adicional:
+      quarto.valor_pessoa_adicional != null
+        ? String(quarto.valor_pessoa_adicional)
+        : "",
     status: quarto.status,
     comodidade_ids: comodidadeIds,
   };

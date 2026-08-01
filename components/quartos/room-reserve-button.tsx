@@ -22,7 +22,7 @@ export function RoomReserveButton({ quarto }: { quarto: QuartoDetalhado }) {
   return (
     <>
       <Button size="lg" className="w-full" onClick={() => setOpen(true)}>
-        Reservar Agora
+        Reservar com estes hóspedes
       </Button>
       <p className="mt-3 text-center text-xs text-gray-text">
         Sua reserva ficará pendente de confirmação pela recepção.

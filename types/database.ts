@@ -280,6 +280,36 @@ export type Database = {
           },
         ]
       }
+      clientes: {
+        Row: {
+          cpf: string
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          email: string
+          id: string
+          nome: string
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comodidades: {
         Row: {
           created_at: string
@@ -1525,7 +1555,9 @@ export type Database = {
           numero: string
           status: Database["public"]["Enums"]["status_quarto"]
           updated_at: string
+          valor_casal: number | null
           valor_diaria: number
+          valor_pessoa_adicional: number | null
         }
         Insert: {
           capacidade_maxima?: number
@@ -1536,7 +1568,9 @@ export type Database = {
           numero: string
           status?: Database["public"]["Enums"]["status_quarto"]
           updated_at?: string
+          valor_casal?: number | null
           valor_diaria?: number
+          valor_pessoa_adicional?: number | null
         }
         Update: {
           capacidade_maxima?: number
@@ -1547,7 +1581,9 @@ export type Database = {
           numero?: string
           status?: Database["public"]["Enums"]["status_quarto"]
           updated_at?: string
+          valor_casal?: number | null
           valor_diaria?: number
+          valor_pessoa_adicional?: number | null
         }
         Relationships: [
           {
@@ -1649,6 +1685,7 @@ export type Database = {
       }
       reservas: {
         Row: {
+          cliente_id: string | null
           codigo: string
           created_at: string
           data_entrada: string
@@ -1667,6 +1704,7 @@ export type Database = {
           valor_total: number
         }
         Insert: {
+          cliente_id?: string | null
           codigo?: string
           created_at?: string
           data_entrada: string
@@ -1685,6 +1723,7 @@ export type Database = {
           valor_total: number
         }
         Update: {
+          cliente_id?: string | null
           codigo?: string
           created_at?: string
           data_entrada?: string
@@ -1703,6 +1742,13 @@ export type Database = {
           valor_total?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "reservas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reservas_hospede_principal_id_fkey"
             columns: ["hospede_principal_id"]
@@ -1869,6 +1915,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      criar_reserva_cliente: {
+        Args: {
+          p_acompanhantes_adultos?: Json
+          p_criancas?: Json
+          p_data_entrada: string
+          p_data_saida: string
+          p_observacoes?: string
+          p_quarto_id: string
+        }
+        Returns: {
+          codigo: string
+          id: string
+          valor_total: number
+        }[]
+      }
       criar_reserva_site: {
         Args: {
           p_cpf: string
@@ -1986,6 +2047,7 @@ export type Database = {
         }
       }
       informacoes_sistema: { Args: never; Returns: Json }
+      is_staff: { Args: never; Returns: boolean }
       listar_dados_reconhecimento_facial: {
         Args: never
         Returns: {

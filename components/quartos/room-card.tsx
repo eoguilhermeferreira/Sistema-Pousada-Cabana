@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 import type { QuartoDetalhado } from "@/types/quarto";
 import { getComodidadeIcon } from "@/types/quarto";
 import { quartoSlug } from "@/lib/quarto-slug";
+import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,6 @@ import { RoomName } from "@/components/quartos/room-name";
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
-  maximumFractionDigits: 0,
 });
 
 export function RoomCard({
@@ -33,6 +32,30 @@ export function RoomCard({
   const visibleAmenities = quarto.comodidades.slice(0, 4);
   const capa = quarto.fotos[0]?.url;
   const href = `/quartos/${slug}${guestsQueryString ? `?${guestsQueryString}` : ""}`;
+
+  const params = new URLSearchParams(guestsQueryString ?? "");
+  const adultos = Math.max(1, Math.trunc(Number(params.get("adults"))) || 1);
+  const criancasIdades = (params.get("children") ?? "")
+    .split(",")
+    .map((value) => Number(value))
+    .filter((age) => Number.isFinite(age) && age >= 0);
+  const checkin = params.get("checkin") ?? "";
+  const checkout = params.get("checkout") ?? "";
+  const noites = calcularNoites(checkin, checkout);
+
+  const valores = calcularValores({
+    noites: noites || 1,
+    valorDiaria: quarto.valor_diaria,
+    valorCasal: quarto.valor_casal,
+    valorPessoaAdicional: quarto.valor_pessoa_adicional,
+    adultos,
+    criancas: criancasIdades.map((idade) => ({ idade })),
+  });
+
+  const resumoLinhas = [
+    adultos === 1 ? "1 Adulto" : `${adultos} Adultos`,
+    ...criancasIdades.map((idade) => `1 Criança (${idade} anos)`),
+  ];
 
   return (
     <article
@@ -88,24 +111,32 @@ export function RoomCard({
 
         <div className="mt-auto space-y-3 pt-2">
           <div>
-            <p className="text-xs text-gray-text">diária</p>
+            <p className="text-xs text-gray-text">
+              {noites > 0 ? `${noites} ${noites === 1 ? "diária" : "diárias"}` : "valor estimado"}
+            </p>
             <p className="font-sans text-xl font-semibold text-primary-dark">
-              {currency.format(quarto.valor_diaria)}
+              {currency.format(valores.valorTotal)}
             </p>
           </div>
-          <div
-            className="grid grid-cols-2 gap-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Button asChild variant="ghost" size="sm">
-              <Link href={href}>
-                Ver detalhes
-                <ArrowRight className="size-4" />
-              </Link>
+
+          <div onClick={(e) => e.stopPropagation()}>
+            <Button className="w-full" size="sm" onClick={() => onReservar?.(quarto)}>
+              Reservar com estes hóspedes
             </Button>
-            <Button size="sm" onClick={() => onReservar?.(quarto)}>
-              Reservar
-            </Button>
+          </div>
+
+          <div className="space-y-1 rounded-xl bg-admin-bg/60 px-3 py-2.5">
+            <ul className="space-y-0.5 text-xs text-gray-text">
+              {resumoLinhas.map((linha, index) => (
+                <li key={index}>• {linha}</li>
+              ))}
+            </ul>
+            <div className="flex items-center justify-between border-t border-gray-light pt-1.5 text-xs">
+              <span className="font-medium text-gray-text">Valor Total</span>
+              <span className="font-sans text-sm font-semibold text-primary-dark">
+                {currency.format(valores.valorTotal)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

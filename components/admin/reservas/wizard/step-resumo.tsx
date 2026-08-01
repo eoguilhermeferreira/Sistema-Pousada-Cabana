@@ -54,6 +54,9 @@ export function StepResumo({
   const valores = calcularValores({
     noites,
     valorDiaria: quarto.valor_diaria,
+    valorCasal: quarto.valor_casal,
+    valorPessoaAdicional: quarto.valor_pessoa_adicional,
+    adultos,
     criancas: criancasValidas.map((c) => ({ idade: c.idadeNum })),
   });
 
@@ -113,7 +116,9 @@ export function StepResumo({
         </p>
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-text">
-            Hospedagem ({noites} × {currency.format(quarto.valor_diaria)})
+            Hospedagem ({noites} ×{" "}
+            {currency.format(noites > 0 ? valores.valorHospedagem / noites : quarto.valor_diaria)}
+            {valores.adultosEquivalentes > 1 && ` · ${valores.adultosEquivalentes} adultos`})
           </span>
           <span className="font-medium text-primary-dark">
             {currency.format(valores.valorHospedagem)}

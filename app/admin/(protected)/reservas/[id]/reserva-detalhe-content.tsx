@@ -128,6 +128,7 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
   }
 
   const criancas = reserva.hospedes.filter((h) => h.tipo === "crianca");
+  const acompanhantesAdultos = reserva.hospedes.filter((h) => h.tipo === "adulto");
   const podeCancelar = !["cancelada", "checkout_realizado", "no_show"].includes(
     reserva.status,
   );
@@ -232,6 +233,18 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
               {criancas.length > 0 &&
                 ` · ${criancas.length} ${criancas.length === 1 ? "criança" : "crianças"}`}
             </p>
+            {acompanhantesAdultos.length > 0 && (
+              <ul className="space-y-1.5">
+                {acompanhantesAdultos.map((adulto) => (
+                  <li
+                    key={adulto.id}
+                    className="rounded-lg bg-admin-bg/60 px-3 py-2 text-sm text-primary-dark"
+                  >
+                    {adulto.nome || "Acompanhante"}
+                  </li>
+                ))}
+              </ul>
+            )}
             {criancas.length > 0 && (
               <ul className="space-y-1.5">
                 {criancas.map((crianca) => (

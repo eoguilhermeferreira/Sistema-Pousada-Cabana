@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -83,6 +83,18 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/minha-conta"
+            className={cn(
+              "flex items-center gap-1.5 text-sm font-medium transition-colors duration-200",
+              solid
+                ? "text-primary-dark hover:text-primary"
+                : "text-white hover:text-white/80",
+            )}
+          >
+            <User className="size-4" />
+            Minha Conta
+          </Link>
           <Button asChild size="sm">
             <Link href="/#reservar">Reservar Agora</Link>
           </Button>
@@ -114,6 +126,14 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/minha-conta"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-1.5 text-base font-medium text-primary-dark"
+            >
+              <User className="size-4" />
+              Minha Conta
+            </Link>
             <Button asChild className="w-full">
               <Link href="/#reservar" onClick={() => setMobileOpen(false)}>
                 Reservar Agora

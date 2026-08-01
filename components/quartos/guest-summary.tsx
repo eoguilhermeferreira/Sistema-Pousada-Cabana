@@ -32,6 +32,9 @@ export function GuestSummary({ quarto }: { quarto: QuartoDetalhado }) {
   const valores = calcularValores({
     noites: noites || 1,
     valorDiaria: quarto.valor_diaria,
+    valorCasal: quarto.valor_casal,
+    valorPessoaAdicional: quarto.valor_pessoa_adicional,
+    adultos: Math.max(1, adults),
     criancas: childrenAges.map((idade) => ({ idade })),
   });
 
@@ -63,7 +66,7 @@ export function GuestSummary({ quarto }: { quarto: QuartoDetalhado }) {
       </div>
 
       <Button className="mt-4 w-full" onClick={() => setOpen(true)}>
-        Reservar com esses hóspedes
+        Reservar com estes hóspedes
       </Button>
 
       <ReservationModal

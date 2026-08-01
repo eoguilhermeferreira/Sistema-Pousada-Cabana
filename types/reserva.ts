@@ -22,6 +22,17 @@ export const statusReservaLabels: Record<StatusReserva, string> = {
   no_show: "No-show",
 };
 
+/** Rótulos mostrados pro cliente na área "Minha Conta" — mais amigáveis que
+ * os usados no admin, sem mudar o enum ou o funcionamento existente. */
+export const statusReservaLabelsCliente: Record<StatusReserva, string> = {
+  reservada: "Aguardando Confirmação",
+  confirmada: "Reserva Confirmada",
+  checkin_realizado: "Hospedagem em andamento",
+  checkout_realizado: "Reserva Finalizada",
+  cancelada: "Cancelada",
+  no_show: "Não compareceu",
+};
+
 export const statusReservaOptions: StatusReserva[] = [
   "reservada",
   "confirmada",

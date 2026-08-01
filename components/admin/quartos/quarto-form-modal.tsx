@@ -172,6 +172,17 @@ export function QuartoFormModal({
     const valor = Number(values.valor_diaria);
     if (Number.isNaN(valor) || valor < 0)
       nextErrors.valor_diaria = "Valor inválido.";
+    if (
+      values.valor_casal &&
+      (Number.isNaN(Number(values.valor_casal)) || Number(values.valor_casal) < 0)
+    )
+      nextErrors.valor_casal = "Valor inválido.";
+    if (
+      values.valor_pessoa_adicional &&
+      (Number.isNaN(Number(values.valor_pessoa_adicional)) ||
+        Number(values.valor_pessoa_adicional) < 0)
+    )
+      nextErrors.valor_pessoa_adicional = "Valor inválido.";
     return nextErrors;
   }
 
@@ -204,6 +215,10 @@ export function QuartoFormModal({
         descricao: values.descricao.trim() || null,
         capacidade_maxima: Number(values.capacidade_maxima),
         valor_diaria: Number(values.valor_diaria),
+        valor_casal: values.valor_casal ? Number(values.valor_casal) : null,
+        valor_pessoa_adicional: values.valor_pessoa_adicional
+          ? Number(values.valor_pessoa_adicional)
+          : null,
         status: values.status,
       };
 
@@ -274,7 +289,7 @@ export function QuartoFormModal({
                 />
               </Field>
               <Field
-                label="Valor da diária (R$)"
+                label="Valor da diária (R$) — 1 pessoa"
                 required
                 error={errors.valor_diaria}
               >
@@ -305,6 +320,43 @@ export function QuartoFormModal({
                   ))}
                 </select>
               </Field>
+            </div>
+
+            <div className="space-y-2 rounded-xl border border-gray-text/20 p-4">
+              <p className="text-xs font-medium text-gray-text">
+                Preço por ocupação (opcional) — se não preencher, o valor da
+                diária acima vale para qualquer quantidade de hóspedes.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <Field
+                  label="Valor da diária (R$) — casal (2 pessoas)"
+                  error={errors.valor_casal}
+                >
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={values.valor_casal}
+                    onChange={(e) => setField("valor_casal", e.target.value)}
+                    placeholder="0,00"
+                  />
+                </Field>
+                <Field
+                  label="Adicional por diária — cada pessoa a partir da 3ª"
+                  error={errors.valor_pessoa_adicional}
+                >
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={values.valor_pessoa_adicional}
+                    onChange={(e) =>
+                      setField("valor_pessoa_adicional", e.target.value)
+                    }
+                    placeholder="0,00"
+                  />
+                </Field>
+              </div>
             </div>
 
             <Field label="Descrição" error={errors.descricao}>

@@ -23,6 +23,7 @@ import { useUsuarioAtual } from "@/components/admin/usuario-context";
 import { formatCpf } from "@/lib/cpf";
 import { formatPhone } from "@/lib/phone";
 import { permissoesPorCargo } from "@/lib/permissions";
+import { createClient } from "@/lib/supabase/client";
 import {
   getFuncionarioById,
   listHistoricoFuncionario,
@@ -112,6 +113,30 @@ export function FuncionarioPainelDrawer({
     if (!funcionarioId) return;
     setPontos(await listPontosPorFuncionario(funcionarioId));
   }, [funcionarioId]);
+
+  // Se o funcionário bater o ponto (ou um admin corrigir) enquanto o painel
+  // dele está aberto, a aba "Pontos" atualiza sozinha, sem precisar de F5.
+  React.useEffect(() => {
+    if (!open || !funcionarioId) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`funcionario-pontos-realtime-${funcionarioId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "pontos",
+          filter: `funcionario_id=eq.${funcionarioId}`,
+        },
+        () => reloadPontos(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [open, funcionarioId, reloadPontos]);
 
   const dias = React.useMemo(() => agruparPontosPorDia(pontos), [pontos]);
 

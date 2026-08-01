@@ -5,6 +5,7 @@ import { ExternalLink, RefreshCw, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
+import { createClient } from "@/lib/supabase/client";
 import { listPontosHoje } from "@/services/pontos-service";
 import { formatarStatusPonto, tipoPontoLabels } from "@/types/ponto";
 import type { PontoComFuncionario } from "@/types/ponto";
@@ -35,12 +36,36 @@ export function BaterPontoPageContent() {
     }
   }, []);
 
+  // Atualização silenciosa (sem spinner) usada pelo Realtime, pra não piscar
+  // a lista toda vez que alguém bate o ponto no kiosk.
+  const reload = React.useCallback(async () => {
+    setPontos(await listPontosHoje());
+  }, []);
+
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       load();
     }, 0);
     return () => clearTimeout(timeout);
   }, [load]);
+
+  // Assim que um ponto é batido no kiosk (ou corrigido por um admin), a
+  // lista atualiza sozinha aqui — sem precisar apertar F5.
+  React.useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("bater-ponto-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "pontos" },
+        () => reload(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [reload]);
 
   return (
     <div className="space-y-6">

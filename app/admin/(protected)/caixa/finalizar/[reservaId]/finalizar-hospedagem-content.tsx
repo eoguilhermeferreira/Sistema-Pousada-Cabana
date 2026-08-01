@@ -102,6 +102,15 @@ export function FinalizarHospedagemContent({
   React.useEffect(() => {
     if (loading) return;
     const timeout = setTimeout(() => {
+      setIncluirHospedagem(valorHospedagemPendente > 0);
+      setIncluirConsumo(valorConsumoPendente > 0);
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [loading, valorHospedagemPendente, valorConsumoPendente]);
+
+  React.useEffect(() => {
+    if (loading) return;
+    const timeout = setTimeout(() => {
       setFormas(
         valorACobrar > 0 ? [{ forma: "pix", valor: valorACobrar }] : [],
       );

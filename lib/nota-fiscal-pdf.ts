@@ -287,7 +287,16 @@ export async function gerarNotaFiscalPdf(dados: NotaFiscalPdfData) {
 }
 
 export async function imprimirNotaFiscalPdf(dados: NotaFiscalPdfData) {
+  // A janela precisa ser aberta de forma síncrona, ainda dentro do clique do
+  // usuário — se abrirmos só depois do await (import do jsPDF, fetch do logo),
+  // o navegador não reconhece mais como ação do usuário e bloqueia o popup.
+  const printWindow = window.open("", "_blank");
   const doc = await montarDocumento(dados);
   doc.autoPrint();
-  window.open(doc.output("bloburl"), "_blank");
+  const blobUrl = doc.output("bloburl").toString();
+  if (printWindow) {
+    printWindow.location.href = blobUrl;
+  } else {
+    window.open(blobUrl, "_blank");
+  }
 }

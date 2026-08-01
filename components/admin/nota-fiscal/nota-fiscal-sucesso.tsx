@@ -13,6 +13,7 @@ interface NotaFiscalSucessoProps {
   nota: NotaFiscalComProdutos;
   empresa: EmpresaConfiguracao;
   veioDoCheckout: boolean;
+  error?: string;
   onImprimir: () => void;
   onBaixarPdf: () => void;
   onNovaNota: () => void;
@@ -21,6 +22,7 @@ interface NotaFiscalSucessoProps {
 export function NotaFiscalSucesso({
   nota,
   veioDoCheckout,
+  error,
   onImprimir,
   onBaixarPdf,
   onNovaNota,
@@ -68,6 +70,12 @@ export function NotaFiscalSucesso({
           <span className="font-mono font-medium text-primary-dark">{nota.codigo_autenticacao}</span>
         </p>
       </div>
+
+      {error && (
+        <p className="rounded-2xl border border-status-ocupado/30 bg-status-ocupado-light px-5 py-4 text-left text-sm font-medium text-status-ocupado">
+          {error}
+        </p>
+      )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Button

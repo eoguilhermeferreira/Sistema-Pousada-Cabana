@@ -189,6 +189,7 @@ export function NotaFiscalPageContent() {
 
   function handleNovaNota() {
     resetarFormulario();
+    setNotaEmitida(null);
     router.replace("/admin/nota-fiscal");
   }
 
@@ -297,6 +298,7 @@ export function NotaFiscalPageContent() {
         nota={notaEmitida}
         empresa={empresa}
         veioDoCheckout={veioDoCheckout}
+        error={error}
         onImprimir={handleImprimir}
         onBaixarPdf={handleBaixarPdf}
         onNovaNota={handleNovaNota}

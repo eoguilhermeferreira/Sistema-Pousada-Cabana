@@ -7,6 +7,7 @@ import { Lock, Mail, TriangleAlert } from "lucide-react";
 import type { AuthError } from "@supabase/supabase-js";
 
 import { signInWithPassword } from "@/services/auth-service";
+import { registrarSessaoLogin } from "@/services/usuarios-admin-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -41,12 +42,18 @@ export function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const { error } = await signInWithPassword(email, password);
+    const { data, error } = await signInWithPassword(email, password);
 
     if (error) {
       setError(describeAuthError(error));
       setLoading(false);
       return;
+    }
+
+    if (data.user) {
+      // Best-effort: registra o login para a aba Segurança. Nunca deve
+      // bloquear o acesso caso essa gravação falhe.
+      registrarSessaoLogin(data.user.id).catch(() => {});
     }
 
     router.push("/admin/dashboard");

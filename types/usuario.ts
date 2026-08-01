@@ -18,3 +18,33 @@ export const cargoOptions: CargoUsuario[] = [
   "financeiro",
   "limpeza",
 ];
+
+export interface UsuarioFormValues {
+  nome: string;
+  email: string;
+  telefone: string;
+  cpf: string;
+  cargo: CargoUsuario | "";
+  senha: string;
+}
+
+export const emptyUsuarioForm: UsuarioFormValues = {
+  nome: "",
+  email: "",
+  telefone: "",
+  cpf: "",
+  cargo: "",
+  senha: "",
+};
+
+export interface FiltrosUsuarios {
+  search: string;
+  cargo: CargoUsuario | "";
+  status: "ativo" | "inativo" | "";
+}
+
+export const emptyFiltrosUsuarios: FiltrosUsuarios = {
+  search: "",
+  cargo: "",
+  status: "",
+};

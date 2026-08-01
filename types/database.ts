@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      backups: {
+        Row: {
+          created_at: string
+          gerado_por: string | null
+          id: string
+          tabelas: Json | null
+          tamanho_bytes: number
+        }
+        Insert: {
+          created_at?: string
+          gerado_por?: string | null
+          id?: string
+          tabelas?: Json | null
+          tamanho_bytes?: number
+        }
+        Update: {
+          created_at?: string
+          gerado_por?: string | null
+          id?: string
+          tabelas?: Json | null
+          tamanho_bytes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backups_gerado_por_fkey"
+            columns: ["gerado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caixa: {
         Row: {
           aberto_em: string
@@ -197,21 +229,56 @@ export type Database = {
       }
       chatbot_conversas: {
         Row: {
+          aguardando_humano: boolean
+          atendido_por: string | null
+          canal: string
           created_at: string
+          hospede_nome: string | null
+          hospede_telefone: string | null
           id: string
+          identificador_externo: string | null
+          status: string
+          ultima_mensagem: string | null
+          ultima_mensagem_em: string | null
           updated_at: string
         }
         Insert: {
+          aguardando_humano?: boolean
+          atendido_por?: string | null
+          canal?: string
           created_at?: string
+          hospede_nome?: string | null
+          hospede_telefone?: string | null
           id?: string
+          identificador_externo?: string | null
+          status?: string
+          ultima_mensagem?: string | null
+          ultima_mensagem_em?: string | null
           updated_at?: string
         }
         Update: {
+          aguardando_humano?: boolean
+          atendido_por?: string | null
+          canal?: string
           created_at?: string
+          hospede_nome?: string | null
+          hospede_telefone?: string | null
           id?: string
+          identificador_externo?: string | null
+          status?: string
+          ultima_mensagem?: string | null
+          ultima_mensagem_em?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_conversas_atendido_por_fkey"
+            columns: ["atendido_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       comodidades: {
         Row: {
@@ -671,6 +738,36 @@ export type Database = {
         }
         Relationships: []
       }
+      integracoes_configuracoes: {
+        Row: {
+          campos: Json
+          chave: string
+          conectado: boolean
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          campos?: Json
+          chave: string
+          conectado?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          campos?: Json
+          chave?: string
+          conectado?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mensagens: {
         Row: {
           created_at: string
@@ -1057,6 +1154,114 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pousada_configuracoes: {
+        Row: {
+          capa_url: string | null
+          cep: string
+          cidade: string
+          created_at: string
+          email: string
+          endereco: string
+          estado: string
+          facebook: string
+          horario_funcionamento: string
+          id: string
+          instagram: string
+          logo_url: string | null
+          nome: string
+          site: string
+          telefone: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          capa_url?: string | null
+          cep?: string
+          cidade?: string
+          created_at?: string
+          email?: string
+          endereco?: string
+          estado?: string
+          facebook?: string
+          horario_funcionamento?: string
+          id?: string
+          instagram?: string
+          logo_url?: string | null
+          nome?: string
+          site?: string
+          telefone?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Update: {
+          capa_url?: string | null
+          cep?: string
+          cidade?: string
+          created_at?: string
+          email?: string
+          endereco?: string
+          estado?: string
+          facebook?: string
+          horario_funcionamento?: string
+          id?: string
+          instagram?: string
+          logo_url?: string | null
+          nome?: string
+          site?: string
+          telefone?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      preferencias_sistema: {
+        Row: {
+          autenticacao_dois_fatores: boolean
+          created_at: string
+          formato_data: string
+          formato_hora: string
+          id: string
+          idioma: string
+          itens_por_pagina: number
+          minutos_expiracao_sessao: number
+          moeda: string
+          notificacoes_ativas: boolean
+          sons_ativos: boolean
+          tema: string
+          updated_at: string
+        }
+        Insert: {
+          autenticacao_dois_fatores?: boolean
+          created_at?: string
+          formato_data?: string
+          formato_hora?: string
+          id?: string
+          idioma?: string
+          itens_por_pagina?: number
+          minutos_expiracao_sessao?: number
+          moeda?: string
+          notificacoes_ativas?: boolean
+          sons_ativos?: boolean
+          tema?: string
+          updated_at?: string
+        }
+        Update: {
+          autenticacao_dois_fatores?: boolean
+          created_at?: string
+          formato_data?: string
+          formato_hora?: string
+          id?: string
+          idioma?: string
+          itens_por_pagina?: number
+          minutos_expiracao_sessao?: number
+          moeda?: string
+          notificacoes_ativas?: boolean
+          sons_ativos?: boolean
+          tema?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       produtos: {
         Row: {
@@ -1496,35 +1701,117 @@ export type Database = {
           },
         ]
       }
+      sessoes_login: {
+        Row: {
+          criado_em: string
+          dispositivo: string | null
+          id: string
+          ip: string | null
+          navegador: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          criado_em?: string
+          dispositivo?: string | null
+          id?: string
+          ip?: string | null
+          navegador?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          criado_em?: string
+          dispositivo?: string | null
+          id?: string
+          ip?: string | null
+          navegador?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessoes_login_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sistema_logs: {
+        Row: {
+          acao: string
+          created_at: string
+          detalhes: Json | null
+          id: string
+          modulo: string
+          usuario_id: string | null
+          usuario_nome: string
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          detalhes?: Json | null
+          id?: string
+          modulo: string
+          usuario_id?: string | null
+          usuario_nome?: string
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          detalhes?: Json | null
+          id?: string
+          modulo?: string
+          usuario_id?: string | null
+          usuario_nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sistema_logs_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usuarios: {
         Row: {
           ativo: boolean
           avatar_url: string | null
           cargo: Database["public"]["Enums"]["cargo_usuario"]
+          cpf: string | null
           created_at: string
           email: string
           id: string
           nome: string
+          telefone: string | null
+          ultimo_acesso: string | null
           updated_at: string
         }
         Insert: {
           ativo?: boolean
           avatar_url?: string | null
           cargo?: Database["public"]["Enums"]["cargo_usuario"]
+          cpf?: string | null
           created_at?: string
           email: string
           id: string
           nome: string
+          telefone?: string | null
+          ultimo_acesso?: string | null
           updated_at?: string
         }
         Update: {
           ativo?: boolean
           avatar_url?: string | null
           cargo?: Database["public"]["Enums"]["cargo_usuario"]
+          cpf?: string | null
           created_at?: string
           email?: string
           id?: string
           nome?: string
+          telefone?: string | null
+          ultimo_acesso?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1583,9 +1870,42 @@ export type Database = {
           valor_total: number
         }[]
       }
+      criar_usuario_admin: {
+        Args: {
+          p_cargo: Database["public"]["Enums"]["cargo_usuario"]
+          p_cpf?: string
+          p_email: string
+          p_nome: string
+          p_senha: string
+          p_telefone?: string
+        }
+        Returns: {
+          ativo: boolean
+          avatar_url: string | null
+          cargo: Database["public"]["Enums"]["cargo_usuario"]
+          cpf: string | null
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          telefone: string | null
+          ultimo_acesso: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "usuarios"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_cargo: {
         Args: never
         Returns: Database["public"]["Enums"]["cargo_usuario"]
+      }
+      excluir_usuario_admin: {
+        Args: { p_usuario_id: string }
+        Returns: undefined
       }
       fechar_caixa: {
         Args: {
@@ -1647,6 +1967,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      informacoes_sistema: { Args: never; Returns: Json }
       listar_dados_reconhecimento_facial: {
         Args: never
         Returns: {
@@ -1656,6 +1977,10 @@ export type Database = {
           funcionario_id: string
           nome: string
         }[]
+      }
+      redefinir_senha_usuario: {
+        Args: { p_nova_senha: string; p_usuario_id: string }
+        Returns: undefined
       }
       registrar_consumo_quarto: {
         Args: {

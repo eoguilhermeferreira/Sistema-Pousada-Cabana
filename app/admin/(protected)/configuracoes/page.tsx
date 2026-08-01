@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
-import { Settings } from "lucide-react";
+import { redirect } from "next/navigation";
 
-import { ComingSoon } from "@/components/admin/coming-soon";
+import { getUsuarioAtual } from "@/services/usuarios-service";
+import { ConfiguracoesPageContent } from "./configuracoes-page-content";
 
 export const metadata: Metadata = {
   title: "Configurações | Sistema Administrativo Pousada Cabana",
 };
 
-export default function ConfiguracoesPage() {
-  return <ComingSoon icon={Settings} title="Configurações" etapa="uma próxima etapa" />;
+export default async function ConfiguracoesPage() {
+  const usuario = await getUsuarioAtual();
+
+  // Segunda camada de defesa além da Sidebar: mesmo que alguém digite a
+  // URL diretamente, apenas administradores acessam este módulo.
+  if (!usuario || usuario.cargo !== "administrador") {
+    redirect("/admin/dashboard");
+  }
+
+  return <ConfiguracoesPageContent />;
 }

@@ -92,6 +92,11 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
 };
 
 export function podeAcessarRota(cargo: CargoUsuario, href: string): boolean {
+  // Configurações Gerais (Etapa 13) é exclusivo do administrador, mesmo
+  // para cargos com navegação "*" como o gerente.
+  if (href.startsWith("/admin/configuracoes") && cargo !== "administrador") {
+    return false;
+  }
   const permissoes = permissoesPorCargo[cargo];
   if (permissoes.navegacao.includes("*")) return true;
   return permissoes.navegacao.some((permitido) => href.startsWith(permitido));

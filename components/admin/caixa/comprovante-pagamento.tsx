@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2, Download, Printer } from "lucide-react";
+import { CheckCircle2, Download, FileText, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { formaPagamentoLabels } from "@/types/caixa";
@@ -96,8 +96,11 @@ async function gerarPdf(comprovante: ComprovanteData) {
 
 export function ComprovantePagamento({
   comprovante,
+  reservaId,
 }: {
   comprovante: ComprovanteData;
+  /** Quando informado, exibe o atalho para emitir a nota fiscal desta hospedagem. */
+  reservaId?: string;
 }) {
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -206,7 +209,7 @@ export function ComprovantePagamento({
         <Button asChild variant="ghost">
           <Link href="/admin/caixa">Voltar para o Caixa</Link>
         </Button>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="outline"
@@ -216,10 +219,18 @@ export function ComprovantePagamento({
             <Printer className="size-4" />
             Imprimir Resumo
           </Button>
-          <Button type="button" onClick={() => gerarPdf(comprovante)}>
+          <Button type="button" variant="outline" className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark" onClick={() => gerarPdf(comprovante)}>
             <Download className="size-4" />
             Gerar PDF
           </Button>
+          {reservaId && (
+            <Button asChild>
+              <Link href={`/admin/nota-fiscal?reservaId=${reservaId}`}>
+                <FileText className="size-4" />
+                Emitir Nota Fiscal
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>

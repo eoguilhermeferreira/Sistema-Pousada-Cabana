@@ -78,3 +78,19 @@ export async function removerConsumoQuarto(consumoId: string) {
   });
   if (error) throw error;
 }
+
+/** Todo o consumo de uma reserva, pago ou não — usado pela Nota Fiscal
+ * (emitida após o pagamento no Caixa, quando o consumo já está pago). */
+export async function listConsumosPorReserva(
+  reservaId: string,
+): Promise<QuartoConsumoComProduto[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("quarto_consumos")
+    .select("*, produto:produtos(id, nome, unidade), usuario:usuarios(nome)")
+    .eq("reserva_id", reservaId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []) as unknown as QuartoConsumoComProduto[];
+}

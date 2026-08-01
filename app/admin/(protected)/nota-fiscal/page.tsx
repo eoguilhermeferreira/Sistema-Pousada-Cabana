@@ -1,12 +1,23 @@
 import type { Metadata } from "next";
-import { FileText } from "lucide-react";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 
-import { ComingSoon } from "@/components/admin/coming-soon";
+import { NotaFiscalPageContent } from "./nota-fiscal-page-content";
 
 export const metadata: Metadata = {
   title: "Nota Fiscal | Sistema Administrativo Pousada Cabana",
 };
 
 export default function NotaFiscalPage() {
-  return <ComingSoon icon={FileText} title="Nota Fiscal" etapa="Etapa 12" />;
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="size-6 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <NotaFiscalPageContent />
+    </Suspense>
+  );
 }

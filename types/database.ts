@@ -240,6 +240,54 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_configuracoes: {
+        Row: {
+          cep: string
+          cidade: string
+          cnpj: string
+          created_at: string
+          email: string
+          endereco: string
+          estado: string
+          id: string
+          inscricao_municipal: string
+          nome_fantasia: string
+          razao_social: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          cep?: string
+          cidade?: string
+          cnpj?: string
+          created_at?: string
+          email?: string
+          endereco?: string
+          estado?: string
+          id?: string
+          inscricao_municipal?: string
+          nome_fantasia?: string
+          razao_social?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Update: {
+          cep?: string
+          cidade?: string
+          cnpj?: string
+          created_at?: string
+          email?: string
+          endereco?: string
+          estado?: string
+          id?: string
+          inscricao_municipal?: string
+          nome_fantasia?: string
+          razao_social?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       estoque: {
         Row: {
           created_at: string
@@ -643,21 +691,206 @@ export type Database = {
       }
       notas_fiscais: {
         Row: {
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
           created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
           id: string
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
           updated_at: string
+          valor_final: number
+          valor_produtos: number
+        }
+        Insert: {
+          cancelada_em?: string | null
+          cancelada_motivo?: string | null
+          codigo_autenticacao?: string | null
+          competencia?: string
+          created_at?: string
+          criada_por?: string | null
+          data_emissao?: string
+          desconto?: number
+          emitida_em?: string | null
+          emitida_por?: string | null
+          id?: string
+          iss_aliquota?: number
+          iss_valor?: number
+          numero?: number
+          observacoes?: string | null
+          protocolo_prefeitura?: string | null
+          reserva_id?: string | null
+          serie?: string
+          servico_descricao?: string
+          servico_quantidade?: number
+          servico_valor_total?: number
+          servico_valor_unitario?: number
+          status?: string
+          tomador_bairro?: string | null
+          tomador_cep?: string | null
+          tomador_cidade?: string | null
+          tomador_complemento?: string | null
+          tomador_documento?: string
+          tomador_email?: string | null
+          tomador_empresa?: string | null
+          tomador_estado?: string | null
+          tomador_nome?: string
+          tomador_numero?: string | null
+          tomador_rua?: string | null
+          tomador_telefone?: string | null
+          updated_at?: string
+          valor_final?: number
+          valor_produtos?: number
+        }
+        Update: {
+          cancelada_em?: string | null
+          cancelada_motivo?: string | null
+          codigo_autenticacao?: string | null
+          competencia?: string
+          created_at?: string
+          criada_por?: string | null
+          data_emissao?: string
+          desconto?: number
+          emitida_em?: string | null
+          emitida_por?: string | null
+          id?: string
+          iss_aliquota?: number
+          iss_valor?: number
+          numero?: number
+          observacoes?: string | null
+          protocolo_prefeitura?: string | null
+          reserva_id?: string | null
+          serie?: string
+          servico_descricao?: string
+          servico_quantidade?: number
+          servico_valor_total?: number
+          servico_valor_unitario?: number
+          status?: string
+          tomador_bairro?: string | null
+          tomador_cep?: string | null
+          tomador_cidade?: string | null
+          tomador_complemento?: string | null
+          tomador_documento?: string
+          tomador_email?: string | null
+          tomador_empresa?: string | null
+          tomador_estado?: string | null
+          tomador_nome?: string
+          tomador_numero?: string | null
+          tomador_rua?: string | null
+          tomador_telefone?: string | null
+          updated_at?: string
+          valor_final?: number
+          valor_produtos?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notas_fiscais_criada_por_fkey"
+            columns: ["criada_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_fiscais_emitida_por_fkey"
+            columns: ["emitida_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_fiscais_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notas_fiscais_produtos: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          nota_fiscal_id: string
+          produto_id: string | null
+          quantidade: number
+          quarto_consumo_id: string | null
+          valor_total: number
+          valor_unitario: number
         }
         Insert: {
           created_at?: string
+          descricao: string
           id?: string
-          updated_at?: string
+          nota_fiscal_id: string
+          produto_id?: string | null
+          quantidade: number
+          quarto_consumo_id?: string | null
+          valor_total: number
+          valor_unitario: number
         }
         Update: {
           created_at?: string
+          descricao?: string
           id?: string
-          updated_at?: string
+          nota_fiscal_id?: string
+          produto_id?: string | null
+          quantidade?: number
+          quarto_consumo_id?: string | null
+          valor_total?: number
+          valor_unitario?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notas_fiscais_produtos_nota_fiscal_id_fkey"
+            columns: ["nota_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "notas_fiscais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_fiscais_produtos_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_fiscais_produtos_quarto_consumo_id_fkey"
+            columns: ["quarto_consumo_id"]
+            isOneToOne: false
+            referencedRelation: "quarto_consumos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pagamento_formas: {
         Row: {

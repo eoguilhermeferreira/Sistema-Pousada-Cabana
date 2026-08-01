@@ -176,7 +176,7 @@ export function FinalizarHospedagemContent({
   }
 
   if (comprovante) {
-    return <ComprovantePagamento comprovante={comprovante} />;
+    return <ComprovantePagamento comprovante={comprovante} reservaId={reserva?.id} />;
   }
 
   if (loading || !reserva) {

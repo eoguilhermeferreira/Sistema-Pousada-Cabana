@@ -46,6 +46,24 @@ export async function listReservasNoPeriodo(
   return (data ?? []) as unknown as ReservaComRelacoes[];
 }
 
+/** Reserva com check-in em andamento no quarto — usada para vincular o consumo lançado. */
+export async function getReservaAtivaPorQuarto(
+  quartoId: string,
+): Promise<ReservaComRelacoes | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("reservas")
+    .select(RESERVA_SELECT)
+    .eq("quarto_id", quartoId)
+    .eq("status", "checkin_realizado")
+    .order("data_entrada", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data as unknown as ReservaComRelacoes | null;
+}
+
 export async function getReservaById(id: string): Promise<ReservaDetalhada> {
   const supabase = createClient();
 

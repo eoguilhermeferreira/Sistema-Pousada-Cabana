@@ -20,7 +20,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-gray-light bg-white transition-[width] duration-300 ease-out",
+        "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-gray-light bg-white transition-[width] duration-300 ease-out print:hidden",
         collapsed ? "w-20" : "w-64",
       )}
     >

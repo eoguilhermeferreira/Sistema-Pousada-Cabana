@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { QuartoStatusBadge } from "@/components/admin/quartos/quarto-status-badge";
 import { AdicionarConsumoModal } from "@/components/admin/estoque/adicionar-consumo-modal";
 import { getQuartoById } from "@/services/quartos-service";
+import { getReservaAtivaPorQuarto } from "@/services/reservas-service";
 import {
   listConsumosPorQuarto,
   listHistoricoPorQuarto,
@@ -58,6 +59,9 @@ export function QuartoCentralDrawer({
 }: QuartoCentralDrawerProps) {
   const [quarto, setQuarto] = React.useState<QuartoDetalhado | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [reservaAtivaId, setReservaAtivaId] = React.useState<string | null>(
+    null,
+  );
 
   const [consumos, setConsumos] = React.useState<QuartoConsumoComProduto[]>([]);
   const [historico, setHistorico] = React.useState<MovimentacaoComRelacoes[]>(
@@ -72,8 +76,12 @@ export function QuartoCentralDrawer({
     const timeout = setTimeout(async () => {
       setLoading(true);
       try {
-        const data = await getQuartoById(quartoId);
+        const [data, reservaAtiva] = await Promise.all([
+          getQuartoById(quartoId),
+          getReservaAtivaPorQuarto(quartoId),
+        ]);
         setQuarto(data);
+        setReservaAtivaId(reservaAtiva?.id ?? null);
       } finally {
         setLoading(false);
       }
@@ -372,6 +380,7 @@ export function QuartoCentralDrawer({
                   open={adicionarConsumoOpen}
                   onOpenChange={setAdicionarConsumoOpen}
                   quartoId={quarto.id}
+                  reservaId={reservaAtivaId}
                   onAdicionado={loadConsumo}
                 />
               </TabsContent>

@@ -22,12 +22,12 @@ export function AdminShell({
 
       <div
         className={cn(
-          "transition-[margin] duration-300 ease-out",
+          "transition-[margin] duration-300 ease-out print:ml-0",
           collapsed ? "ml-20" : "ml-64",
         )}
       >
         <Topbar usuario={usuario} />
-        <main className="p-6">{children}</main>
+        <main className="p-6 print:p-0">{children}</main>
       </div>
     </div>
   );

@@ -16,21 +16,130 @@ export type Database = {
     Tables: {
       caixa: {
         Row: {
+          aberto_em: string
+          aberto_por: string | null
           created_at: string
+          diferenca: number | null
+          fechado_em: string | null
+          fechado_por: string | null
+          funcionario_nome: string
           id: string
+          observacao_abertura: string | null
+          observacao_fechamento: string | null
+          status: string
           updated_at: string
+          valor_contado: number | null
+          valor_esperado: number | null
+          valor_inicial: number
         }
         Insert: {
+          aberto_em?: string
+          aberto_por?: string | null
           created_at?: string
+          diferenca?: number | null
+          fechado_em?: string | null
+          fechado_por?: string | null
+          funcionario_nome: string
           id?: string
+          observacao_abertura?: string | null
+          observacao_fechamento?: string | null
+          status?: string
           updated_at?: string
+          valor_contado?: number | null
+          valor_esperado?: number | null
+          valor_inicial?: number
         }
         Update: {
+          aberto_em?: string
+          aberto_por?: string | null
           created_at?: string
+          diferenca?: number | null
+          fechado_em?: string | null
+          fechado_por?: string | null
+          funcionario_nome?: string
           id?: string
+          observacao_abertura?: string | null
+          observacao_fechamento?: string | null
+          status?: string
           updated_at?: string
+          valor_contado?: number | null
+          valor_esperado?: number | null
+          valor_inicial?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "caixa_aberto_por_fkey"
+            columns: ["aberto_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "caixa_fechado_por_fkey"
+            columns: ["fechado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      caixa_movimentacoes: {
+        Row: {
+          caixa_id: string
+          created_at: string
+          descricao: string | null
+          id: string
+          origem: string
+          pagamento_id: string | null
+          tipo: string
+          usuario_id: string | null
+          valor: number
+        }
+        Insert: {
+          caixa_id: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          origem: string
+          pagamento_id?: string | null
+          tipo: string
+          usuario_id?: string | null
+          valor: number
+        }
+        Update: {
+          caixa_id?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          origem?: string
+          pagamento_id?: string | null
+          tipo?: string
+          usuario_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caixa_movimentacoes_caixa_id_fkey"
+            columns: ["caixa_id"]
+            isOneToOne: false
+            referencedRelation: "caixa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "caixa_movimentacoes_pagamento_id_fkey"
+            columns: ["pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "pagamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "caixa_movimentacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categorias_produto: {
         Row: {
@@ -207,21 +316,74 @@ export type Database = {
       }
       financeiro: {
         Row: {
+          caixa_id: string | null
+          categoria: string
           created_at: string
+          descricao: string | null
           id: string
+          pagamento_id: string | null
+          reserva_id: string | null
+          tipo: string
           updated_at: string
+          usuario_id: string | null
+          valor: number
         }
         Insert: {
+          caixa_id?: string | null
+          categoria: string
           created_at?: string
+          descricao?: string | null
           id?: string
+          pagamento_id?: string | null
+          reserva_id?: string | null
+          tipo: string
           updated_at?: string
+          usuario_id?: string | null
+          valor: number
         }
         Update: {
+          caixa_id?: string | null
+          categoria?: string
           created_at?: string
+          descricao?: string | null
           id?: string
+          pagamento_id?: string | null
+          reserva_id?: string | null
+          tipo?: string
           updated_at?: string
+          usuario_id?: string | null
+          valor?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "financeiro_caixa_id_fkey"
+            columns: ["caixa_id"]
+            isOneToOne: false
+            referencedRelation: "caixa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_pagamento_id_fkey"
+            columns: ["pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "pagamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       funcionarios: {
         Row: {
@@ -352,6 +514,118 @@ export type Database = {
         }
         Relationships: []
       }
+      pagamento_formas: {
+        Row: {
+          created_at: string
+          forma: Database["public"]["Enums"]["forma_pagamento"]
+          id: string
+          pagamento_id: string
+          troco: number | null
+          valor: number
+          valor_recebido: number | null
+        }
+        Insert: {
+          created_at?: string
+          forma: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          pagamento_id: string
+          troco?: number | null
+          valor: number
+          valor_recebido?: number | null
+        }
+        Update: {
+          created_at?: string
+          forma?: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          pagamento_id?: string
+          troco?: number | null
+          valor?: number
+          valor_recebido?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamento_formas_pagamento_id_fkey"
+            columns: ["pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "pagamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          caixa_id: string
+          created_at: string
+          id: string
+          inclui_consumo: boolean
+          inclui_hospedagem: boolean
+          observacao: string | null
+          quarto_id: string
+          reserva_id: string
+          usuario_id: string | null
+          valor_consumo: number
+          valor_hospedagem: number
+          valor_total: number
+        }
+        Insert: {
+          caixa_id: string
+          created_at?: string
+          id?: string
+          inclui_consumo?: boolean
+          inclui_hospedagem?: boolean
+          observacao?: string | null
+          quarto_id: string
+          reserva_id: string
+          usuario_id?: string | null
+          valor_consumo?: number
+          valor_hospedagem?: number
+          valor_total: number
+        }
+        Update: {
+          caixa_id?: string
+          created_at?: string
+          id?: string
+          inclui_consumo?: boolean
+          inclui_hospedagem?: boolean
+          observacao?: string | null
+          quarto_id?: string
+          reserva_id?: string
+          usuario_id?: string | null
+          valor_consumo?: number
+          valor_hospedagem?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_caixa_id_fkey"
+            columns: ["caixa_id"]
+            isOneToOne: false
+            referencedRelation: "caixa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pontos: {
         Row: {
           created_at: string
@@ -463,6 +737,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          pago: boolean
           produto_id: string
           quantidade: number
           quarto_id: string
@@ -475,6 +750,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          pago?: boolean
           produto_id: string
           quantidade: number
           quarto_id: string
@@ -487,6 +763,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          pago?: boolean
           produto_id?: string
           quantidade?: number
           quarto_id?: string
@@ -697,6 +974,7 @@ export type Database = {
           created_at: string
           data_entrada: string
           data_saida: string
+          hospedagem_paga: boolean
           hospede_principal_id: string
           id: string
           observacoes: string | null
@@ -714,6 +992,7 @@ export type Database = {
           created_at?: string
           data_entrada: string
           data_saida: string
+          hospedagem_paga?: boolean
           hospede_principal_id: string
           id?: string
           observacoes?: string | null
@@ -731,6 +1010,7 @@ export type Database = {
           created_at?: string
           data_entrada?: string
           data_saida?: string
+          hospedagem_paga?: boolean
           hospede_principal_id?: string
           id?: string
           observacoes?: string | null
@@ -798,6 +1078,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      abrir_caixa: {
+        Args: {
+          p_funcionario_nome: string
+          p_observacao?: string
+          p_valor_inicial: number
+        }
+        Returns: {
+          aberto_em: string
+          aberto_por: string | null
+          created_at: string
+          diferenca: number | null
+          fechado_em: string | null
+          fechado_por: string | null
+          funcionario_nome: string
+          id: string
+          observacao_abertura: string | null
+          observacao_fechamento: string | null
+          status: string
+          updated_at: string
+          valor_contado: number | null
+          valor_esperado: number | null
+          valor_inicial: number
+        }
+      }
       criar_reserva_site: {
         Args: {
           p_cpf: string
@@ -817,6 +1121,54 @@ export type Database = {
           valor_total: number
         }[]
       }
+      fechar_caixa: {
+        Args: {
+          p_caixa_id: string
+          p_observacao?: string
+          p_valor_contado: number
+        }
+        Returns: {
+          aberto_em: string
+          aberto_por: string | null
+          created_at: string
+          diferenca: number | null
+          fechado_em: string | null
+          fechado_por: string | null
+          funcionario_nome: string
+          id: string
+          observacao_abertura: string | null
+          observacao_fechamento: string | null
+          status: string
+          updated_at: string
+          valor_contado: number | null
+          valor_esperado: number | null
+          valor_inicial: number
+        }
+      }
+      finalizar_pagamento_hospedagem: {
+        Args: {
+          p_caixa_id: string
+          p_formas: Json
+          p_incluir_consumo: boolean
+          p_incluir_hospedagem: boolean
+          p_observacao?: string
+          p_reserva_id: string
+        }
+        Returns: {
+          caixa_id: string
+          created_at: string
+          id: string
+          inclui_consumo: boolean
+          inclui_hospedagem: boolean
+          observacao: string | null
+          quarto_id: string
+          reserva_id: string
+          usuario_id: string | null
+          valor_consumo: number
+          valor_hospedagem: number
+          valor_total: number
+        }
+      }
       registrar_consumo_quarto: {
         Args: {
           p_produto_id: string
@@ -827,6 +1179,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          pago: boolean
           produto_id: string
           quantidade: number
           quarto_id: string
@@ -866,6 +1219,7 @@ export type Database = {
     }
     Enums: {
       cargo_usuario: "administrador" | "recepcao" | "financeiro" | "limpeza"
+      forma_pagamento: "pix" | "dinheiro" | "cartao_debito" | "cartao_credito"
       sexo_hospede: "masculino" | "feminino" | "outro"
       status_hospede: "ativo" | "inativo"
       status_quarto:
@@ -1016,6 +1370,7 @@ export const Constants = {
   public: {
     Enums: {
       cargo_usuario: ["administrador", "recepcao", "financeiro", "limpeza"],
+      forma_pagamento: ["pix", "dinheiro", "cartao_debito", "cartao_credito"],
       sexo_hospede: ["masculino", "feminino", "outro"],
       status_hospede: ["ativo", "inativo"],
       status_quarto: [

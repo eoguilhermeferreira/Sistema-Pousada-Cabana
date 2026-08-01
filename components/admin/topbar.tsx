@@ -61,7 +61,7 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
   const timeLabel = now ? timeFormatter.format(now) : "--:--:--";
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-light bg-white px-6">
+    <header className="flex h-16 items-center justify-between border-b border-gray-light bg-white px-6 print:hidden">
       <div className="flex items-baseline gap-2 text-sm text-gray-text">
         <span>{dateLabel}</span>
         <span className="text-gray-text/40">•</span>

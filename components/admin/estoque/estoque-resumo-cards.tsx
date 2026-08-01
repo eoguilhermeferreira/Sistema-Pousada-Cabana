@@ -1,10 +1,4 @@
-import {
-  AlertTriangle,
-  ArrowLeftRight,
-  Boxes,
-  PackageX,
-  Wallet,
-} from "lucide-react";
+import { ArrowLeftRight, Boxes, PackageX, Wallet } from "lucide-react";
 
 import { StatCard } from "@/components/admin/stat-card";
 import type { ResumoEstoque } from "@/types/produto";
@@ -16,18 +10,12 @@ const currency = new Intl.NumberFormat("pt-BR", {
 
 export function EstoqueResumoCards({ resumo }: { resumo: ResumoEstoque }) {
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <StatCard
         icon={Boxes}
         label="Produtos cadastrados"
         value={String(resumo.produtosCadastrados)}
         accent="primary"
-      />
-      <StatCard
-        icon={AlertTriangle}
-        label="Estoque baixo"
-        value={String(resumo.estoqueBaixo)}
-        accent="checkout"
       />
       <StatCard
         icon={PackageX}

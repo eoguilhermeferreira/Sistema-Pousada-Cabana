@@ -29,31 +29,26 @@ export interface QuartoConsumoComProduto extends QuartoConsumo {
   usuario: { nome: string } | null;
 }
 
-export type StatusEstoqueProduto = "em_estoque" | "estoque_baixo" | "sem_estoque";
+export type StatusEstoqueProduto = "em_estoque" | "sem_estoque";
 
 export function getStatusEstoqueProduto(
-  produto: Pick<Produto, "quantidade" | "estoque_minimo">,
+  produto: Pick<Produto, "quantidade">,
 ): StatusEstoqueProduto {
-  if (produto.quantidade <= 0) return "sem_estoque";
-  if (produto.quantidade <= produto.estoque_minimo) return "estoque_baixo";
-  return "em_estoque";
+  return produto.quantidade <= 0 ? "sem_estoque" : "em_estoque";
 }
 
 export const statusEstoqueLabels: Record<StatusEstoqueProduto, string> = {
   em_estoque: "Em estoque",
-  estoque_baixo: "Estoque baixo",
   sem_estoque: "Sem estoque",
 };
 
 const statusEstoqueBadgeClasses: Record<StatusEstoqueProduto, string> = {
   em_estoque: "bg-status-disponivel-light text-status-disponivel",
-  estoque_baixo: "bg-status-checkout-light text-status-checkout",
   sem_estoque: "bg-status-ocupado-light text-status-ocupado",
 };
 
 const statusEstoqueDotClasses: Record<StatusEstoqueProduto, string> = {
   em_estoque: "bg-status-disponivel",
-  estoque_baixo: "bg-status-checkout",
   sem_estoque: "bg-status-ocupado",
 };
 
@@ -111,10 +106,8 @@ export interface ProdutoFormValues {
   categoria_id: string;
   fornecedor: string;
   descricao: string;
-  valor_custo: string;
   valor_venda: string;
   quantidade: string;
-  estoque_minimo: string;
   unidade: string;
   observacoes: string;
   ativo: boolean;
@@ -126,10 +119,8 @@ export const emptyProdutoForm: ProdutoFormValues = {
   categoria_id: "",
   fornecedor: "",
   descricao: "",
-  valor_custo: "",
   valor_venda: "",
   quantidade: "0",
-  estoque_minimo: "0",
   unidade: "un",
   observacoes: "",
   ativo: true,
@@ -142,10 +133,8 @@ export function produtoToFormValues(produto: Produto): ProdutoFormValues {
     categoria_id: produto.categoria_id,
     fornecedor: produto.fornecedor ?? "",
     descricao: produto.descricao ?? "",
-    valor_custo: String(produto.valor_custo),
     valor_venda: String(produto.valor_venda),
     quantidade: String(produto.quantidade),
-    estoque_minimo: String(produto.estoque_minimo),
     unidade: produto.unidade,
     observacoes: produto.observacoes ?? "",
     ativo: produto.ativo,
@@ -168,7 +157,6 @@ export const emptyFiltrosProdutos: FiltrosProdutos = {
 
 export interface ResumoEstoque {
   produtosCadastrados: number;
-  estoqueBaixo: number;
   semEstoque: number;
   movimentacoesHoje: number;
   valorTotalEstoque: number;

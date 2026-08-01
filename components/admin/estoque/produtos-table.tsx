@@ -23,9 +23,7 @@ const columns = [
   "Produto",
   "Categoria",
   "Quantidade",
-  "Estoque mínimo",
-  "Valor de custo",
-  "Valor de venda",
+  "Valor",
   "Status",
   "",
 ];
@@ -117,12 +115,6 @@ export function ProdutosTable({
                   </td>
                   <td className="px-5 py-3 text-gray-text">
                     {produto.quantidade} {produto.unidade}
-                  </td>
-                  <td className="px-5 py-3 text-gray-text">
-                    {produto.estoque_minimo} {produto.unidade}
-                  </td>
-                  <td className="px-5 py-3 text-gray-text">
-                    {currency.format(produto.valor_custo)}
                   </td>
                   <td className="px-5 py-3 font-medium text-primary-dark">
                     {currency.format(produto.valor_venda)}

@@ -79,9 +79,6 @@ export function EstoquePageContent() {
     const hoje = dateKey(new Date());
     return {
       produtosCadastrados: produtos.length,
-      estoqueBaixo: produtos.filter(
-        (p) => getStatusEstoqueProduto(p) === "estoque_baixo",
-      ).length,
       semEstoque: produtos.filter(
         (p) => getStatusEstoqueProduto(p) === "sem_estoque",
       ).length,
@@ -89,7 +86,7 @@ export function EstoquePageContent() {
         (m) => dateKey(new Date(m.created_at)) === hoje,
       ).length,
       valorTotalEstoque: produtos.reduce(
-        (total, p) => total + p.quantidade * p.valor_custo,
+        (total, p) => total + p.quantidade * p.valor_venda,
         0,
       ),
     };

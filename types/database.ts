@@ -377,7 +377,6 @@ export type Database = {
           codigo: string
           created_at: string
           descricao: string | null
-          estoque_minimo: number
           fornecedor: string | null
           id: string
           imagem_url: string | null
@@ -386,7 +385,6 @@ export type Database = {
           quantidade: number
           unidade: string
           updated_at: string
-          valor_custo: number
           valor_venda: number
         }
         Insert: {
@@ -395,7 +393,6 @@ export type Database = {
           codigo: string
           created_at?: string
           descricao?: string | null
-          estoque_minimo?: number
           fornecedor?: string | null
           id?: string
           imagem_url?: string | null
@@ -404,7 +401,6 @@ export type Database = {
           quantidade?: number
           unidade?: string
           updated_at?: string
-          valor_custo?: number
           valor_venda?: number
         }
         Update: {
@@ -413,7 +409,6 @@ export type Database = {
           codigo?: string
           created_at?: string
           descricao?: string | null
-          estoque_minimo?: number
           fornecedor?: string | null
           id?: string
           imagem_url?: string | null
@@ -422,7 +417,6 @@ export type Database = {
           quantidade?: number
           unidade?: string
           updated_at?: string
-          valor_custo?: number
           valor_venda?: number
         }
         Relationships: [

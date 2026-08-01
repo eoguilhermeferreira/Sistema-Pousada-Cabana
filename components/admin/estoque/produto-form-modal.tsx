@@ -131,9 +131,6 @@ export function ProdutoFormModal({
     if (!values.codigo.trim()) nextErrors.codigo = "Informe o código interno.";
     if (!values.nome.trim()) nextErrors.nome = "Informe o nome do produto.";
     if (!values.categoria_id) nextErrors.categoria_id = "Selecione a categoria.";
-    const custo = Number(values.valor_custo);
-    if (Number.isNaN(custo) || custo < 0)
-      nextErrors.valor_custo = "Valor inválido.";
     const venda = Number(values.valor_venda);
     if (Number.isNaN(venda) || venda < 0)
       nextErrors.valor_venda = "Valor inválido.";
@@ -142,9 +139,6 @@ export function ProdutoFormModal({
       if (!Number.isInteger(quantidade) || quantidade < 0)
         nextErrors.quantidade = "Quantidade inválida.";
     }
-    const estoqueMinimo = Number(values.estoque_minimo);
-    if (!Number.isInteger(estoqueMinimo) || estoqueMinimo < 0)
-      nextErrors.estoque_minimo = "Valor inválido.";
     return nextErrors;
   }
 
@@ -177,9 +171,7 @@ export function ProdutoFormModal({
         categoria_id: values.categoria_id,
         fornecedor: values.fornecedor.trim() || null,
         descricao: values.descricao.trim() || null,
-        valor_custo: Number(values.valor_custo),
         valor_venda: Number(values.valor_venda),
-        estoque_minimo: Number(values.estoque_minimo),
         unidade: values.unidade,
         observacoes: values.observacoes.trim() || null,
         ativo: values.ativo,
@@ -297,18 +289,8 @@ export function ProdutoFormModal({
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <Field label="Valor de compra (R$)" required error={errors.valor_custo}>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={values.valor_custo}
-                  onChange={(e) => setField("valor_custo", e.target.value)}
-                  placeholder="0,00"
-                />
-              </Field>
-              <Field label="Valor de venda (R$)" required error={errors.valor_venda}>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Valor do produto (R$)" required error={errors.valor_venda}>
                 <Input
                   type="number"
                   min={0}
@@ -331,15 +313,6 @@ export function ProdutoFormModal({
                   onChange={(e) => setField("quantidade", e.target.value)}
                   disabled={isEditing}
                   className={inputClass}
-                />
-              </Field>
-              <Field label="Estoque mínimo" required error={errors.estoque_minimo}>
-                <Input
-                  type="number"
-                  min={0}
-                  step="1"
-                  value={values.estoque_minimo}
-                  onChange={(e) => setField("estoque_minimo", e.target.value)}
                 />
               </Field>
             </div>

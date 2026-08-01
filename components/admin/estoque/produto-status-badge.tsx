@@ -11,7 +11,7 @@ export function ProdutoStatusBadge({
   produto,
   className,
 }: {
-  produto: Pick<Produto, "quantidade" | "estoque_minimo">;
+  produto: Pick<Produto, "quantidade">;
   className?: string;
 }) {
   const status = getStatusEstoqueProduto(produto);

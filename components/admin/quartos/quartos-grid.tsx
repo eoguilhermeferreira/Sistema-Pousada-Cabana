@@ -1,7 +1,7 @@
 import { BedDouble } from "lucide-react";
 
 import { QuartoCard } from "@/components/admin/quartos/quarto-card";
-import type { QuartoComCategoria } from "@/types/quarto";
+import type { QuartoComCategoria, StatusQuarto } from "@/types/quarto";
 
 interface QuartosGridProps {
   quartos: QuartoComCategoria[];
@@ -9,6 +9,8 @@ interface QuartosGridProps {
   onOpen: (quarto: QuartoComCategoria) => void;
   onEdit: (quarto: QuartoComCategoria) => void;
   onDelete: (quarto: QuartoComCategoria) => void;
+  onStatusChange: (quarto: QuartoComCategoria, status: StatusQuarto) => void;
+  savingStatusId?: string | null;
 }
 
 export function QuartosGrid({
@@ -17,6 +19,8 @@ export function QuartosGrid({
   onOpen,
   onEdit,
   onDelete,
+  onStatusChange,
+  savingStatusId,
 }: QuartosGridProps) {
   if (loading) {
     return (
@@ -56,6 +60,8 @@ export function QuartosGrid({
           onOpen={onOpen}
           onEdit={onEdit}
           onDelete={onDelete}
+          onStatusChange={onStatusChange}
+          savingStatus={savingStatusId === quarto.id}
         />
       ))}
     </div>

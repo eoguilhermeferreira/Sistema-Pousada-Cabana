@@ -1,7 +1,7 @@
 import { BedDouble, Pencil, Trash2, Users } from "lucide-react";
 
 import { QuartoStatusBadge } from "@/components/admin/quartos/quarto-status-badge";
-import type { QuartoComCategoria } from "@/types/quarto";
+import type { QuartoComCategoria, StatusQuarto } from "@/types/quarto";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -13,6 +13,8 @@ interface QuartoCardProps {
   onOpen: (quarto: QuartoComCategoria) => void;
   onEdit: (quarto: QuartoComCategoria) => void;
   onDelete: (quarto: QuartoComCategoria) => void;
+  onStatusChange: (quarto: QuartoComCategoria, status: StatusQuarto) => void;
+  savingStatus?: boolean;
 }
 
 export function QuartoCard({
@@ -20,6 +22,8 @@ export function QuartoCard({
   onOpen,
   onEdit,
   onDelete,
+  onStatusChange,
+  savingStatus,
 }: QuartoCardProps) {
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
@@ -55,7 +59,11 @@ export function QuartoCard({
               {quarto.categoria.nome}
             </span>
           </div>
-          <QuartoStatusBadge status={quarto.status} />
+          <QuartoStatusBadge
+            status={quarto.status}
+            saving={savingStatus}
+            onStatusChange={(status) => onStatusChange(quarto, status)}
+          />
         </div>
 
         <div className="flex items-center justify-between text-sm">

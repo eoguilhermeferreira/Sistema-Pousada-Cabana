@@ -8,6 +8,7 @@ import type {
   QuartoFoto,
   QuartoInsert,
   QuartoUpdate,
+  StatusQuarto,
 } from "@/types/quarto";
 
 export async function listCategorias(): Promise<CategoriaQuarto[]> {
@@ -119,6 +120,18 @@ export async function updateQuarto(
 
   await setQuartoComodidades(id, comodidadeIds);
   return data;
+}
+
+export async function updateQuartoStatus(
+  id: string,
+  status: StatusQuarto,
+): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("quartos")
+    .update({ status })
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export async function deleteQuarto(id: string) {

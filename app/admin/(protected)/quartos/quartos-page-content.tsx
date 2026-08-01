@@ -15,6 +15,7 @@ import {
   listCategorias,
   listComodidades,
   listQuartos,
+  updateQuartoStatus,
 } from "@/services/quartos-service";
 import type {
   CategoriaQuarto,
@@ -49,6 +50,10 @@ export function QuartosPageContent() {
   const [deletingQuarto, setDeletingQuarto] =
     React.useState<QuartoComCategoria | null>(null);
   const [deleting, setDeleting] = React.useState(false);
+
+  const [savingStatusId, setSavingStatusId] = React.useState<string | null>(
+    null,
+  );
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -110,6 +115,29 @@ export function QuartosPageContent() {
     setCentralOpen(true);
   }
 
+  async function handleStatusChange(
+    quarto: QuartoComCategoria,
+    status: StatusQuarto,
+  ) {
+    if (status === quarto.status) return;
+    const previousStatus = quarto.status;
+    setQuartos((prev) =>
+      prev.map((item) => (item.id === quarto.id ? { ...item, status } : item)),
+    );
+    setSavingStatusId(quarto.id);
+    try {
+      await updateQuartoStatus(quarto.id, status);
+    } catch {
+      setQuartos((prev) =>
+        prev.map((item) =>
+          item.id === quarto.id ? { ...item, status: previousStatus } : item,
+        ),
+      );
+    } finally {
+      setSavingStatusId(null);
+    }
+  }
+
   function handleDeleteRequest(quarto: QuartoComCategoria) {
     setDeletingQuarto(quarto);
     setDeleteOpen(true);
@@ -163,6 +191,8 @@ export function QuartosPageContent() {
         onOpen={handleOpenCentral}
         onEdit={handleEdit}
         onDelete={handleDeleteRequest}
+        onStatusChange={handleStatusChange}
+        savingStatusId={savingStatusId}
       />
 
       <QuartoFormModal

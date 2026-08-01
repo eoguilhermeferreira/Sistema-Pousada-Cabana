@@ -1,4 +1,9 @@
 import type { CargoUsuario } from "@/types/usuario";
+import {
+  relatoriosFinanceiros,
+  relatoriosOperacionais,
+  type RelatorioTab,
+} from "@/types/relatorio";
 
 /**
  * Matriz de permissões por cargo. Cobre os exemplos pedidos na Etapa 9
@@ -12,9 +17,13 @@ export interface PermissoesCargo {
   podeVerSalario: boolean;
   /** Corrigir/lançar pontos manualmente (também reforçado no banco). */
   podeCorrigirPonto: boolean;
+  /** Abas do módulo de Relatórios (Etapa 10) liberadas para o cargo. */
+  relatoriosPermitidos: RelatorioTab[];
   /** Prefixos de rota liberados no menu. "*" libera tudo. */
   navegacao: string[];
 }
+
+const todosRelatorios: RelatorioTab[] = [...relatoriosOperacionais, ...relatoriosFinanceiros];
 
 export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
   administrador: {
@@ -22,6 +31,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     podeExcluirFuncionarios: true,
     podeVerSalario: true,
     podeCorrigirPonto: true,
+    relatoriosPermitidos: todosRelatorios,
     navegacao: ["*"],
   },
   gerente: {
@@ -29,6 +39,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     podeExcluirFuncionarios: true,
     podeVerSalario: true,
     podeCorrigirPonto: true,
+    relatoriosPermitidos: todosRelatorios,
     navegacao: ["*"],
   },
   recepcao: {
@@ -36,6 +47,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     podeExcluirFuncionarios: false,
     podeVerSalario: false,
     podeCorrigirPonto: false,
+    relatoriosPermitidos: relatoriosOperacionais,
     navegacao: [
       "/admin/dashboard",
       "/admin/calendario",
@@ -47,6 +59,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
       "/admin/caixa",
       "/admin/funcionarios",
       "/admin/bater-ponto",
+      "/admin/relatorios",
     ],
   },
   financeiro: {
@@ -54,6 +67,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     podeExcluirFuncionarios: false,
     podeVerSalario: true,
     podeCorrigirPonto: false,
+    relatoriosPermitidos: relatoriosFinanceiros,
     navegacao: [
       "/admin/dashboard",
       "/admin/quartos",
@@ -62,6 +76,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
       "/admin/caixa",
       "/admin/funcionarios",
       "/admin/bater-ponto",
+      "/admin/relatorios",
     ],
   },
   limpeza: {
@@ -69,6 +84,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     podeExcluirFuncionarios: false,
     podeVerSalario: false,
     podeCorrigirPonto: false,
+    relatoriosPermitidos: [],
     navegacao: ["/admin/dashboard", "/admin/quartos", "/admin/checkin-checkout"],
   },
 };

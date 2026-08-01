@@ -24,6 +24,8 @@ export type QuartoUpdate = TablesUpdate<"quartos">;
 export type CategoriaQuarto = Tables<"categorias_quarto">;
 export type Comodidade = Tables<"comodidades">;
 export type QuartoFoto = Tables<"quarto_fotos">;
+/** Etapa 10 — histórico de transições de status do quarto (alimenta o Relatório de Quartos). */
+export type QuartoHistorico = Tables<"quarto_historico">;
 
 export type StatusQuarto = Quarto["status"];
 

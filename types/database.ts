@@ -1017,6 +1017,48 @@ export type Database = {
           },
         ]
       }
+      quarto_historico: {
+        Row: {
+          alterado_em: string
+          alterado_por: string | null
+          id: string
+          quarto_id: string
+          status_anterior: Database["public"]["Enums"]["status_quarto"]
+          status_novo: Database["public"]["Enums"]["status_quarto"]
+        }
+        Insert: {
+          alterado_em?: string
+          alterado_por?: string | null
+          id?: string
+          quarto_id: string
+          status_anterior: Database["public"]["Enums"]["status_quarto"]
+          status_novo: Database["public"]["Enums"]["status_quarto"]
+        }
+        Update: {
+          alterado_em?: string
+          alterado_por?: string | null
+          id?: string
+          quarto_id?: string
+          status_anterior?: Database["public"]["Enums"]["status_quarto"]
+          status_novo?: Database["public"]["Enums"]["status_quarto"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quarto_historico_alterado_por_fkey"
+            columns: ["alterado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quarto_historico_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quartos: {
         Row: {
           capacidade_maxima: number
@@ -1282,6 +1324,12 @@ export type Database = {
           valor_esperado: number | null
           valor_inicial: number
         }
+        SetofOptions: {
+          from: "*"
+          to: "caixa"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       criar_reserva_site: {
         Args: {
@@ -1329,6 +1377,12 @@ export type Database = {
           valor_esperado: number | null
           valor_inicial: number
         }
+        SetofOptions: {
+          from: "*"
+          to: "caixa"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       finalizar_pagamento_hospedagem: {
         Args: {
@@ -1352,6 +1406,12 @@ export type Database = {
           valor_consumo: number
           valor_hospedagem: number
           valor_total: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pagamentos"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       listar_dados_reconhecimento_facial: {
@@ -1384,6 +1444,12 @@ export type Database = {
           valor_total: number
           valor_unitario: number
         }
+        SetofOptions: {
+          from: "*"
+          to: "quarto_consumos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       registrar_movimentacao_estoque: {
         Args: {
@@ -1406,6 +1472,12 @@ export type Database = {
           valor_total: number | null
           valor_unitario: number | null
         }
+        SetofOptions: {
+          from: "*"
+          to: "estoque"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       registrar_ponto_facial: {
         Args: { p_confianca?: number; p_funcionario_id: string }
@@ -1420,6 +1492,12 @@ export type Database = {
           registrado_por: string | null
           tipo: string
           updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pontos"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       remover_consumo_quarto: {

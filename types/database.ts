@@ -385,23 +385,168 @@ export type Database = {
           },
         ]
       }
-      funcionarios: {
+      funcionario_historico: {
         Row: {
           created_at: string
+          descricao: string | null
+          evento: string
+          funcionario_id: string
           id: string
-          updated_at: string
+          usuario_id: string | null
         }
         Insert: {
           created_at?: string
+          descricao?: string | null
+          evento: string
+          funcionario_id: string
           id?: string
-          updated_at?: string
+          usuario_id?: string | null
         }
         Update: {
           created_at?: string
+          descricao?: string | null
+          evento?: string
+          funcionario_id?: string
           id?: string
-          updated_at?: string
+          usuario_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_historico_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_historico_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funcionario_templates_faciais: {
+        Row: {
+          capturado_em: string
+          created_at: string
+          descritor: Json
+          funcionario_id: string
+          id: string
+        }
+        Insert: {
+          capturado_em?: string
+          created_at?: string
+          descritor: Json
+          funcionario_id: string
+          id?: string
+        }
+        Update: {
+          capturado_em?: string
+          created_at?: string
+          descritor?: Json
+          funcionario_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_templates_faciais_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funcionarios: {
+        Row: {
+          bairro: string | null
+          cargo: Database["public"]["Enums"]["cargo_usuario"]
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
+          cpf: string
+          created_at: string
+          data_admissao: string
+          data_nascimento: string | null
+          email: string | null
+          estado: string | null
+          foto_url: string | null
+          id: string
+          nome: string
+          numero: string | null
+          observacoes: string | null
+          rg: string | null
+          rua: string | null
+          salario: number | null
+          status: string
+          telefone: string
+          turno: string
+          updated_at: string
+          usuario_id: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          cargo: Database["public"]["Enums"]["cargo_usuario"]
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf: string
+          created_at?: string
+          data_admissao?: string
+          data_nascimento?: string | null
+          email?: string | null
+          estado?: string | null
+          foto_url?: string | null
+          id?: string
+          nome: string
+          numero?: string | null
+          observacoes?: string | null
+          rg?: string | null
+          rua?: string | null
+          salario?: number | null
+          status?: string
+          telefone: string
+          turno?: string
+          updated_at?: string
+          usuario_id?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          cargo?: Database["public"]["Enums"]["cargo_usuario"]
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf?: string
+          created_at?: string
+          data_admissao?: string
+          data_nascimento?: string | null
+          email?: string | null
+          estado?: string | null
+          foto_url?: string | null
+          id?: string
+          nome?: string
+          numero?: string | null
+          observacoes?: string | null
+          rg?: string | null
+          rua?: string | null
+          salario?: number | null
+          status?: string
+          telefone?: string
+          turno?: string
+          updated_at?: string
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionarios_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hospedes: {
         Row: {
@@ -628,21 +773,57 @@ export type Database = {
       }
       pontos: {
         Row: {
+          confianca: number | null
           created_at: string
+          funcionario_id: string
           id: string
+          metodo: string
+          observacoes: string | null
+          registrado_em: string
+          registrado_por: string | null
+          tipo: string
           updated_at: string
         }
         Insert: {
+          confianca?: number | null
           created_at?: string
+          funcionario_id: string
           id?: string
+          metodo?: string
+          observacoes?: string | null
+          registrado_em?: string
+          registrado_por?: string | null
+          tipo: string
           updated_at?: string
         }
         Update: {
+          confianca?: number | null
           created_at?: string
+          funcionario_id?: string
           id?: string
+          metodo?: string
+          observacoes?: string | null
+          registrado_em?: string
+          registrado_por?: string | null
+          tipo?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pontos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pontos_registrado_por_fkey"
+            columns: ["registrado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       produtos: {
         Row: {
@@ -1121,6 +1302,10 @@ export type Database = {
           valor_total: number
         }[]
       }
+      current_cargo: {
+        Args: never
+        Returns: Database["public"]["Enums"]["cargo_usuario"]
+      }
       fechar_caixa: {
         Args: {
           p_caixa_id: string
@@ -1169,6 +1354,16 @@ export type Database = {
           valor_total: number
         }
       }
+      listar_dados_reconhecimento_facial: {
+        Args: never
+        Returns: {
+          cargo: Database["public"]["Enums"]["cargo_usuario"]
+          descritor: Json
+          foto_url: string
+          funcionario_id: string
+          nome: string
+        }[]
+      }
       registrar_consumo_quarto: {
         Args: {
           p_produto_id: string
@@ -1212,13 +1407,33 @@ export type Database = {
           valor_unitario: number | null
         }
       }
+      registrar_ponto_facial: {
+        Args: { p_confianca?: number; p_funcionario_id: string }
+        Returns: {
+          confianca: number | null
+          created_at: string
+          funcionario_id: string
+          id: string
+          metodo: string
+          observacoes: string | null
+          registrado_em: string
+          registrado_por: string | null
+          tipo: string
+          updated_at: string
+        }
+      }
       remover_consumo_quarto: {
         Args: { p_consumo_id: string }
         Returns: undefined
       }
     }
     Enums: {
-      cargo_usuario: "administrador" | "recepcao" | "financeiro" | "limpeza"
+      cargo_usuario:
+        | "administrador"
+        | "recepcao"
+        | "financeiro"
+        | "limpeza"
+        | "gerente"
       forma_pagamento: "pix" | "dinheiro" | "cartao_debito" | "cartao_credito"
       sexo_hospede: "masculino" | "feminino" | "outro"
       status_hospede: "ativo" | "inativo"
@@ -1369,7 +1584,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      cargo_usuario: ["administrador", "recepcao", "financeiro", "limpeza"],
+      cargo_usuario: [
+        "administrador",
+        "recepcao",
+        "financeiro",
+        "limpeza",
+        "gerente",
+      ],
       forma_pagamento: ["pix", "dinheiro", "cartao_debito", "cartao_credito"],
       sexo_hospede: ["masculino", "feminino", "outro"],
       status_hospede: ["ativo", "inativo"],

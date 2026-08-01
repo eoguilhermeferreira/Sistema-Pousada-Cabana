@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 
 import { adminNavItems } from "@/lib/admin-nav";
+import { podeAcessarRota } from "@/lib/permissions";
+import { useUsuarioAtual } from "@/components/admin/usuario-context";
 import { cn } from "@/lib/utils";
 
 export function Sidebar({
@@ -16,6 +18,10 @@ export function Sidebar({
   onToggle: () => void;
 }) {
   const pathname = usePathname();
+  const usuarioAtual = useUsuarioAtual();
+  const navItems = adminNavItems.filter((item) =>
+    podeAcessarRota(usuarioAtual.cargo, item.href),
+  );
 
   return (
     <aside
@@ -45,7 +51,7 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {adminNavItems.map((item) => {
+        {navItems.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;

@@ -585,9 +585,13 @@ export type Database = {
           created_at: string
           data_admissao: string
           data_nascimento: string | null
+          duracao_almoco_minutos: number | null
           email: string | null
           estado: string | null
           foto_url: string | null
+          horario_entrada: string | null
+          horario_saida: string | null
+          horario_saida_almoco: string | null
           id: string
           nome: string
           numero: string | null
@@ -611,9 +615,13 @@ export type Database = {
           created_at?: string
           data_admissao?: string
           data_nascimento?: string | null
+          duracao_almoco_minutos?: number | null
           email?: string | null
           estado?: string | null
           foto_url?: string | null
+          horario_entrada?: string | null
+          horario_saida?: string | null
+          horario_saida_almoco?: string | null
           id?: string
           nome: string
           numero?: string | null
@@ -637,9 +645,13 @@ export type Database = {
           created_at?: string
           data_admissao?: string
           data_nascimento?: string | null
+          duracao_almoco_minutos?: number | null
           email?: string | null
           estado?: string | null
           foto_url?: string | null
+          horario_entrada?: string | null
+          horario_saida?: string | null
+          horario_saida_almoco?: string | null
           id?: string
           nome?: string
           numero?: string | null
@@ -1103,11 +1115,13 @@ export type Database = {
       }
       pontos: {
         Row: {
+          atrasado: boolean
           confianca: number | null
           created_at: string
           funcionario_id: string
           id: string
           metodo: string
+          minutos_diferenca: number | null
           observacoes: string | null
           registrado_em: string
           registrado_por: string | null
@@ -1115,11 +1129,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          atrasado?: boolean
           confianca?: number | null
           created_at?: string
           funcionario_id: string
           id?: string
           metodo?: string
+          minutos_diferenca?: number | null
           observacoes?: string | null
           registrado_em?: string
           registrado_por?: string | null
@@ -1127,11 +1143,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          atrasado?: boolean
           confianca?: number | null
           created_at?: string
           funcionario_id?: string
           id?: string
           metodo?: string
+          minutos_diferenca?: number | null
           observacoes?: string | null
           registrado_em?: string
           registrado_por?: string | null
@@ -2040,11 +2058,13 @@ export type Database = {
       registrar_ponto_facial: {
         Args: { p_confianca?: number; p_funcionario_id: string }
         Returns: {
+          atrasado: boolean
           confianca: number | null
           created_at: string
           funcionario_id: string
           id: string
           metodo: string
+          minutos_diferenca: number | null
           observacoes: string | null
           registrado_em: string
           registrado_por: string | null

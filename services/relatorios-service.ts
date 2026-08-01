@@ -387,6 +387,8 @@ export async function getRelatorioFuncionarios(
         confianca: null,
         observacoes: null,
         registrado_por: null,
+        minutos_diferenca: null,
+        atrasado: false,
       })),
     );
     const horasTrabalhadas = dias.reduce((total, dia) => total + (dia.horasTrabalhadas ?? 0), 0);

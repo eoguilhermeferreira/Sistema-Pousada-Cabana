@@ -45,6 +45,10 @@ export interface FuncionarioFormValues {
   data_admissao: string;
   observacoes: string;
   status: StatusFuncionario;
+  horario_entrada: string;
+  horario_saida_almoco: string;
+  duracao_almoco_minutos: string;
+  horario_saida: string;
 }
 
 export const emptyFuncionarioForm: FuncionarioFormValues = {
@@ -67,6 +71,10 @@ export const emptyFuncionarioForm: FuncionarioFormValues = {
   data_admissao: new Date().toISOString().slice(0, 10),
   observacoes: "",
   status: "ativo",
+  horario_entrada: "",
+  horario_saida_almoco: "",
+  duracao_almoco_minutos: "",
+  horario_saida: "",
 };
 
 export function funcionarioToFormValues(
@@ -92,6 +100,13 @@ export function funcionarioToFormValues(
     data_admissao: funcionario.data_admissao,
     observacoes: funcionario.observacoes ?? "",
     status: funcionario.status as StatusFuncionario,
+    horario_entrada: funcionario.horario_entrada?.slice(0, 5) ?? "",
+    horario_saida_almoco: funcionario.horario_saida_almoco?.slice(0, 5) ?? "",
+    duracao_almoco_minutos:
+      funcionario.duracao_almoco_minutos != null
+        ? String(funcionario.duracao_almoco_minutos)
+        : "",
+    horario_saida: funcionario.horario_saida?.slice(0, 5) ?? "",
   };
 }
 

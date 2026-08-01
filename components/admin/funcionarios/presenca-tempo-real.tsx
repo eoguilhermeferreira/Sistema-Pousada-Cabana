@@ -19,13 +19,22 @@ function statusPresenca(ultimoPonto: Ponto | undefined): StatusPresenca {
     return { cor: "bg-status-ocupado", label: "Ainda não registrou entrada" };
   }
   const horario = timeFormatter.format(new Date(ultimoPonto.registrado_em));
+  const atraso = ultimoPonto.atrasado
+    ? ` · atraso de ${ultimoPonto.minutos_diferenca} min`
+    : "";
   switch (ultimoPonto.tipo) {
     case "entrada":
-      return { cor: "bg-status-disponivel", label: `Entrada às ${horario}` };
+      return {
+        cor: ultimoPonto.atrasado ? "bg-status-ocupado" : "bg-status-disponivel",
+        label: `Entrada às ${horario}${atraso}`,
+      };
     case "saida_almoco":
       return { cor: "bg-status-checkout", label: "Em intervalo" };
     case "retorno_almoco":
-      return { cor: "bg-status-confirmada", label: `Retornou às ${horario}` };
+      return {
+        cor: ultimoPonto.atrasado ? "bg-status-ocupado" : "bg-status-confirmada",
+        label: `Retornou às ${horario}${atraso}`,
+      };
     case "saida":
       return { cor: "bg-gray-text/40", label: `Encerrou às ${horario}` };
     default:

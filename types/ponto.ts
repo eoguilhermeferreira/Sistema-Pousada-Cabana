@@ -10,6 +10,63 @@ export const tipoPontoLabels: Record<TipoPonto, string> = {
   saida: "Saída",
 };
 
+/** Tolerância (em minutos) antes de um horário registrado depois do
+ * previsto virar atraso — usada apenas para exibição, o cálculo em si
+ * (minutos_diferenca/atrasado) já vem pronto do banco. */
+export const TOLERANCIA_ATRASO_MINUTOS = 5;
+
+export interface StatusPontoInfo {
+  /** "atraso" (entrada/retorno do almoço fora da tolerância — o patrão
+   * precisa saber), "informativo" (saiu antes/depois do horário, sem ser
+   * falta grave) ou "neutro" (dentro do horário previsto). */
+  tom: "atraso" | "informativo" | "neutro";
+  mensagem: string;
+}
+
+/** Traduz minutos_diferenca/atrasado (calculados por trigger no banco, a
+ * partir dos horários cadastrados do funcionário) numa mensagem para o
+ * usuário. Retorna null quando o funcionário não tem horário cadastrado
+ * para aquele tipo de ponto. */
+export function formatarStatusPonto(ponto: Ponto): StatusPontoInfo | null {
+  const diferenca = ponto.minutos_diferenca;
+  if (diferenca === null || diferenca === undefined) return null;
+
+  const ehRetornoAoTrabalho =
+    ponto.tipo === "entrada" || ponto.tipo === "retorno_almoco";
+
+  if (ehRetornoAoTrabalho) {
+    if (ponto.atrasado) {
+      const rotulo =
+        ponto.tipo === "entrada" ? "Atraso" : "Atraso no retorno do almoço";
+      return { tom: "atraso", mensagem: `${rotulo} de ${diferenca} min` };
+    }
+    if (diferenca > 0) {
+      return {
+        tom: "neutro",
+        mensagem: `${diferenca} min após o horário (dentro da tolerância)`,
+      };
+    }
+    if (diferenca < 0) {
+      return { tom: "neutro", mensagem: `${Math.abs(diferenca)} min adiantado` };
+    }
+    return { tom: "neutro", mensagem: "No horário" };
+  }
+
+  // saída para o almoço e saída final: nunca é "atraso", só informa a
+  // diferença para o patrão acompanhar.
+  const rotulo = ponto.tipo === "saida_almoco" ? "Saiu para o almoço" : "Saiu";
+  if (diferenca > TOLERANCIA_ATRASO_MINUTOS) {
+    return { tom: "informativo", mensagem: `${rotulo} ${diferenca} min depois do horário` };
+  }
+  if (diferenca < -TOLERANCIA_ATRASO_MINUTOS) {
+    return {
+      tom: "informativo",
+      mensagem: `${rotulo} ${Math.abs(diferenca)} min antes do horário`,
+    };
+  }
+  return { tom: "neutro", mensagem: "No horário" };
+}
+
 export interface PontoComFuncionario extends Ponto {
   funcionario: {
     id: string;

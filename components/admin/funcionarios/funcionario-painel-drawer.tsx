@@ -28,7 +28,7 @@ import {
   listHistoricoFuncionario,
 } from "@/services/funcionarios-service";
 import { listPontosPorFuncionario } from "@/services/pontos-service";
-import { agruparPontosPorDia } from "@/types/ponto";
+import { agruparPontosPorDia, formatarStatusPonto } from "@/types/ponto";
 import { turnoLabels, type Funcionario, type FuncionarioHistorico } from "@/types/funcionario";
 import type { Ponto, TipoPonto } from "@/types/ponto";
 import { cargoLabels } from "@/types/usuario";
@@ -449,9 +449,25 @@ function PontoCell({
   const label = ponto
     ? timeFormatter.format(new Date(ponto.registrado_em))
     : "—";
+  const status = ponto ? formatarStatusPonto(ponto) : null;
+
+  const statusLabel = status && (
+    <span
+      className={`block text-[11px] font-normal leading-tight ${
+        status.tom === "atraso" ? "text-status-ocupado" : "text-gray-text/70"
+      }`}
+    >
+      {status.mensagem}
+    </span>
+  );
 
   if (!editavel) {
-    return <td className="px-3 py-2 text-gray-text">{label}</td>;
+    return (
+      <td className="px-3 py-2 text-gray-text">
+        {label}
+        {statusLabel}
+      </td>
+    );
   }
 
   return (
@@ -465,6 +481,7 @@ function PontoCell({
         title={ponto ? "Corrigir ponto" : "Lançar ponto manualmente"}
       >
         {label}
+        {statusLabel}
       </button>
     </td>
   );

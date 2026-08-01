@@ -16,7 +16,7 @@ import {
   getDadosReconhecimentoFacial,
   registrarPontoFacial,
 } from "@/services/pontos-service";
-import { tipoPontoLabels, type TipoPonto } from "@/types/ponto";
+import { formatarStatusPonto, tipoPontoLabels, type TipoPonto } from "@/types/ponto";
 import type { Ponto } from "@/types/ponto";
 import { cargoLabels, type CargoUsuario } from "@/types/usuario";
 
@@ -294,6 +294,22 @@ export function BaterPontoContent() {
               {horaMinutoFormatter.format(new Date(ponto.registrado_em))}.
             </span>
           </p>
+
+          {(() => {
+            const status = formatarStatusPonto(ponto);
+            if (!status) return null;
+            return (
+              <p
+                className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+                  status.tom === "atraso"
+                    ? "bg-status-ocupado-light text-status-ocupado"
+                    : "bg-white/10 text-white/80"
+                }`}
+              >
+                {status.mensagem}
+              </p>
+            );
+          })()}
         </div>
       )}
 

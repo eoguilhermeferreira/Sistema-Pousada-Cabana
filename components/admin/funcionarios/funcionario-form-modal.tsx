@@ -191,6 +191,12 @@ export function FuncionarioFormModal({
       (Number.isNaN(Number(values.salario)) || Number(values.salario) < 0)
     )
       nextErrors.salario = "Valor inválido.";
+    if (
+      values.duracao_almoco_minutos &&
+      (Number.isNaN(Number(values.duracao_almoco_minutos)) ||
+        Number(values.duracao_almoco_minutos) <= 0)
+    )
+      nextErrors.duracao_almoco_minutos = "Duração inválida.";
     return nextErrors;
   }
 
@@ -239,6 +245,12 @@ export function FuncionarioFormModal({
         data_admissao: values.data_admissao,
         observacoes: values.observacoes.trim() || null,
         status: values.status,
+        horario_entrada: values.horario_entrada || null,
+        horario_saida_almoco: values.horario_saida_almoco || null,
+        duracao_almoco_minutos: values.duracao_almoco_minutos
+          ? Number(values.duracao_almoco_minutos)
+          : null,
+        horario_saida: values.horario_saida || null,
       };
 
       const saved = funcionario
@@ -542,6 +554,66 @@ export function FuncionarioFormModal({
                     placeholder="Anotações internas sobre o funcionário..."
                   />
                 </Field>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-text">
+                    Horários de trabalho (opcional)
+                  </h3>
+                  <p className="mt-1 text-xs text-gray-text">
+                    Se preenchidos, o sistema avisa atraso na entrada e no
+                    retorno do almoço, e informa quando a saída para o
+                    almoço ou a saída final acontecem fora do horário.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <Field label="Entrada" error={errors.horario_entrada}>
+                    <Input
+                      type="time"
+                      value={values.horario_entrada}
+                      onChange={(e) =>
+                        setField("horario_entrada", e.target.value)
+                      }
+                    />
+                  </Field>
+                  <Field
+                    label="Saída p/ almoço"
+                    error={errors.horario_saida_almoco}
+                  >
+                    <Input
+                      type="time"
+                      value={values.horario_saida_almoco}
+                      onChange={(e) =>
+                        setField("horario_saida_almoco", e.target.value)
+                      }
+                    />
+                  </Field>
+                  <Field
+                    label="Duração do almoço (min)"
+                    error={errors.duracao_almoco_minutos}
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      step={5}
+                      value={values.duracao_almoco_minutos}
+                      onChange={(e) =>
+                        setField("duracao_almoco_minutos", e.target.value)
+                      }
+                      placeholder="Ex.: 90 = 1h30"
+                    />
+                  </Field>
+                  <Field label="Saída" error={errors.horario_saida}>
+                    <Input
+                      type="time"
+                      value={values.horario_saida}
+                      onChange={(e) =>
+                        setField("horario_saida", e.target.value)
+                      }
+                    />
+                  </Field>
+                </div>
               </div>
 
               {formError && (

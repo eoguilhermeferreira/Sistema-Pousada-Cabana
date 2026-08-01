@@ -118,15 +118,18 @@ export interface ResultadoReconhecimento {
  * limiar original (0.28) mesmo em boas condições de luz, então iluminação
  * diferente da do cadastro (ex.: cadastrado de madrugada, batendo ponto de
  * dia) empurrava reconhecimentos válidos para fora da faixa. Ajustado para
- * dar mais tolerância; se o time de funcionários crescer bastante, vale
- * revisar este valor para reduzir o risco de confundir duas pessoas. */
-export const LIMIAR_RECONHECIMENTO = 0.36;
+ * dar bem mais tolerância enquanto o time é pequeno (hoje, 1 funcionário —
+ * risco de confundir duas pessoas é praticamente nulo); revisar este valor
+ * para baixo se o time crescer bastante. */
+export const LIMIAR_RECONHECIMENTO = 0.55;
 
 /**
  * Compara um descritor capturado ao vivo contra todos os templates
- * cadastrados e retorna o mais próximo, se estiver dentro do limiar.
+ * cadastrados e retorna o candidato mais próximo, esteja ele dentro do
+ * limiar ou não — útil para exibir uma aproximação em tempo real na tela
+ * de bater ponto e diagnosticar quando o reconhecimento está "quase lá".
  */
-export function reconhecerRosto(
+export function melhorCandidato(
   descritorAoVivo: number[],
   candidatos: CandidatoReconhecimento[],
 ): ResultadoReconhecimento | null {
@@ -146,6 +149,18 @@ export function reconhecerRosto(
     }
   }
 
+  return melhor;
+}
+
+/**
+ * Igual a {@link melhorCandidato}, mas só retorna o resultado se a distância
+ * estiver dentro do limiar aceito (reconhecimento confirmado).
+ */
+export function reconhecerRosto(
+  descritorAoVivo: number[],
+  candidatos: CandidatoReconhecimento[],
+): ResultadoReconhecimento | null {
+  const melhor = melhorCandidato(descritorAoVivo, candidatos);
   if (!melhor || melhor.distancia > LIMIAR_RECONHECIMENTO) return null;
   return melhor;
 }

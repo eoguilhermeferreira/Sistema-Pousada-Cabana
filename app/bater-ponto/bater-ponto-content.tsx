@@ -7,6 +7,7 @@ import { AlertTriangle, CheckCircle2, Fingerprint, X } from "lucide-react";
 import { FaceCamera } from "@/components/facial/face-camera";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import {
+  melhorCandidato,
   reconhecerRosto,
   type CandidatoReconhecimento,
   type ResultadoReconhecimento,
@@ -73,6 +74,10 @@ export function BaterPontoContent() {
   const [ponto, setPonto] = React.useState<Ponto | null>(null);
   const [erro, setErro] = React.useState("");
   const [erroFalha, setErroFalha] = React.useState("");
+  /** Aproximação do candidato mais próximo (0-100), mostrada durante o
+   * escaneamento para ajudar a diagnosticar reconhecimento "quase lá"
+   * (iluminação, ângulo) sem precisar mexer no código. */
+  const [aproximacao, setAproximacao] = React.useState(0);
 
   const matchRef = React.useRef<{ id: string; contagem: number } | null>(null);
   const processandoRef = React.useRef(false);
@@ -101,6 +106,7 @@ export function BaterPontoContent() {
     setResultado(null);
     setPonto(null);
     setErroFalha("");
+    setAproximacao(0);
     setEstado("inicial");
   }
 
@@ -142,8 +148,12 @@ export function BaterPontoContent() {
     if (processandoRef.current) return;
     if (!descritor) {
       matchRef.current = null;
+      setAproximacao(0);
       return;
     }
+
+    const proximo = melhorCandidato(descritor, candidatos);
+    setAproximacao(proximo ? Math.round(proximo.confianca * 100) : 0);
 
     const match = reconhecerRosto(descritor, candidatos);
     if (!match) {
@@ -227,6 +237,20 @@ export function BaterPontoContent() {
         <div className="flex w-full max-w-sm flex-col items-center gap-6 text-center">
           <p className="text-lg font-semibold">Posicione seu rosto na câmera</p>
           <FaceCamera active onFrame={handleFrame} className="max-w-xs" />
+
+          <div className="w-full max-w-xs space-y-1.5">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/15">
+              <div
+                className="h-full rounded-full bg-status-disponivel transition-all duration-150"
+                style={{ width: `${Math.min(100, aproximacao)}%` }}
+              />
+            </div>
+            <p className="text-xs text-white/60">
+              Aproximação: {aproximacao}% — aproxime o rosto e melhore a luz se
+              estiver baixo
+            </p>
+          </div>
+
           <button
             type="button"
             onClick={resetar}

@@ -113,8 +113,14 @@ export interface ResultadoReconhecimento {
 }
 
 /** Distância máxima aceita para considerar um rosto reconhecido — calibrado
- * empiricamente; abaixo disso é a mesma pessoa, acima é "não reconhecido". */
-export const LIMIAR_RECONHECIMENTO = 0.28;
+ * empiricamente; abaixo disso é a mesma pessoa, acima é "não reconhecido".
+ * Os registros reais de ponto mostraram distâncias legítimas já próximas do
+ * limiar original (0.28) mesmo em boas condições de luz, então iluminação
+ * diferente da do cadastro (ex.: cadastrado de madrugada, batendo ponto de
+ * dia) empurrava reconhecimentos válidos para fora da faixa. Ajustado para
+ * dar mais tolerância; se o time de funcionários crescer bastante, vale
+ * revisar este valor para reduzir o risco de confundir duas pessoas. */
+export const LIMIAR_RECONHECIMENTO = 0.36;
 
 /**
  * Compara um descritor capturado ao vivo contra todos os templates

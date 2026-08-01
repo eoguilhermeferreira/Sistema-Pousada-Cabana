@@ -137,6 +137,24 @@ export function FuncionarioFormModal({
     setFotoUrl(URL.createObjectURL(file));
   }
 
+  function handleCapturaConcluida(
+    descritores: number[][],
+    fotoCapturada: Blob | null,
+  ) {
+    setDescritoresFaciais(descritores);
+    // A foto captada durante o cadastro facial é usada apenas para
+    // identificação visual (avatar) — a autenticação continua baseada
+    // exclusivamente no template matemático. Só preenche a foto se o
+    // administrador ainda não tiver escolhido uma manualmente.
+    if (fotoCapturada && !fotoFile) {
+      const file = new File([fotoCapturada], `rosto-${Date.now()}.jpg`, {
+        type: "image/jpeg",
+      });
+      setFotoFile(file);
+      setFotoUrl(URL.createObjectURL(file));
+    }
+  }
+
   async function handleCepBlur() {
     if (!isValidCep(values.cep)) return;
     setCheckingCep(true);
@@ -554,7 +572,7 @@ export function FuncionarioFormModal({
       <CapturaFacialModal
         open={capturaOpen}
         onOpenChange={setCapturaOpen}
-        onConcluido={setDescritoresFaciais}
+        onConcluido={handleCapturaConcluida}
       />
     </>
   );

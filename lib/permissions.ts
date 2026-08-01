@@ -10,6 +10,8 @@ export interface PermissoesCargo {
   label: string;
   podeExcluirFuncionarios: boolean;
   podeVerSalario: boolean;
+  /** Corrigir/lançar pontos manualmente (também reforçado no banco). */
+  podeCorrigirPonto: boolean;
   /** Prefixos de rota liberados no menu. "*" libera tudo. */
   navegacao: string[];
 }
@@ -19,18 +21,21 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     label: "Administrador",
     podeExcluirFuncionarios: true,
     podeVerSalario: true,
+    podeCorrigirPonto: true,
     navegacao: ["*"],
   },
   gerente: {
     label: "Gerente",
     podeExcluirFuncionarios: true,
     podeVerSalario: true,
+    podeCorrigirPonto: true,
     navegacao: ["*"],
   },
   recepcao: {
     label: "Recepção",
     podeExcluirFuncionarios: false,
     podeVerSalario: false,
+    podeCorrigirPonto: false,
     navegacao: [
       "/admin/dashboard",
       "/admin/calendario",
@@ -48,6 +53,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     label: "Financeiro",
     podeExcluirFuncionarios: false,
     podeVerSalario: true,
+    podeCorrigirPonto: false,
     navegacao: [
       "/admin/dashboard",
       "/admin/quartos",
@@ -62,6 +68,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     label: "Limpeza",
     podeExcluirFuncionarios: false,
     podeVerSalario: false,
+    podeCorrigirPonto: false,
     navegacao: ["/admin/dashboard", "/admin/quartos", "/admin/checkin-checkout"],
   },
 };

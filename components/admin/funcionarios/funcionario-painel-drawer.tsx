@@ -18,6 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { FuncionarioStatusBadge } from "@/components/admin/funcionarios/funcionario-status-badge";
+import { CorrigirPontoModal } from "@/components/admin/funcionarios/corrigir-ponto-modal";
+import { useUsuarioAtual } from "@/components/admin/usuario-context";
 import { formatCpf } from "@/lib/cpf";
 import { formatPhone } from "@/lib/phone";
 import { permissoesPorCargo } from "@/lib/permissions";
@@ -28,7 +30,7 @@ import {
 import { listPontosPorFuncionario } from "@/services/pontos-service";
 import { agruparPontosPorDia } from "@/types/ponto";
 import { turnoLabels, type Funcionario, type FuncionarioHistorico } from "@/types/funcionario";
-import type { Ponto } from "@/types/ponto";
+import type { Ponto, TipoPonto } from "@/types/ponto";
 import { cargoLabels } from "@/types/usuario";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -73,10 +75,18 @@ export function FuncionarioPainelDrawer({
   funcionarioId,
   onEdit,
 }: FuncionarioPainelDrawerProps) {
+  const usuarioAtual = useUsuarioAtual();
+  const podeCorrigirPonto = permissoesPorCargo[usuarioAtual.cargo].podeCorrigirPonto;
+
   const [funcionario, setFuncionario] = React.useState<Funcionario | null>(null);
   const [pontos, setPontos] = React.useState<Ponto[]>([]);
   const [historico, setHistorico] = React.useState<FuncionarioHistorico[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [correcaoAlvo, setCorrecaoAlvo] = React.useState<{
+    data: string;
+    tipo: TipoPonto;
+    ponto: Ponto | null;
+  } | null>(null);
 
   React.useEffect(() => {
     if (!open || !funcionarioId) return;
@@ -97,6 +107,11 @@ export function FuncionarioPainelDrawer({
     }, 0);
     return () => clearTimeout(timeout);
   }, [open, funcionarioId]);
+
+  const reloadPontos = React.useCallback(async () => {
+    if (!funcionarioId) return;
+    setPontos(await listPontosPorFuncionario(funcionarioId));
+  }, [funcionarioId]);
 
   const dias = React.useMemo(() => agruparPontosPorDia(pontos), [pontos]);
 
@@ -283,26 +298,50 @@ export function FuncionarioPainelDrawer({
                             <td className="px-3 py-2 text-primary-dark">
                               {formatDate(dia.data)}
                             </td>
-                            <td className="px-3 py-2 text-gray-text">
-                              {dia.entrada
-                                ? timeFormatter.format(new Date(dia.entrada.registrado_em))
-                                : "—"}
-                            </td>
-                            <td className="px-3 py-2 text-gray-text">
-                              {dia.saidaAlmoco
-                                ? timeFormatter.format(new Date(dia.saidaAlmoco.registrado_em))
-                                : "—"}
-                            </td>
-                            <td className="px-3 py-2 text-gray-text">
-                              {dia.retornoAlmoco
-                                ? timeFormatter.format(new Date(dia.retornoAlmoco.registrado_em))
-                                : "—"}
-                            </td>
-                            <td className="px-3 py-2 text-gray-text">
-                              {dia.saida
-                                ? timeFormatter.format(new Date(dia.saida.registrado_em))
-                                : "—"}
-                            </td>
+                            <PontoCell
+                              ponto={dia.entrada}
+                              editavel={podeCorrigirPonto}
+                              onClick={() =>
+                                setCorrecaoAlvo({
+                                  data: dia.data,
+                                  tipo: "entrada",
+                                  ponto: dia.entrada,
+                                })
+                              }
+                            />
+                            <PontoCell
+                              ponto={dia.saidaAlmoco}
+                              editavel={podeCorrigirPonto}
+                              onClick={() =>
+                                setCorrecaoAlvo({
+                                  data: dia.data,
+                                  tipo: "saida_almoco",
+                                  ponto: dia.saidaAlmoco,
+                                })
+                              }
+                            />
+                            <PontoCell
+                              ponto={dia.retornoAlmoco}
+                              editavel={podeCorrigirPonto}
+                              onClick={() =>
+                                setCorrecaoAlvo({
+                                  data: dia.data,
+                                  tipo: "retorno_almoco",
+                                  ponto: dia.retornoAlmoco,
+                                })
+                              }
+                            />
+                            <PontoCell
+                              ponto={dia.saida}
+                              editavel={podeCorrigirPonto}
+                              onClick={() =>
+                                setCorrecaoAlvo({
+                                  data: dia.data,
+                                  tipo: "saida",
+                                  ponto: dia.saida,
+                                })
+                              }
+                            />
                             <td className="px-3 py-2 font-medium text-primary-dark">
                               {dia.horasTrabalhadas != null
                                 ? `${dia.horasTrabalhadas.toFixed(1)}h`
@@ -382,7 +421,52 @@ export function FuncionarioPainelDrawer({
           </Tabs>
         )}
       </SheetContent>
+
+      {correcaoAlvo && funcionarioId && (
+        <CorrigirPontoModal
+          open={Boolean(correcaoAlvo)}
+          onOpenChange={(next) => !next && setCorrecaoAlvo(null)}
+          funcionarioId={funcionarioId}
+          data={correcaoAlvo.data}
+          tipo={correcaoAlvo.tipo}
+          pontoExistente={correcaoAlvo.ponto}
+          onSaved={reloadPontos}
+        />
+      )}
     </Sheet>
+  );
+}
+
+function PontoCell({
+  ponto,
+  editavel,
+  onClick,
+}: {
+  ponto: Ponto | null;
+  editavel: boolean;
+  onClick: () => void;
+}) {
+  const label = ponto
+    ? timeFormatter.format(new Date(ponto.registrado_em))
+    : "—";
+
+  if (!editavel) {
+    return <td className="px-3 py-2 text-gray-text">{label}</td>;
+  }
+
+  return (
+    <td className="px-3 py-2">
+      <button
+        type="button"
+        onClick={onClick}
+        className={`rounded-lg px-2 py-1 text-left transition-colors duration-200 hover:bg-primary-light hover:text-primary ${
+          ponto ? "text-gray-text" : "text-gray-text/50"
+        }`}
+        title={ponto ? "Corrigir ponto" : "Lançar ponto manualmente"}
+      >
+        {label}
+      </button>
+    </td>
   );
 }
 

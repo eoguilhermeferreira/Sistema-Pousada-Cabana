@@ -15,12 +15,13 @@ import {
   getDadosReconhecimentoFacial,
   registrarPontoFacial,
 } from "@/services/pontos-service";
-import { tipoPontoLabels } from "@/types/ponto";
+import { tipoPontoLabels, type TipoPonto } from "@/types/ponto";
 import type { Ponto } from "@/types/ponto";
 import { cargoLabels, type CargoUsuario } from "@/types/usuario";
 
 const CAPTURAS_PARA_CONFIRMAR = 5;
 const TIMEOUT_ESCANEAMENTO_MS = 20_000;
+const AUTO_RETORNO_MS = 3_000;
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   weekday: "long",
@@ -35,7 +36,30 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
   second: "2-digit",
 });
 
-type Estado = "inicial" | "escaneando" | "sucesso";
+const horaMinutoFormatter = new Intl.DateTimeFormat("pt-BR", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const tipoPontoMensagem: Record<TipoPonto, string> = {
+  entrada: "Entrada registrada às",
+  saida_almoco: "Saída para o almoço registrada às",
+  retorno_almoco: "Retorno do almoço registrado às",
+  saida: "Saída registrada às",
+};
+
+function primeiroNome(nomeCompleto: string) {
+  return nomeCompleto.trim().split(/\s+/)[0] || nomeCompleto;
+}
+
+function saudacao(data: Date) {
+  const hora = data.getHours();
+  if (hora < 12) return "Bom dia";
+  if (hora < 18) return "Boa tarde";
+  return "Boa noite";
+}
+
+type Estado = "inicial" | "escaneando" | "sucesso" | "erro";
 
 export function BaterPontoContent() {
   const [estado, setEstado] = React.useState<Estado>("inicial");
@@ -48,6 +72,7 @@ export function BaterPontoContent() {
   );
   const [ponto, setPonto] = React.useState<Ponto | null>(null);
   const [erro, setErro] = React.useState("");
+  const [erroFalha, setErroFalha] = React.useState("");
 
   const matchRef = React.useRef<{ id: string; contagem: number } | null>(null);
   const processandoRef = React.useRef(false);
@@ -75,7 +100,17 @@ export function BaterPontoContent() {
     processandoRef.current = false;
     setResultado(null);
     setPonto(null);
+    setErroFalha("");
     setEstado("inicial");
+  }
+
+  function mostrarErro(mensagem: string) {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    matchRef.current = null;
+    processandoRef.current = false;
+    setErroFalha(mensagem);
+    setEstado("erro");
+    successTimeoutRef.current = setTimeout(resetar, AUTO_RETORNO_MS);
   }
 
   async function iniciarEscaneamento() {
@@ -95,8 +130,7 @@ export function BaterPontoContent() {
 
       timeoutRef.current = setTimeout(() => {
         if (!processandoRef.current) {
-          setErro("Rosto não reconhecido. Tente novamente.");
-          resetar();
+          mostrarErro("Rosto não reconhecido. Tente novamente.");
         }
       }, TIMEOUT_ESCANEAMENTO_MS);
     } catch {
@@ -136,17 +170,17 @@ export function BaterPontoContent() {
         match.funcionarioId,
         match.confianca,
       );
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setResultado(match);
       setPonto(pontoRegistrado);
       setEstado("sucesso");
-      successTimeoutRef.current = setTimeout(resetar, 6000);
+      successTimeoutRef.current = setTimeout(resetar, AUTO_RETORNO_MS);
     } catch (err) {
-      setErro(
+      mostrarErro(
         err instanceof Error
           ? err.message
           : "Não foi possível registrar o ponto.",
       );
-      resetar();
     }
   }
 
@@ -205,35 +239,49 @@ export function BaterPontoContent() {
       )}
 
       {estado === "sucesso" && resultado && ponto && (
-        <div className="flex w-full max-w-sm flex-col items-center gap-5 text-center">
-          <span className="flex size-16 items-center justify-center rounded-full bg-status-disponivel-light text-status-disponivel">
+        <div className="flex w-full max-w-sm animate-in fade-in zoom-in-95 flex-col items-center gap-4 text-center duration-300">
+          <span className="flex size-16 animate-in zoom-in-50 items-center justify-center rounded-full bg-status-disponivel-light text-status-disponivel duration-500">
             <CheckCircle2 className="size-9" />
           </span>
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-status-disponivel">
+            <CheckCircle2 className="size-4" />
+            Rosto reconhecido
+          </p>
+
           <HospedeAvatar
             nome={resultado.nome}
             fotoUrl={resultado.fotoUrl}
             size="lg"
           />
+
           <div>
-            <p className="font-display text-xl font-semibold">
-              {resultado.nome}
+            <p className="font-display text-2xl font-semibold">
+              {saudacao(new Date(ponto.registrado_em))}, {primeiroNome(resultado.nome)}!
             </p>
-            <p className="text-sm text-white/70">
+            <p className="mt-1 text-sm text-white/70">
               {cargoLabels[resultado.cargo as CargoUsuario] ?? resultado.cargo}
             </p>
           </div>
-          <div className="rounded-2xl bg-white/10 px-6 py-4">
-            <p className="text-sm text-white/70">
-              {tipoPontoLabels[ponto.tipo as keyof typeof tipoPontoLabels] ??
-                ponto.tipo}
-            </p>
-            <p className="font-sans text-2xl font-semibold tabular-nums">
-              {timeFormatter.format(new Date(ponto.registrado_em))}
-            </p>
-          </div>
-          <p className="text-sm font-medium text-status-disponivel">
-            Ponto registrado com sucesso!
+
+          <p className="text-base text-white/90">
+            {tipoPontoMensagem[ponto.tipo as TipoPonto] ??
+              tipoPontoLabels[ponto.tipo as keyof typeof tipoPontoLabels]}{" "}
+            <span className="font-semibold tabular-nums">
+              {horaMinutoFormatter.format(new Date(ponto.registrado_em))}.
+            </span>
           </p>
+        </div>
+      )}
+
+      {estado === "erro" && (
+        <div className="flex w-full max-w-sm animate-in fade-in zoom-in-95 flex-col items-center gap-4 text-center duration-300">
+          <span className="flex size-16 animate-in zoom-in-50 items-center justify-center rounded-full bg-status-ocupado-light text-status-ocupado duration-500">
+            <AlertTriangle className="size-9" />
+          </span>
+          <p className="font-display text-xl font-semibold">
+            Rosto não reconhecido
+          </p>
+          <p className="text-sm text-white/70">{erroFalha || "Tente novamente."}</p>
         </div>
       )}
     </div>

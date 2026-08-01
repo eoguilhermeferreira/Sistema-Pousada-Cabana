@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import type { CandidatoReconhecimento } from "@/lib/face-recognition";
-import type { Ponto, PontoComFuncionario } from "@/types/ponto";
+import type { Ponto, PontoComFuncionario, TipoPonto } from "@/types/ponto";
 
 export async function listPontosPorFuncionario(
   funcionarioId: string,
@@ -76,6 +76,53 @@ export async function getDadosReconhecimentoFacial(): Promise<
     fotoUrl: linha.foto_url,
     descritor: linha.descritor as unknown as number[],
   }));
+}
+
+/** Corrige um ponto já registrado — permitido apenas a administrador/gerente
+ * (reforçado por RLS: pontos_update_privilegiado). */
+export async function corrigirPonto(
+  id: string,
+  patch: { registrado_em?: string; observacoes?: string },
+): Promise<Ponto> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("pontos")
+    .update({ ...patch, metodo: "manual" })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/** Lança manualmente um ponto que faltou — permitido apenas a
+ * administrador/gerente (reforçado por RLS: pontos_insert_privilegiado). */
+export async function criarPontoManual(
+  funcionarioId: string,
+  tipo: TipoPonto,
+  registradoEm: string,
+  observacoes?: string,
+): Promise<Ponto> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("pontos")
+    .insert({
+      funcionario_id: funcionarioId,
+      tipo,
+      registrado_em: registradoEm,
+      metodo: "manual",
+      observacoes,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function excluirPonto(id: string) {
+  const supabase = createClient();
+  const { error } = await supabase.from("pontos").delete().eq("id", id);
+  if (error) throw error;
 }
 
 export async function registrarPontoFacial(

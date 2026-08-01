@@ -16,12 +16,11 @@ interface FaceCameraProps {
   videoClassName?: string;
 }
 
-export function FaceCamera({
-  onFrame,
-  active = true,
-  className,
-  videoClassName,
-}: FaceCameraProps) {
+export const FaceCamera = React.forwardRef<HTMLVideoElement, FaceCameraProps>(
+  function FaceCamera(
+    { onFrame, active = true, className, videoClassName },
+    forwardedRef,
+  ) {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const rafRef = React.useRef<number | null>(null);
@@ -99,7 +98,11 @@ export function FaceCamera({
       )}
     >
       <video
-        ref={videoRef}
+        ref={(node) => {
+          videoRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
         autoPlay
         playsInline
         muted
@@ -133,4 +136,5 @@ export function FaceCamera({
       )}
     </div>
   );
-}
+  },
+);

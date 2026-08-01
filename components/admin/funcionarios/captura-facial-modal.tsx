@@ -12,7 +12,7 @@ const CAPTURAS_NECESSARIAS = 4;
 interface CapturaFacialModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConcluido: (descritores: number[][]) => void;
+  onConcluido: (descritores: number[][], foto: Blob | null) => void;
 }
 
 export function CapturaFacialModal({
@@ -24,27 +24,50 @@ export function CapturaFacialModal({
     null,
   );
   const [capturas, setCapturas] = React.useState<number[][]>([]);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const fotoRef = React.useRef<Blob | null>(null);
 
   React.useEffect(() => {
     if (!open) return;
     const timeout = setTimeout(() => {
       setCapturas([]);
       setDescritorAtual(null);
+      fotoRef.current = null;
     }, 0);
     return () => clearTimeout(timeout);
   }, [open]);
 
+  function capturarFotoPerfil() {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    // A câmera exibe a imagem espelhada (-scale-x-100); espelha o desenho
+    // também para que a foto salva saia no sentido correto.
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (blob) fotoRef.current = blob;
+    }, "image/jpeg", 0.85);
+  }
+
   function capturarAngulo() {
     if (!descritorAtual) return;
+    if (capturas.length === 0) capturarFotoPerfil();
     setCapturas((prev) => [...prev, descritorAtual]);
   }
 
   function refazer() {
     setCapturas([]);
+    fotoRef.current = null;
   }
 
   function concluir() {
-    onConcluido(capturas);
+    onConcluido(capturas, fotoRef.current);
     onOpenChange(false);
   }
 
@@ -61,7 +84,7 @@ export function CapturaFacialModal({
           </p>
 
           <div className="flex justify-center">
-            <FaceCamera active={open} onFrame={setDescritorAtual} />
+            <FaceCamera ref={videoRef} active={open} onFrame={setDescritorAtual} />
           </div>
 
           <div className="flex items-center justify-center gap-2">

@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useUsuarioAtual } from "@/components/admin/usuario-context";
 import { FuncionariosResumoCards } from "@/components/admin/funcionarios/funcionarios-resumo-cards";
+import { PresencaTempoReal } from "@/components/admin/funcionarios/presenca-tempo-real";
 import { FuncionariosFilters } from "@/components/admin/funcionarios/funcionarios-filters";
 import { FuncionariosTable } from "@/components/admin/funcionarios/funcionarios-table";
 import { FuncionarioFormModal } from "@/components/admin/funcionarios/funcionario-form-modal";
 import { FuncionarioPainelDrawer } from "@/components/admin/funcionarios/funcionario-painel-drawer";
+import { createClient } from "@/lib/supabase/client";
 import { permissoesPorCargo } from "@/lib/permissions";
 import { deleteFuncionario, listFuncionarios } from "@/services/funcionarios-service";
 import { listPontosHoje, listUltimoPontoPorFuncionario } from "@/services/pontos-service";
@@ -80,6 +82,29 @@ export function FuncionariosPageContent() {
     }, 0);
     return () => clearTimeout(timeout);
   }, [load]);
+
+  // Painel de presença em tempo real: qualquer ponto novo (batido no kiosk ou
+  // corrigido por um admin) atualiza a tela sozinha, sem precisar recarregar.
+  React.useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("funcionarios-pontos-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "pontos" },
+        () => load(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [load]);
+
+  const funcionariosAtivos = React.useMemo(
+    () => funcionarios.filter((f) => f.status === "ativo"),
+    [funcionarios],
+  );
 
   const resumo = React.useMemo(() => {
     const ativos = funcionarios.filter((f) => f.status === "ativo");
@@ -186,6 +211,11 @@ export function FuncionariosPageContent() {
       </div>
 
       <FuncionariosResumoCards resumo={resumo} />
+
+      <PresencaTempoReal
+        funcionariosAtivos={funcionariosAtivos}
+        ultimoPontoHoje={pontosHojePorFuncionario}
+      />
 
       <FuncionariosFilters filtros={filtros} onChange={setFiltros} />
 

@@ -19,6 +19,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
     { data: checkoutsHoje },
     { data: reservasSemNota },
     { data: conversasAguardando },
+    { data: reservasAguardandoConfirmacao },
   ] = await Promise.all([
     supabase.from("produtos").select("id, nome, quantidade").eq("ativo", true),
     supabase.from("quartos").select("numero").eq("status", "limpeza"),
@@ -44,9 +45,23 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       .from("chatbot_conversas")
       .select("id")
       .eq("aguardando_humano", true),
+    supabase.from("reservas").select("id, codigo").eq("status", "reservada"),
   ]);
 
   const notificacoes: NotificacaoSistema[] = [];
+
+  // Reservas novas do site aguardando confirmação da recepção — o alerta
+  // mais urgente, sempre no topo da lista (alimenta o sino do topbar).
+  if ((reservasAguardandoConfirmacao ?? []).length > 0) {
+    const qtd = (reservasAguardandoConfirmacao ?? []).length;
+    notificacoes.push({
+      id: "reservas-aguardando-confirmacao",
+      titulo: "Reservas aguardando confirmação",
+      descricao: `${qtd} reserva${qtd > 1 ? "s" : ""} do site aguardando confirmação.`,
+      severidade: "critico",
+      href: "/admin/reservas",
+    });
+  }
 
   const semEstoque = (produtos ?? []).filter((p) => p.quantidade <= 0);
   if (semEstoque.length > 0) {

@@ -3,12 +3,33 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Bell, ChevronDown, LogOut, Settings, User as UserIcon } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  ChevronDown,
+  Info,
+  LogOut,
+  Settings,
+  TriangleAlert,
+  User as UserIcon,
+} from "lucide-react";
 
 import type { Usuario } from "@/types/usuario";
 import { cargoLabels } from "@/types/usuario";
 import { useCurrentTime } from "@/hooks/use-current-time";
 import { signOut } from "@/services/auth-service";
+import { useNotificacoes } from "@/components/admin/notificacoes-context";
+import type { SeveridadeAlerta } from "@/types/dashboard";
+import { cn } from "@/lib/utils";
+
+const severidadeConfig: Record<
+  SeveridadeAlerta,
+  { icon: React.ComponentType<{ className?: string }>; classes: string }
+> = {
+  critico: { icon: AlertTriangle, classes: "bg-status-ocupado-light text-status-ocupado" },
+  atencao: { icon: TriangleAlert, classes: "bg-status-checkout-light text-status-checkout" },
+  info: { icon: Info, classes: "bg-status-reservado-light text-status-reservado" },
+};
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   weekday: "long",
@@ -32,9 +53,12 @@ function initials(nome: string) {
 export function Topbar({ usuario }: { usuario: Usuario }) {
   const router = useRouter();
   const now = useCurrentTime();
+  const { notificacoes } = useNotificacoes();
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [notifOpen, setNotifOpen] = React.useState(false);
   const [signingOut, setSigningOut] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const notifRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!menuOpen) return;
@@ -46,6 +70,17 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
+
+  React.useEffect(() => {
+    if (!notifOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [notifOpen]);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -71,14 +106,72 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
       </div>
 
       <div className="flex items-center gap-4">
-        <button
-          type="button"
-          aria-label="Notificações"
-          className="relative flex size-10 items-center justify-center rounded-full text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark"
-        >
-          <Bell className="size-5" strokeWidth={1.75} />
-          <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-status-ocupado" />
-        </button>
+        <div ref={notifRef} className="relative">
+          <button
+            type="button"
+            aria-label="Notificações"
+            onClick={() => setNotifOpen((open) => !open)}
+            className="relative flex size-10 items-center justify-center rounded-full text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark"
+          >
+            <Bell className="size-5" strokeWidth={1.75} />
+            {notificacoes.length > 0 && (
+              <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-status-ocupado" />
+            )}
+          </button>
+
+          {notifOpen && (
+            <div className="absolute right-0 top-full z-30 mt-2 w-80 overflow-hidden rounded-2xl border border-gray-light bg-white shadow-xl">
+              <div className="border-b border-gray-light px-4 py-3">
+                <p className="text-sm font-semibold text-primary-dark">Notificações</p>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                {notificacoes.length === 0 ? (
+                  <p className="px-4 py-6 text-center text-sm text-gray-text">
+                    Nenhuma notificação no momento.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-gray-light">
+                    {notificacoes.map((notificacao) => {
+                      const config = severidadeConfig[notificacao.severidade];
+                      const Icon = config.icon;
+                      const conteudo = (
+                        <div className="flex items-start gap-3 px-4 py-3 transition-colors duration-200 hover:bg-gray-light">
+                          <span
+                            className={cn(
+                              "flex size-8 shrink-0 items-center justify-center rounded-lg",
+                              config.classes,
+                            )}
+                          >
+                            <Icon className="size-4" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-primary-dark">
+                              {notificacao.titulo}
+                            </p>
+                            <p className="mt-0.5 text-xs text-gray-text">
+                              {notificacao.descricao}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                      return (
+                        <li key={notificacao.id}>
+                          {notificacao.href ? (
+                            <Link href={notificacao.href} onClick={() => setNotifOpen(false)}>
+                              {conteudo}
+                            </Link>
+                          ) : (
+                            conteudo
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div ref={menuRef} className="relative">
           <button

@@ -8,6 +8,7 @@ import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { adminNavItems } from "@/lib/admin-nav";
 import { podeAcessarRota } from "@/lib/permissions";
 import { useUsuarioAtual } from "@/components/admin/usuario-context";
+import { useNotificacoes } from "@/components/admin/notificacoes-context";
 import { cn } from "@/lib/utils";
 
 export function Sidebar({
@@ -19,8 +20,12 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const usuarioAtual = useUsuarioAtual();
+  const { notificacoes } = useNotificacoes();
   const navItems = adminNavItems.filter((item) =>
     podeAcessarRota(usuarioAtual.cargo, item.href),
+  );
+  const hrefsComPendencia = new Set(
+    notificacoes.map((notificacao) => notificacao.href).filter(Boolean),
   );
 
   return (
@@ -55,6 +60,7 @@ export function Sidebar({
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
+          const temPendencia = hrefsComPendencia.has(item.href);
 
           return (
             <Link
@@ -69,13 +75,15 @@ export function Sidebar({
                   : "text-gray-text hover:bg-gray-light hover:text-primary-dark",
               )}
             >
-              <Icon
-                className={cn(
-                  "size-5 shrink-0",
-                  active ? "text-primary" : "text-gray-text",
+              <span className="relative shrink-0">
+                <Icon
+                  className={cn("size-5", active ? "text-primary" : "text-gray-text")}
+                  strokeWidth={1.75}
+                />
+                {temPendencia && (
+                  <span className="absolute -right-1 -top-1 size-2 rounded-full bg-status-ocupado" />
                 )}
-                strokeWidth={1.75}
-              />
+              </span>
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );

@@ -123,6 +123,8 @@ export function DashboardPageContent() {
 
       <DashboardCards cards={cards} />
 
+      <AlertasInteligentes alertas={alertas} />
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <ReceitaChart
@@ -148,8 +150,6 @@ export function DashboardPageContent() {
         <MovimentacaoEstoqueChart dados={graficos.movimentacaoEstoque} />
         <FuncionariosPresentesChart dados={graficos.funcionariosPresentes} />
       </div>
-
-      <AlertasInteligentes alertas={alertas} />
     </div>
   );
 }

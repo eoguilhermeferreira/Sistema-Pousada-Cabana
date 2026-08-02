@@ -39,7 +39,7 @@ export function GuestPicker({
               onChange={(e) =>
                 updateGuest(guest.id, {
                   type: e.target.value as GuestType,
-                  age: e.target.value === "adulto" ? 30 : 7,
+                  age: e.target.value === "adulto" ? 30 : null,
                 })
               }
               aria-label={`Tipo do hóspede ${index + 1}`}
@@ -54,9 +54,14 @@ export function GuestPicker({
                 type="number"
                 min={0}
                 max={17}
-                value={guest.age}
-                onChange={(e) => updateGuest(guest.id, { age: Number(e.target.value) })}
-                aria-label={`Idade do hóspede ${index + 1}`}
+                value={guest.age ?? ""}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  updateGuest(guest.id, { age: raw === "" ? null : Number(raw) });
+                }}
+                placeholder="Idade"
+                aria-label={`Idade do hóspede ${index + 1} (obrigatório)`}
+                aria-required="true"
                 className="w-20"
               />
             )}

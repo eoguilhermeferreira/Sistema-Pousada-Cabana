@@ -515,7 +515,7 @@ export function ReservationModal({
             </p>
             <div className="rounded-2xl bg-primary-light p-4">
               <p className="text-xs text-gray-text">Código da reserva</p>
-              <p className="font-display text-2xl font-semibold text-primary-dark">
+              <p className="font-sans text-2xl font-semibold tabular-nums text-primary-dark">
                 {resultado.codigo}
               </p>
             </div>

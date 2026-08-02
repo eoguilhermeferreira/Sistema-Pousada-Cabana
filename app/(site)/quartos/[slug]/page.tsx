@@ -14,13 +14,7 @@ import { RoomGallery } from "@/components/quartos/room-gallery";
 import { RoomName } from "@/components/quartos/room-name";
 import { ChildrenPolicyNotice } from "@/components/quartos/children-policy-notice";
 import { GuestSummary } from "@/components/quartos/guest-summary";
-import { RoomReserveButton } from "@/components/quartos/room-reserve-button";
-
-const currency = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  maximumFractionDigits: 0,
-});
+import { RoomPriceAside } from "@/components/quartos/room-price-aside";
 
 export async function generateMetadata({
   params,
@@ -111,18 +105,9 @@ export default async function RoomPage({
         </div>
 
         <div className="space-y-6">
-          <aside className="h-fit rounded-2xl border border-gray-light bg-white p-6 shadow-sm lg:sticky lg:top-24">
-            <p className="text-xs text-gray-text">diária</p>
-            <p className="font-sans text-3xl font-semibold text-primary-dark">
-              {currency.format(quarto.valor_diaria)}
-            </p>
-
-            <div className="mt-6">
-              <Suspense fallback={null}>
-                <RoomReserveButton quarto={quarto} />
-              </Suspense>
-            </div>
-          </aside>
+          <Suspense fallback={null}>
+            <RoomPriceAside quarto={quarto} />
+          </Suspense>
 
           <Suspense fallback={null}>
             <GuestSummary quarto={quarto} />

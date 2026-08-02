@@ -347,7 +347,7 @@ function MinhasReservas() {
         <div key={reserva.id} className="rounded-2xl border border-gray-light bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="font-display text-base font-semibold text-primary-dark">{reserva.codigo}</p>
+              <p className="font-sans text-base font-semibold tabular-nums text-primary-dark">{reserva.codigo}</p>
               <p className="text-sm text-gray-text">
                 Quarto {reserva.quarto.numero} · {reserva.quarto.categoria.nome}
               </p>

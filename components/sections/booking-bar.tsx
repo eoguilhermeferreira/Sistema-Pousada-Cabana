@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { GuestPicker } from "@/components/quartos/guest-picker";
 import {
   createGuest,
+  faltaIdadeCrianca,
   guestsToParams,
   summarizeGuests,
   type Guest,
@@ -20,6 +21,7 @@ export function BookingBar() {
   const [checkOut, setCheckOut] = React.useState("");
   const [guests, setGuests] = React.useState<Guest[]>([createGuest("adulto")]);
   const [pickerOpen, setPickerOpen] = React.useState(false);
+  const [erro, setErro] = React.useState("");
   const pickerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -35,6 +37,12 @@ export function BookingBar() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
+    if (faltaIdadeCrianca(guests)) {
+      setErro("Informe a idade de todas as crianças.");
+      setPickerOpen(true);
+      return;
+    }
+    setErro("");
     const params = guestsToParams(guests);
     if (checkIn) params.set("checkin", checkIn);
     if (checkOut) params.set("checkout", checkOut);
@@ -86,9 +94,16 @@ export function BookingBar() {
 
           {pickerOpen && (
             <div className="absolute left-0 top-full z-30 mt-2 w-72 rounded-2xl border border-gray-light bg-white p-4 shadow-xl">
-              <GuestPicker guests={guests} onChange={setGuests} />
+              <GuestPicker
+                guests={guests}
+                onChange={(next) => {
+                  setGuests(next);
+                  setErro("");
+                }}
+              />
             </div>
           )}
+          {erro && <p className="text-xs font-medium text-red-600">{erro}</p>}
         </div>
 
         <Button type="submit" size="lg" className="md:w-auto">

@@ -69,7 +69,8 @@ export function RoomsExplorer({
   const adultos = guests.filter((g) => g.type === "adulto").length;
   const criancasIdades = guests
     .filter((g) => g.type === "crianca")
-    .map((g) => g.age);
+    .map((g) => g.age)
+    .filter((age): age is number => age !== null);
 
   const [reservando, setReservando] = React.useState<QuartoDetalhado | null>(null);
 

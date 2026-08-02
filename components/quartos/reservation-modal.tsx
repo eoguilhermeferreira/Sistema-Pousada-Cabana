@@ -10,6 +10,7 @@ import { formatCpf, isValidCpf, onlyDigits } from "@/lib/cpf";
 import { formatPhone, isValidPhone } from "@/lib/phone";
 import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
 import { childrenPolicyRules } from "@/lib/children-policy";
+import { checkinCheckoutTexto } from "@/lib/checkin-checkout";
 import {
   cadastrarCliente,
   criarReservaCliente,
@@ -403,6 +404,7 @@ export function ReservationModal({
                 />
               </label>
             </div>
+            <p className="text-xs text-gray-text">{checkinCheckoutTexto}</p>
             {errors.datas && (
               <p className="text-xs font-medium text-status-ocupado">{errors.datas}</p>
             )}

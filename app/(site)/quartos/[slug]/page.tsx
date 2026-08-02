@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Clock, Users } from "lucide-react";
 
 import { getQuartoSiteByNumero } from "@/services/site-quartos-service";
 import { numeroFromSlug } from "@/lib/quarto-slug";
 import { getCategoriaDescricaoFallback } from "@/data/categoria-descriptions";
+import { checkinCheckoutTexto } from "@/lib/checkin-checkout";
 import { getComodidadeIcon } from "@/types/quarto";
 import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
@@ -73,6 +74,10 @@ export default async function RoomPage({
               {quarto.capacidade_maxima === 1
                 ? "1 hóspede"
                 : `Até ${quarto.capacidade_maxima} hóspedes`}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="size-4 text-primary" />
+              {checkinCheckoutTexto}
             </span>
           </div>
 

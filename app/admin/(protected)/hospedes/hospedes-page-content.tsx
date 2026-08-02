@@ -194,7 +194,8 @@ export function HospedesPageContent() {
               <span className="font-medium text-primary-dark">
                 {deletingHospede?.nome}
               </span>
-              ? Esta ação não pode ser desfeita.
+              ? Isso também exclui todas as reservas, pagamentos e consumos
+              vinculados a esse hóspede. Esta ação não pode ser desfeita.
             </>
           )
         }

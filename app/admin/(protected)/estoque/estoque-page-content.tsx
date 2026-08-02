@@ -217,7 +217,8 @@ export function EstoquePageContent() {
                 <span className="font-medium text-primary-dark">
                   {deletingProduto?.nome}
                 </span>
-                ? Esta ação não pode ser desfeita.
+                ? Isso também exclui os registros de estoque e consumo desse
+                produto. Esta ação não pode ser desfeita.
               </>
             )}
           </>

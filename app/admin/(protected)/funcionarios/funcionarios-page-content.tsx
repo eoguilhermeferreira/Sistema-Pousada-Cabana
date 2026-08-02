@@ -253,7 +253,8 @@ export function FuncionariosPageContent() {
               <span className="font-medium text-primary-dark">
                 {deletingFuncionario?.nome}
               </span>
-              ? Esta ação não pode ser desfeita.
+              ? Isso também exclui o histórico de ponto desse funcionário. Esta
+              ação não pode ser desfeita.
             </>
           )
         }

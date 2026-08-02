@@ -234,7 +234,8 @@ export function QuartosPageContent() {
               <span className="font-medium text-primary-dark">
                 Quarto {deletingQuarto?.numero}
               </span>
-              ? Esta ação não pode ser desfeita.
+              ? Isso também exclui todas as reservas, pagamentos e consumos
+              vinculados a esse quarto. Esta ação não pode ser desfeita.
             </>
           )
         }

@@ -25,6 +25,7 @@ import type {
   StatusQuarto,
 } from "@/types/quarto";
 import { statusQuartoLabels } from "@/types/quarto";
+import { getErrorMessage, isForeignKeyViolation } from "@/lib/supabase-error";
 
 export function QuartosPageContent() {
   const [quartos, setQuartos] = React.useState<QuartoComCategoria[]>([]);
@@ -156,9 +157,9 @@ export function QuartosPageContent() {
       await load();
     } catch (error) {
       setDeleteError(
-        error instanceof Error
+        isForeignKeyViolation(error)
           ? "Não foi possível excluir: este quarto possui reservas ou movimentações registradas. Altere o status em vez de excluir."
-          : "Não foi possível excluir o quarto.",
+          : getErrorMessage(error) || "Não foi possível excluir o quarto.",
       );
     } finally {
       setDeleting(false);

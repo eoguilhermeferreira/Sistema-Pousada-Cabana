@@ -17,6 +17,7 @@ import {
   listProdutos,
 } from "@/services/produtos-service";
 import { dateKey } from "@/lib/calendar-grid";
+import { getErrorMessage, isForeignKeyViolation } from "@/lib/supabase-error";
 import {
   emptyFiltrosProdutos,
   getStatusEstoqueProduto,
@@ -145,9 +146,9 @@ export function EstoquePageContent() {
       await load();
     } catch (error) {
       setDeleteError(
-        error instanceof Error
+        isForeignKeyViolation(error)
           ? "Não foi possível excluir: este produto já possui movimentações ou consumos registrados. Desative-o em vez de excluir."
-          : "Não foi possível excluir o produto.",
+          : getErrorMessage(error) || "Não foi possível excluir o produto.",
       );
     } finally {
       setDeleting(false);

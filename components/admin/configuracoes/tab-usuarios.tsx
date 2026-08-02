@@ -12,6 +12,7 @@ import { UsuarioFormModal } from "@/components/admin/configuracoes/usuario-form-
 import { RedefinirSenhaModal } from "@/components/admin/configuracoes/redefinir-senha-modal";
 import { useUsuarioAtual } from "@/components/admin/usuario-context";
 import { excluirUsuario, listUsuarios, setUsuarioAtivo } from "@/services/usuarios-admin-service";
+import { getErrorMessage, isForeignKeyViolation } from "@/lib/supabase-error";
 import {
   cargoLabels,
   cargoOptions,
@@ -101,9 +102,10 @@ export function TabUsuarios() {
       await load();
     } catch (err) {
       setExcluirErro(
-        err instanceof Error
-          ? err.message
-          : "Não foi possível excluir: este usuário possui registros vinculados. Desative-o em vez de excluir.",
+        isForeignKeyViolation(err)
+          ? "Não foi possível excluir: este usuário possui registros vinculados. Desative-o em vez de excluir."
+          : getErrorMessage(err) ||
+              "Não foi possível excluir: este usuário possui registros vinculados. Desative-o em vez de excluir.",
       );
     } finally {
       setExcluindo(false);

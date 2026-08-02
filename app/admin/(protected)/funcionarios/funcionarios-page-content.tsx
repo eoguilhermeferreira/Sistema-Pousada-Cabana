@@ -23,6 +23,7 @@ import {
 } from "@/types/funcionario";
 import type { Ponto } from "@/types/ponto";
 import { cargoLabels } from "@/types/usuario";
+import { getErrorMessage } from "@/lib/supabase-error";
 
 export function FuncionariosPageContent() {
   const usuarioAtual = useUsuarioAtual();
@@ -183,11 +184,7 @@ export function FuncionariosPageContent() {
       setDeletingFuncionario(null);
       await load();
     } catch (error) {
-      setDeleteError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível excluir o funcionário.",
-      );
+      setDeleteError(getErrorMessage(error) || "Não foi possível excluir o funcionário.");
     } finally {
       setDeleting(false);
     }

@@ -11,6 +11,7 @@ import { HospedeFormDrawer } from "@/components/admin/hospedes/hospede-form-draw
 import { HospedeView } from "@/components/admin/hospedes/hospede-view";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { listHospedes, deleteHospede } from "@/services/hospedes-service";
+import { getErrorMessage, isForeignKeyViolation } from "@/lib/supabase-error";
 import type { Hospede, StatusHospede } from "@/types/hospede";
 
 const PAGE_SIZE = 10;
@@ -115,9 +116,9 @@ export function HospedesPageContent() {
       await loadHospedes();
     } catch (error) {
       setDeleteError(
-        error instanceof Error
+        isForeignKeyViolation(error)
           ? "Não foi possível excluir: este hóspede possui reservas registradas. Marque-o como inativo em vez de excluir."
-          : "Não foi possível excluir o hóspede.",
+          : getErrorMessage(error) || "Não foi possível excluir o hóspede.",
       );
     } finally {
       setDeleting(false);

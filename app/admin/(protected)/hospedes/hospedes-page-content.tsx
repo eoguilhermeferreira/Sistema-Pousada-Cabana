@@ -39,6 +39,7 @@ export function HospedesPageContent() {
     null,
   );
   const [deleting, setDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState("");
 
   React.useEffect(() => {
     const timeout = setTimeout(() => {
@@ -99,17 +100,25 @@ export function HospedesPageContent() {
 
   function handleDeleteRequest(hospede: Hospede) {
     setDeletingHospede(hospede);
+    setDeleteError("");
     setDeleteOpen(true);
   }
 
   async function handleConfirmDelete() {
     if (!deletingHospede) return;
     setDeleting(true);
+    setDeleteError("");
     try {
       await deleteHospede(deletingHospede.id);
       setDeleteOpen(false);
       setDeletingHospede(null);
       await loadHospedes();
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error
+          ? "Não foi possível excluir: este hóspede possui reservas registradas. Marque-o como inativo em vez de excluir."
+          : "Não foi possível excluir o hóspede.",
+      );
     } finally {
       setDeleting(false);
     }
@@ -176,13 +185,17 @@ export function HospedesPageContent() {
         onOpenChange={setDeleteOpen}
         title="Excluir hóspede"
         description={
-          <>
-            Tem certeza que deseja excluir{" "}
-            <span className="font-medium text-primary-dark">
-              {deletingHospede?.nome}
-            </span>
-            ? Esta ação não pode ser desfeita.
-          </>
+          deleteError ? (
+            deleteError
+          ) : (
+            <>
+              Tem certeza que deseja excluir{" "}
+              <span className="font-medium text-primary-dark">
+                {deletingHospede?.nome}
+              </span>
+              ? Esta ação não pode ser desfeita.
+            </>
+          )
         }
         confirmLabel="Excluir"
         loading={deleting}

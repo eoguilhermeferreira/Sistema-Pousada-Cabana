@@ -50,6 +50,7 @@ export function QuartosPageContent() {
   const [deletingQuarto, setDeletingQuarto] =
     React.useState<QuartoComCategoria | null>(null);
   const [deleting, setDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState("");
 
   const [savingStatusId, setSavingStatusId] = React.useState<string | null>(
     null,
@@ -140,17 +141,25 @@ export function QuartosPageContent() {
 
   function handleDeleteRequest(quarto: QuartoComCategoria) {
     setDeletingQuarto(quarto);
+    setDeleteError("");
     setDeleteOpen(true);
   }
 
   async function handleConfirmDelete() {
     if (!deletingQuarto) return;
     setDeleting(true);
+    setDeleteError("");
     try {
       await deleteQuarto(deletingQuarto.id);
       setDeleteOpen(false);
       setDeletingQuarto(null);
       await load();
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error
+          ? "Não foi possível excluir: este quarto possui reservas ou movimentações registradas. Altere o status em vez de excluir."
+          : "Não foi possível excluir o quarto.",
+      );
     } finally {
       setDeleting(false);
     }
@@ -216,13 +225,17 @@ export function QuartosPageContent() {
         onOpenChange={setDeleteOpen}
         title="Excluir quarto"
         description={
-          <>
-            Tem certeza que deseja excluir o{" "}
-            <span className="font-medium text-primary-dark">
-              Quarto {deletingQuarto?.numero}
-            </span>
-            ? Esta ação não pode ser desfeita.
-          </>
+          deleteError ? (
+            deleteError
+          ) : (
+            <>
+              Tem certeza que deseja excluir o{" "}
+              <span className="font-medium text-primary-dark">
+                Quarto {deletingQuarto?.numero}
+              </span>
+              ? Esta ação não pode ser desfeita.
+            </>
+          )
         }
         confirmLabel="Excluir"
         loading={deleting}

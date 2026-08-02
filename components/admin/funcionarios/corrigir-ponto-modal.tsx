@@ -103,6 +103,11 @@ export function CorrigirPontoModal({
       setConfirmDeleteOpen(false);
       onSaved();
       onOpenChange(false);
+    } catch (err) {
+      setConfirmDeleteOpen(false);
+      setError(
+        err instanceof Error ? err.message : "Não foi possível excluir o ponto.",
+      );
     } finally {
       setDeleting(false);
     }

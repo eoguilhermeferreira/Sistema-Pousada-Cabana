@@ -182,41 +182,33 @@ export interface CriarReservaParams {
   hospedesExtra: Omit<ReservaHospedeInsert, "reserva_id">[];
 }
 
+/** Reserva criada pela recepção (walk-in/telefone) nasce já confirmada —
+ * diferente da reserva feita pelo cliente no site, que fica "Aguardando
+ * Confirmação". Tudo (reserva + quarto -> reservado) acontece atômico
+ * dentro da função criar_reserva_admin no banco. */
 export async function createReserva({
   reserva,
   hospedesExtra,
-}: CriarReservaParams): Promise<Reserva> {
+}: CriarReservaParams): Promise<{ id: string; codigo: string }> {
   const supabase = createClient();
 
-  if (
-    await existeConflito(reserva.quarto_id, reserva.data_entrada, reserva.data_saida)
-  ) {
-    throw new Error(
-      "Este quarto já possui uma reserva para o período selecionado.",
-    );
-  }
-
-  const { data, error } = await supabase
-    .from("reservas")
-    .insert(reserva)
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc("criar_reserva_admin", {
+    p_hospede_principal_id: reserva.hospede_principal_id,
+    p_quarto_id: reserva.quarto_id,
+    p_data_entrada: reserva.data_entrada,
+    p_data_saida: reserva.data_saida,
+    p_quantidade_adultos: reserva.quantidade_adultos ?? 1,
+    p_valor_diaria: reserva.valor_diaria,
+    p_valor_criancas: reserva.valor_criancas ?? 0,
+    p_valor_total: reserva.valor_total,
+    p_observacoes: reserva.observacoes ?? undefined,
+    p_hospedes_extra: hospedesExtra,
+  });
   if (error) throw error;
 
-  if (hospedesExtra.length > 0) {
-    const { error: hospedesError } = await supabase
-      .from("reserva_hospedes")
-      .insert(hospedesExtra.map((h) => ({ ...h, reserva_id: data.id })));
-    if (hospedesError) throw hospedesError;
-  }
-
-  await supabase.from("reserva_historico").insert({
-    reserva_id: data.id,
-    evento: "criada",
-    descricao: `Reserva ${data.codigo} criada.`,
-  });
-
-  return data;
+  const resultado = data?.[0];
+  if (!resultado) throw new Error("Não foi possível criar a reserva.");
+  return resultado;
 }
 
 export interface AtualizarReservaParams {
@@ -277,87 +269,47 @@ export async function updateReserva({
   return data;
 }
 
-export async function cancelarReserva(id: string, codigo: string) {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("reservas")
-    .update({ status: "cancelada" })
-    .eq("id", id);
-  if (error) throw error;
+/** Todas as transições de status abaixo passam por funções atômicas no
+ * banco (reserva + quarto mudam juntos, com regras da máquina de estados
+ * validadas no servidor) — evita o quarto ficar "Disponível" por engano
+ * depois de confirmado, ou um check-in fora de ordem. */
 
-  await supabase.from("reserva_historico").insert({
-    reserva_id: id,
-    evento: "cancelada",
-    descricao: `Reserva ${codigo} cancelada.`,
+export async function confirmarReserva(id: string) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("confirmar_reserva", {
+    p_reserva_id: id,
   });
-}
-
-export async function atualizarStatusReserva(
-  id: string,
-  status: Reserva["status"],
-) {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("reservas")
-    .update({ status })
-    .eq("id", id);
   if (error) throw error;
 }
 
-export interface OperacaoCheckinCheckoutParams {
-  id: string;
-  quarto_id: string;
-  codigo: string;
-}
-
-export async function realizarCheckin({
-  id,
-  quarto_id,
-  codigo,
-}: OperacaoCheckinCheckoutParams) {
+export async function cancelarReserva(id: string) {
   const supabase = createClient();
-
-  const { error } = await supabase
-    .from("reservas")
-    .update({ status: "checkin_realizado" })
-    .eq("id", id);
-  if (error) throw error;
-
-  const { error: quartoError } = await supabase
-    .from("quartos")
-    .update({ status: "ocupado" })
-    .eq("id", quarto_id);
-  if (quartoError) throw quartoError;
-
-  await supabase.from("reserva_historico").insert({
-    reserva_id: id,
-    evento: "checkin_realizado",
-    descricao: `Check-in da reserva ${codigo} realizado.`,
+  const { error } = await supabase.rpc("cancelar_reserva", {
+    p_reserva_id: id,
   });
+  if (error) throw error;
 }
 
-export async function realizarCheckout({
-  id,
-  quarto_id,
-  codigo,
-}: OperacaoCheckinCheckoutParams) {
+export async function marcarNoShowReserva(id: string) {
   const supabase = createClient();
-
-  const { error } = await supabase
-    .from("reservas")
-    .update({ status: "checkout_realizado" })
-    .eq("id", id);
-  if (error) throw error;
-
-  const { error: quartoError } = await supabase
-    .from("quartos")
-    .update({ status: "limpeza" })
-    .eq("id", quarto_id);
-  if (quartoError) throw quartoError;
-
-  await supabase.from("reserva_historico").insert({
-    reserva_id: id,
-    evento: "checkout_realizado",
-    descricao: `Check-out da reserva ${codigo} realizado.`,
+  const { error } = await supabase.rpc("marcar_no_show_reserva", {
+    p_reserva_id: id,
   });
+  if (error) throw error;
+}
+
+export async function realizarCheckin(id: string) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("fazer_checkin_reserva", {
+    p_reserva_id: id,
+  });
+  if (error) throw error;
+}
+
+export async function realizarCheckout(id: string) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("fazer_checkout_reserva", {
+    p_reserva_id: id,
+  });
+  if (error) throw error;
 }

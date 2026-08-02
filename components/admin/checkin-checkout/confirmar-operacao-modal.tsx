@@ -24,11 +24,13 @@ function formatDate(value: string) {
 export function ConfirmarOperacaoModal({
   operacao,
   loading,
+  error,
   onOpenChange,
   onConfirm,
 }: {
   operacao: Operacao | null;
   loading: boolean;
+  error?: string;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }) {
@@ -87,8 +89,14 @@ export function ConfirmarOperacaoModal({
           <p className="text-xs text-gray-text">
             {isCheckin
               ? "O quarto será marcado como Ocupado."
-              : "O quarto será marcado como Limpeza."}
+              : "O quarto será marcado como Aguardando Limpeza."}
           </p>
+
+          {error && (
+            <p className="rounded-xl bg-status-ocupado-light px-4 py-3 text-sm font-medium text-status-ocupado">
+              {error}
+            </p>
+          )}
 
           <div className="flex justify-end gap-3">
             <Button

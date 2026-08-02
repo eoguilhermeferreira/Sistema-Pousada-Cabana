@@ -448,6 +448,7 @@ export async function getAlertasInteligentes(): Promise<AlertaInteligente[]> {
     { data: checkinsHoje, error: checkinsErr },
     { data: checkoutsHoje, error: checkoutsErr },
     { data: reservasProximas, error: reservasErr },
+    { data: reservasAguardando, error: reservasAguardandoErr },
   ] = await Promise.all([
     supabase.from("produtos").select("id, nome, quantidade").eq("ativo", true),
     supabase
@@ -481,6 +482,7 @@ export async function getAlertasInteligentes(): Promise<AlertaInteligente[]> {
       .not("status", "in", "(cancelada,no_show)")
       .order("data_entrada", { ascending: true })
       .limit(5),
+    supabase.from("reservas").select("id").eq("status", "reservada"),
   ]);
 
   if (produtosErr) throw produtosErr;
@@ -492,8 +494,22 @@ export async function getAlertasInteligentes(): Promise<AlertaInteligente[]> {
   if (checkinsErr) throw checkinsErr;
   if (checkoutsErr) throw checkoutsErr;
   if (reservasErr) throw reservasErr;
+  if (reservasAguardandoErr) throw reservasAguardandoErr;
 
   const alertas: AlertaInteligente[] = [];
+
+  // Reservas novas do site aguardando confirmação da recepção — mesmo
+  // sinal usado pelo sino do topbar, sempre primeiro na lista.
+  if ((reservasAguardando ?? []).length > 0) {
+    const qtd = (reservasAguardando ?? []).length;
+    alertas.push({
+      id: "reservas-aguardando-confirmacao",
+      titulo: "Reservas aguardando confirmação",
+      descricao: `${qtd} reserva${qtd > 1 ? "s" : ""} do site aguardando confirmação.`,
+      severidade: "critico",
+      href: "/admin/reservas",
+    });
+  }
 
   const semEstoque = (produtos ?? []).filter((p) => p.quantidade <= 0);
   if (semEstoque.length > 0) {

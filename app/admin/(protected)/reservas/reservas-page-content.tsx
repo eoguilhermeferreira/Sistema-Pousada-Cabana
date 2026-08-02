@@ -16,6 +16,7 @@ import {
 } from "@/services/reservas-service";
 import { listCategorias } from "@/services/quartos-service";
 import { dateKey } from "@/lib/calendar-grid";
+import { getErrorMessage } from "@/lib/supabase-error";
 import { emptyFiltrosReservas, type FiltrosReservas, type ReservaComRelacoes, type ReservaDetalhada } from "@/types/reserva";
 import type { CategoriaQuarto } from "@/types/quarto";
 
@@ -31,6 +32,7 @@ export function ReservasPageContent() {
   const [cancelOpen, setCancelOpen] = React.useState(false);
   const [cancelingReserva, setCancelingReserva] = React.useState<ReservaComRelacoes | null>(null);
   const [canceling, setCanceling] = React.useState(false);
+  const [cancelError, setCancelError] = React.useState("");
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -123,17 +125,23 @@ export function ReservasPageContent() {
 
   function handleCancelRequest(reserva: ReservaComRelacoes) {
     setCancelingReserva(reserva);
+    setCancelError("");
     setCancelOpen(true);
   }
 
   async function handleConfirmCancel() {
     if (!cancelingReserva) return;
     setCanceling(true);
+    setCancelError("");
     try {
-      await cancelarReserva(cancelingReserva.id, cancelingReserva.codigo);
+      await cancelarReserva(cancelingReserva.id);
       setCancelOpen(false);
       setCancelingReserva(null);
       await load();
+    } catch (error) {
+      setCancelError(
+        getErrorMessage(error) || "Não foi possível cancelar a reserva.",
+      );
     } finally {
       setCanceling(false);
     }
@@ -179,14 +187,18 @@ export function ReservasPageContent() {
         onOpenChange={setCancelOpen}
         title="Cancelar reserva"
         description={
-          <>
-            Tem certeza que deseja cancelar esta reserva? Esta ação libera o
-            quarto para o período de{" "}
-            <span className="font-medium text-primary-dark">
-              {cancelingReserva?.data_entrada} a {cancelingReserva?.data_saida}
-            </span>
-            .
-          </>
+          cancelError ? (
+            cancelError
+          ) : (
+            <>
+              Tem certeza que deseja cancelar esta reserva? Esta ação libera o
+              quarto para o período de{" "}
+              <span className="font-medium text-primary-dark">
+                {cancelingReserva?.data_entrada} a {cancelingReserva?.data_saida}
+              </span>
+              .
+            </>
+          )
         }
         confirmLabel="Cancelar reserva"
         loading={canceling}

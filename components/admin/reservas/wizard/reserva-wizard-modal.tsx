@@ -12,6 +12,7 @@ import { StepQuarto } from "@/components/admin/reservas/wizard/step-quarto";
 import { StepHospedes, type CriancaWizard } from "@/components/admin/reservas/wizard/step-hospedes";
 import { StepResumo } from "@/components/admin/reservas/wizard/step-resumo";
 import { calcularNoites, calcularValores, valorCriancaPorNoite } from "@/lib/reserva-pricing";
+import { getErrorMessage } from "@/lib/supabase-error";
 import { createReserva, updateReserva } from "@/services/reservas-service";
 import type { Hospede } from "@/types/hospede";
 import type { QuartoDetalhado } from "@/types/quarto";
@@ -160,11 +161,7 @@ export function ReservaWizardModal({
       onSaved();
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Não foi possível salvar a reserva.",
-      );
+      setError(getErrorMessage(err) || "Não foi possível salvar a reserva.");
     } finally {
       setSaving(false);
     }

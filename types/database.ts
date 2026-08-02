@@ -1685,8 +1685,14 @@ export type Database = {
       }
       reservas: {
         Row: {
+          checkin_em: string | null
+          checkin_por: string | null
+          checkout_em: string | null
+          checkout_por: string | null
           cliente_id: string | null
           codigo: string
+          confirmada_em: string | null
+          confirmada_por: string | null
           created_at: string
           data_entrada: string
           data_saida: string
@@ -1704,8 +1710,14 @@ export type Database = {
           valor_total: number
         }
         Insert: {
+          checkin_em?: string | null
+          checkin_por?: string | null
+          checkout_em?: string | null
+          checkout_por?: string | null
           cliente_id?: string | null
           codigo?: string
+          confirmada_em?: string | null
+          confirmada_por?: string | null
           created_at?: string
           data_entrada: string
           data_saida: string
@@ -1723,8 +1735,14 @@ export type Database = {
           valor_total: number
         }
         Update: {
+          checkin_em?: string | null
+          checkin_por?: string | null
+          checkout_em?: string | null
+          checkout_por?: string | null
           cliente_id?: string | null
           codigo?: string
+          confirmada_em?: string | null
+          confirmada_por?: string | null
           created_at?: string
           data_entrada?: string
           data_saida?: string
@@ -1743,10 +1761,31 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "reservas_checkin_por_fkey"
+            columns: ["checkin_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_checkout_por_fkey"
+            columns: ["checkout_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reservas_cliente_id_fkey"
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_confirmada_por_fkey"
+            columns: ["confirmada_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
           {
@@ -1915,6 +1954,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancelar_reserva: { Args: { p_reserva_id: string }; Returns: undefined }
+      confirmar_reserva: { Args: { p_reserva_id: string }; Returns: undefined }
+      criar_reserva_admin: {
+        Args: {
+          p_data_entrada: string
+          p_data_saida: string
+          p_hospede_principal_id: string
+          p_hospedes_extra?: Json
+          p_observacoes?: string
+          p_quantidade_adultos: number
+          p_quarto_id: string
+          p_valor_criancas: number
+          p_valor_diaria: number
+          p_valor_total: number
+        }
+        Returns: {
+          codigo: string
+          id: string
+        }[]
+      }
       criar_reserva_cliente: {
         Args: {
           p_acompanhantes_adultos?: Json
@@ -1984,6 +2043,14 @@ export type Database = {
       }
       excluir_usuario_admin: {
         Args: { p_usuario_id: string }
+        Returns: undefined
+      }
+      fazer_checkin_reserva: {
+        Args: { p_reserva_id: string }
+        Returns: undefined
+      }
+      fazer_checkout_reserva: {
+        Args: { p_reserva_id: string }
         Returns: undefined
       }
       fechar_caixa: {
@@ -2057,6 +2124,10 @@ export type Database = {
           funcionario_id: string
           nome: string
         }[]
+      }
+      marcar_no_show_reserva: {
+        Args: { p_reserva_id: string }
+        Returns: undefined
       }
       redefinir_senha_usuario: {
         Args: { p_nova_senha: string; p_usuario_id: string }

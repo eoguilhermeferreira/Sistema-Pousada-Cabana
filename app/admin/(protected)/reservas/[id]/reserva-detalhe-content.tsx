@@ -6,10 +6,12 @@ import {
   ArrowLeft,
   Building2,
   CalendarDays,
+  CheckCircle2,
   Loader2,
   Pencil,
   Phone,
   User,
+  UserX,
   Users,
   XCircle,
 } from "lucide-react";
@@ -21,16 +23,14 @@ import { ReservaWizardModal } from "@/components/admin/reservas/wizard/reserva-w
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { formatCpf } from "@/lib/cpf";
 import { formatPhone } from "@/lib/phone";
+import { getErrorMessage } from "@/lib/supabase-error";
 import {
-  atualizarStatusReserva,
   cancelarReserva,
+  confirmarReserva,
   getReservaById,
+  marcarNoShowReserva,
 } from "@/services/reservas-service";
-import {
-  statusReservaLabels,
-  statusReservaOptions,
-  type ReservaDetalhada,
-} from "@/types/reserva";
+import type { ReservaDetalhada } from "@/types/reserva";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -55,13 +55,12 @@ function formatDate(value: string) {
   return dateFormatter.format(new Date(`${value}T00:00:00`));
 }
 
-const selectClass =
-  "flex h-10 w-full rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50";
-
 const eventoLabels: Record<string, string> = {
   criada: "Reserva criada",
   editada: "Reserva editada",
+  confirmada: "Reserva confirmada",
   cancelada: "Reserva cancelada",
+  no_show: "Marcada como no-show",
   status_alterado: "Status alterado",
   checkin_realizado: "Check-in realizado",
   checkout_realizado: "Check-out realizado",
@@ -77,7 +76,9 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
   const [editOpen, setEditOpen] = React.useState(false);
   const [cancelOpen, setCancelOpen] = React.useState(false);
   const [canceling, setCanceling] = React.useState(false);
-  const [changingStatus, setChangingStatus] = React.useState(false);
+  const [confirming, setConfirming] = React.useState(false);
+  const [markingNoShow, setMarkingNoShow] = React.useState(false);
+  const [actionError, setActionError] = React.useState("");
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -96,24 +97,50 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
     return () => clearTimeout(timeout);
   }, [load]);
 
-  async function handleStatusChange(status: ReservaDetalhada["status"]) {
+  async function handleConfirmarReserva() {
     if (!reserva) return;
-    setChangingStatus(true);
+    setConfirming(true);
+    setActionError("");
     try {
-      await atualizarStatusReserva(reserva.id, status);
+      await confirmarReserva(reserva.id);
       await load();
+    } catch (error) {
+      setActionError(
+        getErrorMessage(error) || "Não foi possível confirmar a reserva.",
+      );
     } finally {
-      setChangingStatus(false);
+      setConfirming(false);
+    }
+  }
+
+  async function handleMarcarNoShow() {
+    if (!reserva) return;
+    setMarkingNoShow(true);
+    setActionError("");
+    try {
+      await marcarNoShowReserva(reserva.id);
+      await load();
+    } catch (error) {
+      setActionError(
+        getErrorMessage(error) || "Não foi possível marcar como no-show.",
+      );
+    } finally {
+      setMarkingNoShow(false);
     }
   }
 
   async function handleConfirmCancel() {
     if (!reserva) return;
     setCanceling(true);
+    setActionError("");
     try {
-      await cancelarReserva(reserva.id, reserva.codigo);
+      await cancelarReserva(reserva.id);
       setCancelOpen(false);
       await load();
+    } catch (error) {
+      setActionError(
+        getErrorMessage(error) || "Não foi possível cancelar a reserva.",
+      );
     } finally {
       setCanceling(false);
     }
@@ -132,6 +159,8 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
   const podeCancelar = !["cancelada", "checkout_realizado", "no_show"].includes(
     reserva.status,
   );
+  const podeConfirmar = reserva.status === "reservada";
+  const podeMarcarNoShow = ["reservada", "confirmada"].includes(reserva.status);
 
   return (
     <div className="space-y-6">
@@ -152,20 +181,16 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <select
-            className={selectClass}
-            value={reserva.status}
-            disabled={changingStatus}
-            onChange={(e) =>
-              handleStatusChange(e.target.value as ReservaDetalhada["status"])
-            }
-          >
-            {statusReservaOptions.map((status) => (
-              <option key={status} value={status}>
-                {statusReservaLabels[status]}
-              </option>
-            ))}
-          </select>
+          {podeConfirmar && (
+            <Button onClick={handleConfirmarReserva} disabled={confirming}>
+              {confirming ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="size-4" />
+              )}
+              Confirmar Reserva
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={() => setEditOpen(true)}
@@ -174,6 +199,21 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
             <Pencil className="size-4" />
             Editar
           </Button>
+          {podeMarcarNoShow && (
+            <Button
+              variant="outline"
+              onClick={handleMarcarNoShow}
+              disabled={markingNoShow}
+              className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
+            >
+              {markingNoShow ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <UserX className="size-4" />
+              )}
+              No-show
+            </Button>
+          )}
           {podeCancelar && (
             <Button
               onClick={() => setCancelOpen(true)}
@@ -185,6 +225,12 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
           )}
         </div>
       </div>
+
+      {actionError && (
+        <p className="rounded-xl bg-status-ocupado-light px-4 py-3 text-sm font-medium text-status-ocupado">
+          {actionError}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">

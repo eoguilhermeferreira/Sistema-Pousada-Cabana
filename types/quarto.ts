@@ -42,7 +42,7 @@ export const statusQuartoLabels: Record<StatusQuarto, string> = {
   disponivel: "Disponível",
   reservado: "Reservado",
   ocupado: "Ocupado",
-  limpeza: "Limpeza",
+  limpeza: "Aguardando Limpeza",
   manutencao: "Manutenção",
 };
 

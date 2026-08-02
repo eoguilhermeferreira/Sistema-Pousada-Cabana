@@ -13,7 +13,7 @@ export const statusCalendarioLabels: Record<StatusCalendario, string> = {
   checkin: "Check-in",
   checkout: "Check-out",
   ocupado: "Ocupado",
-  limpeza: "Limpeza",
+  limpeza: "Aguardando Limpeza",
   manutencao: "Manutenção",
 };
 

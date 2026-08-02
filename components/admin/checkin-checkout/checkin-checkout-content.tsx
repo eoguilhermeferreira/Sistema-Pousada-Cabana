@@ -16,6 +16,7 @@ import {
   realizarCheckout,
 } from "@/services/reservas-service";
 import { dateKey } from "@/lib/calendar-grid";
+import { getErrorMessage } from "@/lib/supabase-error";
 import type { ReservaComRelacoes } from "@/types/reserva";
 
 export function CheckinCheckoutContent() {
@@ -24,6 +25,7 @@ export function CheckinCheckoutContent() {
   const [search, setSearch] = React.useState("");
   const [operacao, setOperacao] = React.useState<Operacao | null>(null);
   const [processando, setProcessando] = React.useState(false);
+  const [erroOperacao, setErroOperacao] = React.useState("");
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -43,10 +45,13 @@ export function CheckinCheckoutContent() {
 
   const hoje = dateKey(new Date());
 
+  // Só reservas já confirmadas pela recepção podem receber check-in — uma
+  // reserva "reservada" (aguardando confirmação) precisa ser confirmada
+  // primeiro na tela de Reservas.
   const chegadas = React.useMemo(
     () =>
       reservas
-        .filter((r) => r.status === "reservada" || r.status === "confirmada")
+        .filter((r) => r.status === "confirmada")
         .sort((a, b) => a.data_entrada.localeCompare(b.data_entrada)),
     [reservas],
   );
@@ -83,19 +88,19 @@ export function CheckinCheckoutContent() {
   async function handleConfirmarOperacao() {
     if (!operacao) return;
     setProcessando(true);
+    setErroOperacao("");
     try {
-      const params = {
-        id: operacao.reserva.id,
-        quarto_id: operacao.reserva.quarto_id,
-        codigo: operacao.reserva.codigo,
-      };
       if (operacao.tipo === "checkin") {
-        await realizarCheckin(params);
+        await realizarCheckin(operacao.reserva.id);
       } else {
-        await realizarCheckout(params);
+        await realizarCheckout(operacao.reserva.id);
       }
       setOperacao(null);
       await load();
+    } catch (error) {
+      setErroOperacao(
+        getErrorMessage(error) || "Não foi possível concluir a operação.",
+      );
     } finally {
       setProcessando(false);
     }
@@ -178,7 +183,10 @@ export function CheckinCheckoutContent() {
                   reserva={reserva}
                   tipo="checkin"
                   referenceDate={hoje}
-                  onAcionar={() => setOperacao({ tipo: "checkin", reserva })}
+                  onAcionar={() => {
+                    setErroOperacao("");
+                    setOperacao({ tipo: "checkin", reserva });
+                  }}
                 />
               ))}
             </div>
@@ -207,7 +215,10 @@ export function CheckinCheckoutContent() {
                   reserva={reserva}
                   tipo="checkout"
                   referenceDate={hoje}
-                  onAcionar={() => setOperacao({ tipo: "checkout", reserva })}
+                  onAcionar={() => {
+                    setErroOperacao("");
+                    setOperacao({ tipo: "checkout", reserva });
+                  }}
                 />
               ))}
             </div>
@@ -218,6 +229,7 @@ export function CheckinCheckoutContent() {
       <ConfirmarOperacaoModal
         operacao={operacao}
         loading={processando}
+        error={erroOperacao}
         onOpenChange={(open) => !open && setOperacao(null)}
         onConfirm={handleConfirmarOperacao}
       />

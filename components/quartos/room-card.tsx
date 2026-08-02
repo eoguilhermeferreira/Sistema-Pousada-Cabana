@@ -20,27 +20,33 @@ const currency = new Intl.NumberFormat("pt-BR", {
 
 export function RoomCard({
   quarto,
-  guestsQueryString,
+  checkin = "",
+  checkout = "",
+  adultos: adultosProp,
+  criancasIdades = [],
   onReservar,
 }: {
   quarto: QuartoDetalhado;
-  guestsQueryString?: string;
+  checkin?: string;
+  checkout?: string;
+  adultos?: number;
+  criancasIdades?: number[];
   onReservar?: (quarto: QuartoDetalhado) => void;
 }) {
   const router = useRouter();
   const slug = quartoSlug(quarto.numero);
   const visibleAmenities = quarto.comodidades.slice(0, 4);
   const capa = quarto.fotos[0]?.url;
-  const href = `/quartos/${slug}${guestsQueryString ? `?${guestsQueryString}` : ""}`;
 
-  const params = new URLSearchParams(guestsQueryString ?? "");
-  const adultos = Math.max(1, Math.trunc(Number(params.get("adults"))) || 1);
-  const criancasIdades = (params.get("children") ?? "")
-    .split(",")
-    .map((value) => Number(value))
-    .filter((age) => Number.isFinite(age) && age >= 0);
-  const checkin = params.get("checkin") ?? "";
-  const checkout = params.get("checkout") ?? "";
+  const adultos = Math.max(1, adultosProp ?? 1);
+
+  const guestsQuery = new URLSearchParams();
+  guestsQuery.set("adults", String(adultos));
+  if (criancasIdades.length) guestsQuery.set("children", criancasIdades.join(","));
+  if (checkin) guestsQuery.set("checkin", checkin);
+  if (checkout) guestsQuery.set("checkout", checkout);
+  const href = `/quartos/${slug}?${guestsQuery.toString()}`;
+
   const noites = calcularNoites(checkin, checkout);
 
   const valores = calcularValores({

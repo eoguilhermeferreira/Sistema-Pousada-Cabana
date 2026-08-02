@@ -22,9 +22,6 @@ export default async function QuartosPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-  const guestsParam = firstParam(params.guests);
-  const initialGuests = Number(guestsParam) > 0 ? Number(guestsParam) : 1;
-
   const adultsParam = firstParam(params.adults);
   const childrenParam = firstParam(params.children);
   const checkinParam = firstParam(params.checkin);
@@ -73,11 +70,7 @@ export default async function QuartosPage({
           </p>
         </div>
       ) : (
-        <RoomsExplorer
-          quartos={quartos}
-          initialGuests={initialGuests}
-          guestsQueryString={guestsQueryString}
-        />
+        <RoomsExplorer quartos={quartos} guestsQueryString={guestsQueryString} />
       )}
     </div>
   );

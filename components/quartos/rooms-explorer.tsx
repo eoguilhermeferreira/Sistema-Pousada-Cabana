@@ -6,14 +6,13 @@ import type { Comodidade, QuartoDetalhado } from "@/types/quarto";
 import { RoomCard } from "@/components/quartos/room-card";
 import { RoomFilters, type RoomFiltersState } from "@/components/quartos/room-filters";
 import { ReservationModal } from "@/components/quartos/reservation-modal";
+import { createGuest, guestsFromParams, type Guest } from "@/lib/guest-composition";
 
 export function RoomsExplorer({
   quartos,
-  initialGuests,
   guestsQueryString,
 }: {
   quartos: QuartoDetalhado[];
-  initialGuests: number;
   guestsQueryString?: string;
 }) {
   const categorias = React.useMemo(() => {
@@ -43,32 +42,41 @@ export function RoomsExplorer({
     [quartos],
   );
 
+  const params = React.useMemo(
+    () => new URLSearchParams(guestsQueryString ?? ""),
+    [guestsQueryString],
+  );
+  const checkin = params.get("checkin") ?? "";
+  const checkout = params.get("checkout") ?? "";
+
   const [filters, setFilters] = React.useState<RoomFiltersState>({
     categoriaId: "",
     maxPrice: priceRange.max,
-    guests: initialGuests,
     comodidadeIds: [],
   });
 
-  const [reservando, setReservando] = React.useState<QuartoDetalhado | null>(null);
+  // Composição de hóspedes (adultos + crianças com idade) — a mesma usada
+  // na busca inicial do site, mas editável aqui também: mudar aqui atualiza
+  // o filtro de capacidade, o valor calculado e o resumo de cada quarto.
+  const [guests, setGuests] = React.useState<Guest[]>(() => {
+    const iniciais = guestsFromParams({
+      adults: params.get("adults"),
+      children: params.get("children"),
+    });
+    return iniciais.length > 0 ? iniciais : [createGuest("adulto")];
+  });
 
-  const initialDates = React.useMemo(() => {
-    const params = new URLSearchParams(guestsQueryString ?? "");
-    return {
-      dataEntrada: params.get("checkin") ?? "",
-      dataSaida: params.get("checkout") ?? "",
-      adultos: Number(params.get("adults")) || undefined,
-      criancasIdades: (params.get("children") ?? "")
-        .split(",")
-        .map((v) => Number(v))
-        .filter((v) => Number.isFinite(v) && v >= 0),
-    };
-  }, [guestsQueryString]);
+  const adultos = guests.filter((g) => g.type === "adulto").length;
+  const criancasIdades = guests
+    .filter((g) => g.type === "crianca")
+    .map((g) => g.age);
+
+  const [reservando, setReservando] = React.useState<QuartoDetalhado | null>(null);
 
   const filteredRooms = quartos.filter((quarto) => {
     if (filters.categoriaId && quarto.categoria.id !== filters.categoriaId) return false;
     if (quarto.valor_diaria > filters.maxPrice) return false;
-    if (quarto.capacidade_maxima < filters.guests) return false;
+    if (quarto.capacidade_maxima < guests.length) return false;
     if (
       !filters.comodidadeIds.every((id) =>
         quarto.comodidades.some((c) => c.id === id),
@@ -91,6 +99,8 @@ export function RoomsExplorer({
           priceRange={priceRange}
           state={filters}
           onChange={setFilters}
+          guests={guests}
+          onChangeGuests={setGuests}
         />
       </aside>
 
@@ -109,8 +119,8 @@ export function RoomsExplorer({
               Nenhum quarto encontrado
             </p>
             <p className="mt-2 max-w-sm text-sm text-gray-text">
-              Tente ajustar os filtros de categoria, preço ou comodidades para
-              ver mais opções.
+              Tente ajustar os filtros de categoria, preço, hóspedes ou comodidades
+              para ver mais opções.
             </p>
           </div>
         ) : (
@@ -119,7 +129,10 @@ export function RoomsExplorer({
               <RoomCard
                 key={quarto.id}
                 quarto={quarto}
-                guestsQueryString={guestsQueryString}
+                checkin={checkin}
+                checkout={checkout}
+                adultos={adultos}
+                criancasIdades={criancasIdades}
                 onReservar={setReservando}
               />
             ))}
@@ -132,10 +145,10 @@ export function RoomsExplorer({
           quarto={reservando}
           open={Boolean(reservando)}
           onOpenChange={(open) => !open && setReservando(null)}
-          initialDataEntrada={initialDates.dataEntrada}
-          initialDataSaida={initialDates.dataSaida}
-          initialAdultos={initialDates.adultos}
-          initialCriancasIdades={initialDates.criancasIdades}
+          initialDataEntrada={checkin}
+          initialDataSaida={checkout}
+          initialAdultos={adultos}
+          initialCriancasIdades={criancasIdades}
         />
       )}
     </div>

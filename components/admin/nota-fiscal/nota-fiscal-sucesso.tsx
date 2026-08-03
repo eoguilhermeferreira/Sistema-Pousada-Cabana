@@ -57,6 +57,9 @@ export function NotaFiscalSucesso({
           <div>
             <p className="text-xs text-gray-text">Tomador</p>
             <p className="font-medium text-primary-dark">{nota.tomador_nome}</p>
+            {nota.tomador_empresa && (
+              <p className="text-xs text-gray-text">{nota.tomador_empresa}</p>
+            )}
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-text">Valor final</p>

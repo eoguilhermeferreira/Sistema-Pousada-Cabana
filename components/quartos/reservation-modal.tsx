@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCpf, isValidCpf, onlyDigits } from "@/lib/cpf";
 import { formatPhone, isValidPhone } from "@/lib/phone";
+import { formatCep, isValidCep, fetchEnderecoPorCep } from "@/lib/cep";
 import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
 import { childrenPolicyRules } from "@/lib/children-policy";
 import { checkinCheckoutTexto } from "@/lib/checkin-checkout";
@@ -70,6 +71,15 @@ export function ReservationModal({
     criancasIdades.map(() => ""),
   );
   const [observacoes, setObservacoes] = React.useState("");
+  const [empresa, setEmpresa] = React.useState("");
+  const [cep, setCep] = React.useState("");
+  const [rua, setRua] = React.useState("");
+  const [numero, setNumero] = React.useState("");
+  const [complemento, setComplemento] = React.useState("");
+  const [bairro, setBairro] = React.useState("");
+  const [cidade, setCidade] = React.useState("");
+  const [estado, setEstado] = React.useState("");
+  const [buscandoCep, setBuscandoCep] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [saving, setSaving] = React.useState(false);
   const [apiError, setApiError] = React.useState("");
@@ -103,6 +113,14 @@ export function ReservationModal({
       setNomesAdultos(Array(Math.max(0, adultos - 1)).fill(""));
       setNomesCriancas(criancasIdades.map(() => ""));
       setObservacoes("");
+      setEmpresa("");
+      setCep("");
+      setRua("");
+      setNumero("");
+      setComplemento("");
+      setBairro("");
+      setCidade("");
+      setEstado("");
       setErrors({});
 
       getClienteAtual()
@@ -173,6 +191,25 @@ export function ReservationModal({
     }
   }
 
+  async function handleCepBlur() {
+    if (!isValidCep(cep)) return;
+    setBuscandoCep(true);
+    try {
+      const endereco = await fetchEnderecoPorCep(cep);
+      if (endereco) {
+        setRua((prev) => endereco.rua || prev);
+        setBairro((prev) => endereco.bairro || prev);
+        setCidade((prev) => endereco.cidade || prev);
+        setEstado((prev) => endereco.estado || prev);
+        setErrors((prev) => ({ ...prev, cep: "" }));
+      } else {
+        setErrors((prev) => ({ ...prev, cep: "CEP não encontrado." }));
+      }
+    } finally {
+      setBuscandoCep(false);
+    }
+  }
+
   function validateReserva(): Record<string, string> {
     const next: Record<string, string> = {};
     if (!dataEntrada || !dataSaida || noites <= 0) {
@@ -183,6 +220,8 @@ export function ReservationModal({
     if (excedeCapacidade) {
       next.hospedes = `Este quarto acomoda no máximo ${quarto.capacidade_maxima} hóspedes.`;
     }
+    if (!isValidCep(cep)) next.cep = "CEP inválido.";
+    if (!numero.trim()) next.numero = "Informe o número.";
     return next;
   }
 
@@ -205,6 +244,14 @@ export function ReservationModal({
           idade,
         })),
         observacoes: observacoes.trim() || undefined,
+        empresa: empresa.trim() || undefined,
+        cep: onlyDigits(cep) || undefined,
+        rua: rua.trim() || undefined,
+        numero: numero.trim() || undefined,
+        complemento: complemento.trim() || undefined,
+        bairro: bairro.trim() || undefined,
+        cidade: cidade.trim() || undefined,
+        estado: estado.trim() || undefined,
       });
       setResultado({ codigo: resposta.codigo, valorTotal: resposta.valor_total });
       setFase("sucesso");
@@ -466,6 +513,81 @@ export function ReservationModal({
                   <li key={rule}>{rule}</li>
                 ))}
               </ul>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs font-medium text-gray-text">Empresa e endereço</p>
+              <p className="text-xs text-gray-text">
+                Usados na nota fiscal, caso precise apresentar pra empresa depois.
+              </p>
+
+              <label className="block space-y-1.5 text-xs font-medium text-gray-text">
+                Empresa
+                <Input
+                  value={empresa}
+                  onChange={(e) => setEmpresa(e.target.value)}
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1.5 text-xs font-medium text-gray-text">
+                  CEP
+                  <Input
+                    value={cep}
+                    onChange={(e) => setCep(formatCep(e.target.value))}
+                    onBlur={handleCepBlur}
+                    placeholder="00000-000"
+                    inputMode="numeric"
+                  />
+                  {errors.cep && (
+                    <span className="block font-normal text-status-ocupado">{errors.cep}</span>
+                  )}
+                </label>
+                <label className="space-y-1.5 text-xs font-medium text-gray-text">
+                  Número
+                  <Input
+                    value={numero}
+                    onChange={(e) => setNumero(e.target.value)}
+                  />
+                  {errors.numero && (
+                    <span className="block font-normal text-status-ocupado">{errors.numero}</span>
+                  )}
+                </label>
+              </div>
+              {buscandoCep && (
+                <p className="text-xs text-gray-text">Buscando endereço pelo CEP...</p>
+              )}
+              <label className="block space-y-1.5 text-xs font-medium text-gray-text">
+                Rua
+                <Input value={rua} onChange={(e) => setRua(e.target.value)} />
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1.5 text-xs font-medium text-gray-text">
+                  Complemento
+                  <Input
+                    value={complemento}
+                    onChange={(e) => setComplemento(e.target.value)}
+                  />
+                </label>
+                <label className="space-y-1.5 text-xs font-medium text-gray-text">
+                  Bairro
+                  <Input value={bairro} onChange={(e) => setBairro(e.target.value)} />
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1.5 text-xs font-medium text-gray-text">
+                  Cidade
+                  <Input value={cidade} onChange={(e) => setCidade(e.target.value)} />
+                </label>
+                <label className="space-y-1.5 text-xs font-medium text-gray-text">
+                  Estado
+                  <Input
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value.toUpperCase())}
+                    maxLength={2}
+                  />
+                </label>
+              </div>
             </div>
 
             <label className="block space-y-1.5 text-xs font-medium text-gray-text">

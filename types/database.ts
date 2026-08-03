@@ -1977,11 +1977,19 @@ export type Database = {
       criar_reserva_cliente: {
         Args: {
           p_acompanhantes_adultos?: Json
+          p_bairro?: string
+          p_cep?: string
+          p_cidade?: string
+          p_complemento?: string
           p_criancas?: Json
           p_data_entrada: string
           p_data_saida: string
+          p_empresa?: string
+          p_estado?: string
+          p_numero?: string
           p_observacoes?: string
           p_quarto_id: string
+          p_rua?: string
         }
         Returns: {
           codigo: string

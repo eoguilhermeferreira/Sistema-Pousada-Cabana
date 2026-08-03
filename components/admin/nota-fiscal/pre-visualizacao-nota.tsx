@@ -4,8 +4,23 @@ import * as React from "react";
 import { ChevronDown, Eye } from "lucide-react";
 
 import { formatCpfCnpj } from "@/lib/cpf";
+import { formatCep } from "@/lib/cep";
 import { formatPhone } from "@/lib/phone";
 import { statusNotaLabels, type EmpresaConfiguracao, type NotaFiscalFormValues, type ProdutoNotaInput, type ResumoNotaFiscal, type StatusNota } from "@/types/nota-fiscal";
+
+function montarEnderecoTomador(form: NotaFiscalFormValues) {
+  const linha1 = [form.tomadorRua, form.tomadorNumero].filter(Boolean).join(", ");
+  const linha2 = [
+    form.tomadorBairro,
+    form.tomadorCidade && form.tomadorEstado
+      ? `${form.tomadorCidade}/${form.tomadorEstado}`
+      : form.tomadorCidade,
+  ]
+    .filter(Boolean)
+    .join(" — ");
+  const cep = form.tomadorCep ? `CEP ${formatCep(form.tomadorCep)}` : "";
+  return [linha1, form.tomadorComplemento, linha2, cep].filter(Boolean).join(" · ");
+}
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -69,6 +84,15 @@ export function PreVisualizacaoNota({
                 {form.tomadorDocumento ? formatCpfCnpj(form.tomadorDocumento) : "—"}
                 {form.tomadorTelefone ? ` · ${formatPhone(form.tomadorTelefone)}` : ""}
               </p>
+              {form.tomadorEmpresa && (
+                <p className="text-xs text-gray-text">{form.tomadorEmpresa}</p>
+              )}
+              {form.tomadorEmail && (
+                <p className="text-xs text-gray-text">{form.tomadorEmail}</p>
+              )}
+              {montarEnderecoTomador(form) && (
+                <p className="text-xs text-gray-text">{montarEnderecoTomador(form)}</p>
+              )}
             </div>
 
             <div>

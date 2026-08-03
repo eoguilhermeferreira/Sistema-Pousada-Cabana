@@ -129,6 +129,16 @@ export interface CriarReservaClienteParams {
   acompanhantesAdultos: AcompanhanteAdulto[];
   criancas: CriancaReserva[];
   observacoes?: string;
+  /** Dados adicionais do hóspede — pedidos na hora da reserva pra já
+   * alimentar a Nota Fiscal depois (empresa é o único opcional). */
+  empresa?: string;
+  cep?: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
 }
 
 export interface ReservaClienteResultado {
@@ -153,6 +163,14 @@ export async function criarReservaCliente(
       idade: c.idade,
     })),
     p_observacoes: params.observacoes,
+    p_empresa: params.empresa,
+    p_cep: params.cep,
+    p_rua: params.rua,
+    p_numero: params.numero,
+    p_complemento: params.complemento,
+    p_bairro: params.bairro,
+    p_cidade: params.cidade,
+    p_estado: params.estado,
   });
   if (error) throw error;
 

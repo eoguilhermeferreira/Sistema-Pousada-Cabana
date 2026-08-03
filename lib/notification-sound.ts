@@ -30,6 +30,19 @@ function tone(
   oscillator.stop(startTime + duration);
 }
 
+/** Navegadores só deixam áudio tocar depois de uma interação real do
+ * usuário (clique/tecla) — como o som da notificação é disparado por um
+ * evento do Realtime (não por um clique), o AudioContext fica "suspended"
+ * pra sempre e o som nunca toca. Chame isso uma vez em resposta a
+ * qualquer clique/tecla da página pra "destravar" o áudio com antecedência. */
+export function unlockAudioContext() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {});
+  }
+}
+
 /** Toca um "ding-dong" curto pra chamar a atenção da recepção — gerado na
  * hora pela Web Audio API, sem depender de nenhum arquivo de áudio. */
 export function playNotificationSound() {

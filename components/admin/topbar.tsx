@@ -53,7 +53,7 @@ function initials(nome: string) {
 export function Topbar({ usuario }: { usuario: Usuario }) {
   const router = useRouter();
   const now = useCurrentTime();
-  const { notificacoes } = useNotificacoes();
+  const { notificacoes, notificacoesNaoVistas, marcarTodasComoVistas } = useNotificacoes();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
   const [signingOut, setSigningOut] = React.useState(false);
@@ -110,11 +110,17 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
           <button
             type="button"
             aria-label="Notificações"
-            onClick={() => setNotifOpen((open) => !open)}
+            onClick={() =>
+              setNotifOpen((open) => {
+                const next = !open;
+                if (next) marcarTodasComoVistas();
+                return next;
+              })
+            }
             className="relative flex size-10 items-center justify-center rounded-full text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark"
           >
             <Bell className="size-5" strokeWidth={1.75} />
-            {notificacoes.length > 0 && (
+            {notificacoesNaoVistas.length > 0 && (
               <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-status-ocupado" />
             )}
           </button>

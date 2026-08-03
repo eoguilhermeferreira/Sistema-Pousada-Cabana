@@ -20,12 +20,12 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const usuarioAtual = useUsuarioAtual();
-  const { notificacoes } = useNotificacoes();
+  const { notificacoesNaoVistas } = useNotificacoes();
   const navItems = adminNavItems.filter((item) =>
     podeAcessarRota(usuarioAtual.cargo, item.href),
   );
   const hrefsComPendencia = new Set(
-    notificacoes.map((notificacao) => notificacao.href).filter(Boolean),
+    notificacoesNaoVistas.map((notificacao) => notificacao.href).filter(Boolean),
   );
 
   return (

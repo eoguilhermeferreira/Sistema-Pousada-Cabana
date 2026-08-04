@@ -2,7 +2,7 @@ import { Radio } from "lucide-react";
 
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import type { Funcionario } from "@/types/funcionario";
-import type { Ponto } from "@/types/ponto";
+import { formatarDuracao, type Ponto } from "@/types/ponto";
 
 const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
   hour: "2-digit",
@@ -20,7 +20,7 @@ function statusPresenca(ultimoPonto: Ponto | undefined): StatusPresenca {
   }
   const horario = timeFormatter.format(new Date(ultimoPonto.registrado_em));
   const atraso = ultimoPonto.atrasado
-    ? ` · atraso de ${ultimoPonto.minutos_diferenca} min`
+    ? ` · atraso de ${formatarDuracao(ultimoPonto.minutos_diferenca ?? 0)}`
     : "";
   switch (ultimoPonto.tipo) {
     case "entrada":

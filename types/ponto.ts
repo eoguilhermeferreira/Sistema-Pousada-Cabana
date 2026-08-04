@@ -15,6 +15,17 @@ export const tipoPontoLabels: Record<TipoPonto, string> = {
  * (minutos_diferenca/atrasado) já vem pronto do banco. */
 export const TOLERANCIA_ATRASO_MINUTOS = 5;
 
+/** "1325 min" não significa nada pra ninguém — a partir de 1h mostra em
+ * horas (e minutos, se sobrar resto), só fica em minutos puros pra
+ * diferenças pequenas. */
+export function formatarDuracao(minutosAbs: number): string {
+  if (minutosAbs < 60) return `${minutosAbs} min`;
+  const horas = Math.floor(minutosAbs / 60);
+  const minutosRestantes = minutosAbs % 60;
+  const rotuloHoras = `${horas}h`;
+  return minutosRestantes === 0 ? rotuloHoras : `${rotuloHoras}${minutosRestantes}min`;
+}
+
 export interface StatusPontoInfo {
   /** "atraso" (entrada/retorno do almoço fora da tolerância — o patrão
    * precisa saber), "informativo" (saiu antes/depois do horário, sem ser
@@ -38,16 +49,19 @@ export function formatarStatusPonto(ponto: Ponto): StatusPontoInfo | null {
     if (ponto.atrasado) {
       const rotulo =
         ponto.tipo === "entrada" ? "Atraso" : "Atraso no retorno do almoço";
-      return { tom: "atraso", mensagem: `${rotulo} de ${diferenca} min` };
+      return { tom: "atraso", mensagem: `${rotulo} de ${formatarDuracao(diferenca)}` };
     }
     if (diferenca > 0) {
       return {
         tom: "neutro",
-        mensagem: `${diferenca} min após o horário (dentro da tolerância)`,
+        mensagem: `${formatarDuracao(diferenca)} após o horário (dentro da tolerância)`,
       };
     }
     if (diferenca < 0) {
-      return { tom: "neutro", mensagem: `${Math.abs(diferenca)} min adiantado` };
+      return {
+        tom: "neutro",
+        mensagem: `${formatarDuracao(Math.abs(diferenca))} adiantado`,
+      };
     }
     return { tom: "neutro", mensagem: "No horário" };
   }
@@ -56,12 +70,15 @@ export function formatarStatusPonto(ponto: Ponto): StatusPontoInfo | null {
   // diferença para o patrão acompanhar.
   const rotulo = ponto.tipo === "saida_almoco" ? "Saiu para o almoço" : "Saiu";
   if (diferenca > TOLERANCIA_ATRASO_MINUTOS) {
-    return { tom: "informativo", mensagem: `${rotulo} ${diferenca} min depois do horário` };
+    return {
+      tom: "informativo",
+      mensagem: `${rotulo} ${formatarDuracao(diferenca)} depois do horário`,
+    };
   }
   if (diferenca < -TOLERANCIA_ATRASO_MINUTOS) {
     return {
       tom: "informativo",
-      mensagem: `${rotulo} ${Math.abs(diferenca)} min antes do horário`,
+      mensagem: `${rotulo} ${formatarDuracao(Math.abs(diferenca))} antes do horário`,
     };
   }
   return { tom: "neutro", mensagem: "No horário" };

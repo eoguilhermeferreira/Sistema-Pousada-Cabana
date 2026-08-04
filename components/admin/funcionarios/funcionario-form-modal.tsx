@@ -126,6 +126,12 @@ export function FuncionarioFormModal({
     });
   }
 
+  // Duração do almoço fica guardada em minutos no banco, mas ninguém
+  // pensa em minutos totais ("90 min") — mostra em horas + minutos.
+  const duracaoAlmocoTotal = Number(values.duracao_almoco_minutos) || 0;
+  const horasAlmoco = Math.floor(duracaoAlmocoTotal / 60);
+  const minutosAlmoco = duracaoAlmocoTotal % 60;
+
   function handleFotoClick() {
     fileInputRef.current?.click();
   }
@@ -590,19 +596,42 @@ export function FuncionarioFormModal({
                     />
                   </Field>
                   <Field
-                    label="Duração do almoço (min)"
+                    label="Duração do almoço"
                     error={errors.duracao_almoco_minutos}
                   >
-                    <Input
-                      type="number"
-                      min={0}
-                      step={5}
-                      value={values.duracao_almoco_minutos}
-                      onChange={(e) =>
-                        setField("duracao_almoco_minutos", e.target.value)
-                      }
-                      placeholder="Ex.: 90 = 1h30"
-                    />
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        type="number"
+                        min={0}
+                        value={horasAlmoco || ""}
+                        onChange={(e) => {
+                          const horas = Number(e.target.value) || 0;
+                          setField(
+                            "duracao_almoco_minutos",
+                            String(horas * 60 + minutosAlmoco),
+                          );
+                        }}
+                        placeholder="0"
+                        className="w-16"
+                      />
+                      <span className="text-xs text-gray-text">h</span>
+                      <select
+                        className={selectClass}
+                        value={minutosAlmoco}
+                        onChange={(e) => {
+                          const minutos = Number(e.target.value);
+                          setField(
+                            "duracao_almoco_minutos",
+                            String(horasAlmoco * 60 + minutos),
+                          );
+                        }}
+                      >
+                        <option value={0}>00 min</option>
+                        <option value={15}>15 min</option>
+                        <option value={30}>30 min</option>
+                        <option value={45}>45 min</option>
+                      </select>
+                    </div>
                   </Field>
                   <Field label="Saída" error={errors.horario_saida}>
                     <Input

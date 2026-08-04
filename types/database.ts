@@ -280,6 +280,48 @@ export type Database = {
           },
         ]
       }
+      chatbot_mensagens: {
+        Row: {
+          conteudo: string
+          conversa_id: string
+          created_at: string
+          enviada_por: string | null
+          id: string
+          remetente: string
+        }
+        Insert: {
+          conteudo: string
+          conversa_id: string
+          created_at?: string
+          enviada_por?: string | null
+          id?: string
+          remetente: string
+        }
+        Update: {
+          conteudo?: string
+          conversa_id?: string
+          created_at?: string
+          enviada_por?: string | null
+          id?: string
+          remetente?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_mensagens_conversa_id_fkey"
+            columns: ["conversa_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_conversas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chatbot_mensagens_enviada_por_fkey"
+            columns: ["enviada_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clientes: {
         Row: {
           cpf: string

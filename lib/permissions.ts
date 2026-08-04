@@ -58,6 +58,7 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
       "/admin/estoque",
       "/admin/caixa",
       "/admin/nota-fiscal",
+      "/admin/chatbot",
       "/admin/funcionarios",
       "/admin/bater-ponto",
       "/admin/relatorios",

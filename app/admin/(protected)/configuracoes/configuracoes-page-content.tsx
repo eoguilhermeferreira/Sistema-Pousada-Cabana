@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import {
   Bell,
   Building2,
@@ -34,6 +35,11 @@ const abas = [
 ] as const;
 
 export function ConfiguracoesPageContent() {
+  const searchParams = useSearchParams();
+  const abaInicial = abas.some((aba) => aba.value === searchParams.get("aba"))
+    ? (searchParams.get("aba") as (typeof abas)[number]["value"])
+    : "pousada";
+
   return (
     <div className="space-y-6">
       <div>
@@ -45,7 +51,7 @@ export function ConfiguracoesPageContent() {
 
       <CardSistemaInfo />
 
-      <Tabs defaultValue="pousada">
+      <Tabs defaultValue={abaInicial}>
         <div className="rounded-2xl border border-gray-light bg-white shadow-sm">
           <TabsList>
             {abas.map((aba) => (

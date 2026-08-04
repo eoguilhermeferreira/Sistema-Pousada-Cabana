@@ -19,6 +19,7 @@ import { listCategorias } from "@/services/quartos-service";
 import { createClient } from "@/lib/supabase/client";
 import { dateKey } from "@/lib/calendar-grid";
 import { getErrorMessage } from "@/lib/supabase-error";
+import { enviarConfirmacaoWhatsapp } from "@/lib/whatsapp-confirmacao";
 import { emptyFiltrosReservas, type FiltrosReservas, type ReservaComRelacoes, type ReservaDetalhada } from "@/types/reserva";
 import type { CategoriaQuarto } from "@/types/quarto";
 
@@ -162,6 +163,7 @@ export function ReservasPageContent() {
     try {
       await confirmarReserva(reserva.id);
       await recarregarSilencioso();
+      void enviarConfirmacaoWhatsapp(reserva);
     } catch (error) {
       setConfirmError(
         getErrorMessage(error) || "Não foi possível confirmar a reserva.",

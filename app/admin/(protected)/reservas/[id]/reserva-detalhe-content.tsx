@@ -24,6 +24,7 @@ import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { formatCpf } from "@/lib/cpf";
 import { formatPhone } from "@/lib/phone";
 import { getErrorMessage } from "@/lib/supabase-error";
+import { enviarConfirmacaoWhatsapp } from "@/lib/whatsapp-confirmacao";
 import {
   cancelarReserva,
   confirmarReserva,
@@ -93,6 +94,7 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
     try {
       await confirmarReserva(reserva.id);
       await load();
+      void enviarConfirmacaoWhatsapp(reserva);
     } catch (error) {
       setActionError(
         getErrorMessage(error) || "Não foi possível confirmar a reserva.",

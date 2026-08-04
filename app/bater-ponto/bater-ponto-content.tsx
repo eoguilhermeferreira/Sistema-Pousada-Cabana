@@ -6,19 +6,13 @@ import { AlertTriangle, CheckCircle2, Fingerprint, X } from "lucide-react";
 
 import { FaceCamera } from "@/components/facial/face-camera";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
+import { distanciaDescritores } from "@/lib/face-recognition";
 import {
-  melhorCandidato,
-  reconhecerRosto,
-  type CandidatoReconhecimento,
-  type ResultadoReconhecimento,
-} from "@/lib/face-recognition";
-import {
-  getDadosReconhecimentoFacial,
-  registrarPontoFacial,
+  reconhecerERegistrarPonto,
+  type ResultadoReconhecimentoServidor,
 } from "@/services/pontos-service";
 import { formatarStatusPonto, tipoPontoLabels, type TipoPonto } from "@/types/ponto";
-import type { Ponto } from "@/types/ponto";
-import { cargoLabels, type CargoUsuario } from "@/types/usuario";
+import { cargoLabels } from "@/types/usuario";
 
 const CAPTURAS_PARA_CONFIRMAR = 5;
 const TIMEOUT_ESCANEAMENTO_MS = 20_000;
@@ -62,24 +56,28 @@ function saudacao(data: Date) {
 
 type Estado = "inicial" | "escaneando" | "sucesso" | "erro";
 
+/** Distância máxima entre descritores de frames consecutivos pra considerar
+ * o rosto "parado" na câmera — bem mais apertada que um limiar de
+ * identidade, já que é só uma checagem de estabilidade (evita mandar pro
+ * servidor um frame borrado, no meio de um movimento). A identificação em
+ * si (comparar contra os funcionários cadastrados) acontece inteira no
+ * servidor — o cliente nunca mais recebe a lista de descritores. */
+const LIMIAR_ESTABILIDADE = 0.08;
+
 export function BaterPontoContent() {
   const [estado, setEstado] = React.useState<Estado>("inicial");
   const [agora, setAgora] = React.useState(new Date());
-  const [candidatos, setCandidatos] = React.useState<
-    CandidatoReconhecimento[]
-  >([]);
-  const [resultado, setResultado] = React.useState<ResultadoReconhecimento | null>(
-    null,
-  );
-  const [ponto, setPonto] = React.useState<Ponto | null>(null);
+  const [resultado, setResultado] =
+    React.useState<ResultadoReconhecimentoServidor | null>(null);
   const [erro, setErro] = React.useState("");
   const [erroFalha, setErroFalha] = React.useState("");
-  /** Aproximação do candidato mais próximo (0-100), mostrada durante o
-   * escaneamento para ajudar a diagnosticar reconhecimento "quase lá"
-   * (iluminação, ângulo) sem precisar mexer no código. */
-  const [aproximacao, setAproximacao] = React.useState(0);
+  /** Quantos frames seguidos com o rosto parado já foram capturados —
+   * mostrado como progresso enquanto aguarda estabilizar pra enviar ao
+   * servidor. */
+  const [capturasEstaveis, setCapturasEstaveis] = React.useState(0);
 
-  const matchRef = React.useRef<{ id: string; contagem: number } | null>(null);
+  const ultimoDescritorRef = React.useRef<number[] | null>(null);
+  const contagemEstavelRef = React.useRef(0);
   const processandoRef = React.useRef(false);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const successTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
@@ -101,88 +99,71 @@ export function BaterPontoContent() {
   function resetar() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
-    matchRef.current = null;
+    ultimoDescritorRef.current = null;
+    contagemEstavelRef.current = 0;
     processandoRef.current = false;
     setResultado(null);
-    setPonto(null);
     setErroFalha("");
-    setAproximacao(0);
+    setCapturasEstaveis(0);
     setEstado("inicial");
   }
 
   function mostrarErro(mensagem: string) {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    matchRef.current = null;
+    ultimoDescritorRef.current = null;
+    contagemEstavelRef.current = 0;
     processandoRef.current = false;
     setErroFalha(mensagem);
     setEstado("erro");
     successTimeoutRef.current = setTimeout(resetar, AUTO_RETORNO_MS);
   }
 
-  async function iniciarEscaneamento() {
+  function iniciarEscaneamento() {
     setErro("");
-    try {
-      const dados = await getDadosReconhecimentoFacial();
-      if (dados.length === 0) {
-        setErro(
-          "Nenhum funcionário com reconhecimento facial cadastrado ainda.",
-        );
-        return;
-      }
-      setCandidatos(dados);
-      matchRef.current = null;
-      processandoRef.current = false;
-      setEstado("escaneando");
+    ultimoDescritorRef.current = null;
+    contagemEstavelRef.current = 0;
+    processandoRef.current = false;
+    setCapturasEstaveis(0);
+    setEstado("escaneando");
 
-      timeoutRef.current = setTimeout(() => {
-        if (!processandoRef.current) {
-          mostrarErro("Rosto não reconhecido. Tente novamente.");
-        }
-      }, TIMEOUT_ESCANEAMENTO_MS);
-    } catch {
-      setErro("Não foi possível carregar os dados de reconhecimento facial.");
-    }
+    timeoutRef.current = setTimeout(() => {
+      if (!processandoRef.current) {
+        mostrarErro("Rosto não reconhecido. Tente novamente.");
+      }
+    }, TIMEOUT_ESCANEAMENTO_MS);
   }
 
   async function handleFrame(descritor: number[] | null) {
     if (processandoRef.current) return;
     if (!descritor) {
-      matchRef.current = null;
-      setAproximacao(0);
+      ultimoDescritorRef.current = null;
+      contagemEstavelRef.current = 0;
+      setCapturasEstaveis(0);
       return;
     }
 
-    const proximo = melhorCandidato(descritor, candidatos);
-    setAproximacao(proximo ? Math.round(proximo.confianca * 100) : 0);
+    const anterior = ultimoDescritorRef.current;
+    ultimoDescritorRef.current = descritor;
 
-    const match = reconhecerRosto(descritor, candidatos);
-    if (!match) {
-      matchRef.current = null;
-      return;
-    }
-
-    if (matchRef.current?.id === match.funcionarioId) {
-      matchRef.current.contagem += 1;
+    if (anterior && distanciaDescritores(descritor, anterior) <= LIMIAR_ESTABILIDADE) {
+      contagemEstavelRef.current += 1;
     } else {
-      matchRef.current = { id: match.funcionarioId, contagem: 1 };
+      contagemEstavelRef.current = 1;
     }
+    setCapturasEstaveis(Math.min(CAPTURAS_PARA_CONFIRMAR, contagemEstavelRef.current));
 
-    if (matchRef.current.contagem >= CAPTURAS_PARA_CONFIRMAR) {
+    if (contagemEstavelRef.current >= CAPTURAS_PARA_CONFIRMAR) {
       processandoRef.current = true;
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      await confirmarPonto(match);
+      await confirmarPonto(descritor);
     }
   }
 
-  async function confirmarPonto(match: ResultadoReconhecimento) {
+  async function confirmarPonto(descritor: number[]) {
     try {
-      const pontoRegistrado = await registrarPontoFacial(
-        match.funcionarioId,
-        match.confianca,
-      );
+      const resultadoServidor = await reconhecerERegistrarPonto(descritor);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      setResultado(match);
-      setPonto(pontoRegistrado);
+      setResultado(resultadoServidor);
       setEstado("sucesso");
       successTimeoutRef.current = setTimeout(resetar, AUTO_RETORNO_MS);
     } catch (err) {
@@ -242,12 +223,13 @@ export function BaterPontoContent() {
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/15">
               <div
                 className="h-full rounded-full bg-status-disponivel transition-all duration-150"
-                style={{ width: `${Math.min(100, aproximacao)}%` }}
+                style={{
+                  width: `${(capturasEstaveis / CAPTURAS_PARA_CONFIRMAR) * 100}%`,
+                }}
               />
             </div>
             <p className="text-xs text-white/60">
-              Aproximação: {aproximacao}% — aproxime o rosto e melhore a luz se
-              estiver baixo
+              Mantenha o rosto parado — melhore a luz se estiver baixo
             </p>
           </div>
 
@@ -262,7 +244,7 @@ export function BaterPontoContent() {
         </div>
       )}
 
-      {estado === "sucesso" && resultado && ponto && (
+      {estado === "sucesso" && resultado && (
         <div className="flex w-full max-w-sm animate-in fade-in zoom-in-95 flex-col items-center gap-4 text-center duration-300">
           <span className="flex size-16 animate-in zoom-in-50 items-center justify-center rounded-full bg-status-disponivel-light text-status-disponivel duration-500">
             <CheckCircle2 className="size-9" />
@@ -280,23 +262,26 @@ export function BaterPontoContent() {
 
           <div>
             <p className="font-display text-2xl font-semibold">
-              {saudacao(new Date(ponto.registrado_em))}, {primeiroNome(resultado.nome)}!
+              {saudacao(new Date(resultado.registradoEm))}, {primeiroNome(resultado.nome)}!
             </p>
             <p className="mt-1 text-sm text-white/70">
-              {cargoLabels[resultado.cargo as CargoUsuario] ?? resultado.cargo}
+              {cargoLabels[resultado.cargo] ?? resultado.cargo}
             </p>
           </div>
 
           <p className="text-base text-white/90">
-            {tipoPontoMensagem[ponto.tipo as TipoPonto] ??
-              tipoPontoLabels[ponto.tipo as keyof typeof tipoPontoLabels]}{" "}
+            {tipoPontoMensagem[resultado.tipo] ?? tipoPontoLabels[resultado.tipo]}{" "}
             <span className="font-semibold tabular-nums">
-              {horaMinutoFormatter.format(new Date(ponto.registrado_em))}.
+              {horaMinutoFormatter.format(new Date(resultado.registradoEm))}.
             </span>
           </p>
 
           {(() => {
-            const status = formatarStatusPonto(ponto);
+            const status = formatarStatusPonto({
+              tipo: resultado.tipo,
+              atrasado: resultado.atrasado,
+              minutos_diferenca: resultado.minutosDiferenca,
+            });
             if (!status) return null;
             return (
               <p

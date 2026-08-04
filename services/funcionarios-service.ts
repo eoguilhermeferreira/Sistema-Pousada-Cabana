@@ -7,27 +7,30 @@ import type {
   FuncionarioUpdate,
 } from "@/types/funcionario";
 
+// Lê da view funcionarios_visivel (não da tabela) — ela zera o salário pra
+// quem não tem permissão de ver (recepção/limpeza), reforçando no banco a
+// mesma regra que já existia só na interface (podeVerSalario).
 export async function listFuncionarios(): Promise<Funcionario[]> {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from("funcionarios")
+    .from("funcionarios_visivel")
     .select("*")
     .order("nome", { ascending: true });
 
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as Funcionario[];
 }
 
 export async function getFuncionarioById(id: string): Promise<Funcionario> {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from("funcionarios")
+    .from("funcionarios_visivel")
     .select("*")
     .eq("id", id)
     .single();
 
   if (error) throw error;
-  return data;
+  return data as Funcionario;
 }
 
 export async function cpfExists(cpf: string, excludeId?: string) {

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
-import type { CandidatoReconhecimento } from "@/lib/face-recognition";
 import type { Ponto, PontoComFuncionario, TipoPonto } from "@/types/ponto";
+import type { CargoUsuario } from "@/types/usuario";
 
 export async function listPontosPorFuncionario(
   funcionarioId: string,
@@ -58,24 +58,16 @@ export async function listUltimoPontoPorFuncionario(): Promise<
   return ultimos;
 }
 
-/** Dados públicos (sem CPF/salário/endereço) para o reconhecimento facial no
- * kiosk — funciona tanto deslogado (anon) quanto logado. */
-export async function getDadosReconhecimentoFacial(): Promise<
-  CandidatoReconhecimento[]
-> {
-  const supabase = createClient();
-  const { data, error } = await supabase.rpc(
-    "listar_dados_reconhecimento_facial",
-  );
-  if (error) throw error;
-
-  return (data ?? []).map((linha) => ({
-    funcionarioId: linha.funcionario_id,
-    nome: linha.nome,
-    cargo: linha.cargo,
-    fotoUrl: linha.foto_url,
-    descritor: linha.descritor as unknown as number[],
-  }));
+export interface ResultadoReconhecimentoServidor {
+  pontoId: string;
+  funcionarioId: string;
+  nome: string;
+  cargo: CargoUsuario;
+  fotoUrl: string | null;
+  tipo: TipoPonto;
+  registradoEm: string;
+  minutosDiferenca: number | null;
+  atrasado: boolean;
 }
 
 /** Corrige um ponto já registrado — permitido apenas a administrador/gerente
@@ -125,16 +117,30 @@ export async function excluirPonto(id: string) {
   if (error) throw error;
 }
 
-export async function registrarPontoFacial(
-  funcionarioId: string,
-  confianca: number,
-): Promise<Ponto> {
+/** Envia o descritor capturado ao vivo pro banco, que faz a comparação
+ * contra os templates cadastrados e registra o ponto — a comparação
+ * biométrica roda inteira no servidor (nunca mais expõe os descritores
+ * brutos ao cliente, nem confia numa "confiança" enviada pelo cliente). */
+export async function reconhecerERegistrarPonto(
+  descritor: number[],
+): Promise<ResultadoReconhecimentoServidor> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc("registrar_ponto_facial", {
-    p_funcionario_id: funcionarioId,
-    p_confianca: confianca,
+  const { data, error } = await supabase.rpc("reconhecer_e_registrar_ponto", {
+    p_descritor: descritor,
   });
   if (error) throw error;
-  if (!data) throw new Error("Não foi possível registrar o ponto.");
-  return data;
+  const linha = data?.[0];
+  if (!linha) throw new Error("Rosto não reconhecido.");
+
+  return {
+    pontoId: linha.ponto_id,
+    funcionarioId: linha.funcionario_id,
+    nome: linha.nome,
+    cargo: linha.cargo,
+    fotoUrl: linha.foto_url,
+    tipo: linha.tipo as TipoPonto,
+    registradoEm: linha.registrado_em,
+    minutosDiferenca: linha.minutos_diferenca,
+    atrasado: linha.atrasado,
+  };
 }

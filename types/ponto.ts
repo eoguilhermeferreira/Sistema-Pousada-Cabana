@@ -38,7 +38,9 @@ export interface StatusPontoInfo {
  * partir dos horários cadastrados do funcionário) numa mensagem para o
  * usuário. Retorna null quando o funcionário não tem horário cadastrado
  * para aquele tipo de ponto. */
-export function formatarStatusPonto(ponto: Ponto): StatusPontoInfo | null {
+export function formatarStatusPonto(
+  ponto: Pick<Ponto, "tipo" | "atrasado" | "minutos_diferenca">,
+): StatusPontoInfo | null {
   const diferenca = ponto.minutos_diferenca;
   if (diferenca === null || diferenca === undefined) return null;
 

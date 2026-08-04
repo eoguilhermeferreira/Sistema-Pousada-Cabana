@@ -606,6 +606,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "funcionario_historico_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios_visivel"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "funcionario_historico_usuario_id_fkey"
             columns: ["usuario_id"]
             isOneToOne: false
@@ -642,6 +649,13 @@ export type Database = {
             columns: ["funcionario_id"]
             isOneToOne: false
             referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_templates_faciais_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios_visivel"
             referencedColumns: ["id"]
           },
         ]
@@ -1234,6 +1248,13 @@ export type Database = {
             columns: ["funcionario_id"]
             isOneToOne: false
             referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pontos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios_visivel"
             referencedColumns: ["id"]
           },
           {
@@ -1963,7 +1984,107 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      funcionarios_visivel: {
+        Row: {
+          bairro: string | null
+          cargo: Database["public"]["Enums"]["cargo_usuario"] | null
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
+          cpf: string | null
+          created_at: string | null
+          data_admissao: string | null
+          data_nascimento: string | null
+          duracao_almoco_minutos: number | null
+          email: string | null
+          estado: string | null
+          foto_url: string | null
+          horario_entrada: string | null
+          horario_saida: string | null
+          horario_saida_almoco: string | null
+          id: string | null
+          nome: string | null
+          numero: string | null
+          observacoes: string | null
+          rg: string | null
+          rua: string | null
+          salario: number | null
+          status: string | null
+          telefone: string | null
+          turno: string | null
+          updated_at: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          cargo?: Database["public"]["Enums"]["cargo_usuario"] | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          data_admissao?: string | null
+          data_nascimento?: string | null
+          duracao_almoco_minutos?: number | null
+          email?: string | null
+          estado?: string | null
+          foto_url?: string | null
+          horario_entrada?: string | null
+          horario_saida?: string | null
+          horario_saida_almoco?: string | null
+          id?: string | null
+          nome?: string | null
+          numero?: string | null
+          observacoes?: string | null
+          rg?: string | null
+          rua?: string | null
+          salario?: never
+          status?: string | null
+          telefone?: string | null
+          turno?: string | null
+          updated_at?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          cargo?: Database["public"]["Enums"]["cargo_usuario"] | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          data_admissao?: string | null
+          data_nascimento?: string | null
+          duracao_almoco_minutos?: number | null
+          email?: string | null
+          estado?: string | null
+          foto_url?: string | null
+          horario_entrada?: string | null
+          horario_saida?: string | null
+          horario_saida_almoco?: string | null
+          id?: string | null
+          nome?: string | null
+          numero?: string | null
+          observacoes?: string | null
+          rg?: string | null
+          rua?: string | null
+          salario?: never
+          status?: string | null
+          telefone?: string | null
+          turno?: string | null
+          updated_at?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionarios_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       abrir_caixa: {
@@ -2039,25 +2160,6 @@ export type Database = {
           valor_total: number
         }[]
       }
-      criar_reserva_site: {
-        Args: {
-          p_cpf: string
-          p_criancas?: Json
-          p_data_entrada: string
-          p_data_saida: string
-          p_email: string
-          p_nome: string
-          p_observacoes?: string
-          p_quantidade_adultos: number
-          p_quarto_id: string
-          p_telefone: string
-        }
-        Returns: {
-          codigo: string
-          id: string
-          valor_total: number
-        }[]
-      }
       criar_usuario_admin: {
         Args: {
           p_cargo: Database["public"]["Enums"]["cargo_usuario"]
@@ -2090,6 +2192,10 @@ export type Database = {
       current_cargo: {
         Args: never
         Returns: Database["public"]["Enums"]["cargo_usuario"]
+      }
+      distancia_descritores_jsonb: {
+        Args: { a: Json; b: Json }
+        Returns: number
       }
       excluir_usuario_admin: {
         Args: { p_usuario_id: string }
@@ -2178,6 +2284,20 @@ export type Database = {
       marcar_no_show_reserva: {
         Args: { p_reserva_id: string }
         Returns: undefined
+      }
+      reconhecer_e_registrar_ponto: {
+        Args: { p_descritor: Json }
+        Returns: {
+          atrasado: boolean
+          cargo: Database["public"]["Enums"]["cargo_usuario"]
+          foto_url: string
+          funcionario_id: string
+          minutos_diferenca: number
+          nome: string
+          ponto_id: string
+          registrado_em: string
+          tipo: string
+        }[]
       }
       redefinir_senha_usuario: {
         Args: { p_nova_senha: string; p_usuario_id: string }

@@ -14,6 +14,7 @@ export function RoomReserveButton({ quarto }: { quarto: QuartoDetalhado }) {
   const adults = Math.max(0, Math.trunc(Number(searchParams.get("adults"))) || 0);
   const childrenAges = (searchParams.get("children") ?? "")
     .split(",")
+    .filter(Boolean)
     .map((value) => Number(value))
     .filter((age) => Number.isFinite(age) && age >= 0);
   const checkin = searchParams.get("checkin") ?? "";

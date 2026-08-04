@@ -44,6 +44,7 @@ export function guestsFromParams(params: {
   const adultsCount = Math.max(0, Math.trunc(Number(params.adults)) || 0);
   const childrenAges = (params.children ?? "")
     .split(",")
+    .filter(Boolean)
     .map((value) => Number(value))
     .filter((age) => Number.isFinite(age) && age >= 0);
 

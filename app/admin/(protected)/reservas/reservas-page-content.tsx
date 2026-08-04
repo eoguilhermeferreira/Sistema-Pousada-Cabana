@@ -15,6 +15,7 @@ import {
   listReservas,
 } from "@/services/reservas-service";
 import { listCategorias } from "@/services/quartos-service";
+import { createClient } from "@/lib/supabase/client";
 import { dateKey } from "@/lib/calendar-grid";
 import { getErrorMessage } from "@/lib/supabase-error";
 import { emptyFiltrosReservas, type FiltrosReservas, type ReservaComRelacoes, type ReservaDetalhada } from "@/types/reserva";
@@ -48,12 +49,40 @@ export function ReservasPageContent() {
     }
   }, []);
 
+  // Recarrega a lista sem mostrar o loading de tela cheia — usado quando
+  // uma reserva muda em segundo plano (Realtime), pra não piscar a tela.
+  const recarregarSilencioso = React.useCallback(async () => {
+    setReservas(await listReservas());
+  }, []);
+
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       load();
     }, 0);
     return () => clearTimeout(timeout);
   }, [load]);
+
+  // Reserva nova do site, confirmação, check-in/checkout, cancelamento —
+  // qualquer mudança na tabela já atualiza a lista sozinha, sem precisar
+  // apertar F5.
+  React.useEffect(() => {
+    const supabase = createClient();
+    let debounce: ReturnType<typeof setTimeout> | null = null;
+    const agendarRecarga = () => {
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(recarregarSilencioso, 500);
+    };
+
+    const channel = supabase
+      .channel("reservas-lista-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "reservas" }, agendarRecarga)
+      .subscribe();
+
+    return () => {
+      if (debounce) clearTimeout(debounce);
+      supabase.removeChannel(channel);
+    };
+  }, [recarregarSilencioso]);
 
   const resumo = React.useMemo(() => {
     const hoje = dateKey(new Date());

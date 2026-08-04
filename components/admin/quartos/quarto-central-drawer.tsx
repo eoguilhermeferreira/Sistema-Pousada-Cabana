@@ -17,15 +17,19 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { QuartoStatusBadge } from "@/components/admin/quartos/quarto-status-badge";
+import { ReservaStatusBadge } from "@/components/admin/reservas/reserva-status-badge";
 import { AdicionarConsumoModal } from "@/components/admin/estoque/adicionar-consumo-modal";
 import { getQuartoById } from "@/services/quartos-service";
-import { getReservaAtivaPorQuarto } from "@/services/reservas-service";
+import { getReservaRelevantePorQuarto } from "@/services/reservas-service";
 import {
   listConsumosPorQuarto,
   listHistoricoPorQuarto,
   removerConsumoQuarto,
 } from "@/services/consumo-service";
+import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
+import { formatPhone } from "@/lib/phone";
 import { getComodidadeIcon, type QuartoDetalhado } from "@/types/quarto";
+import { reservaHistoricoEventoLabels, type ReservaDetalhada } from "@/types/reserva";
 import type {
   MovimentacaoComRelacoes,
   QuartoConsumoComProduto,
@@ -36,6 +40,12 @@ const currency = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
 const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
   month: "2-digit",
@@ -43,6 +53,68 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
   hour: "2-digit",
   minute: "2-digit",
 });
+
+function formatDate(value: string) {
+  return dateFormatter.format(new Date(`${value}T00:00:00`));
+}
+
+interface ItemHospedagem {
+  label: string;
+  valor: number;
+}
+
+/** Detalha o valor da hospedagem por hóspede — divide o valor da diária
+ * (já no tier certo: sozinho/casal/adicional) igualmente entre os
+ * adultos e crianças de 12+ (que contam como adulto pro preço), e usa o
+ * valor já gravado de cada criança que paga taxa fixa (5 a 11 anos). */
+function montarDetalhamentoHospedagem(reserva: ReservaDetalhada): ItemHospedagem[] {
+  const noites = calcularNoites(reserva.data_entrada, reserva.data_saida);
+  const acompanhantesAdultos = reserva.hospedes.filter((h) => h.tipo === "adulto");
+  const criancas = reserva.hospedes.filter((h) => h.tipo === "crianca");
+
+  const valores = calcularValores({
+    noites,
+    valorDiaria: reserva.quarto.valor_diaria,
+    valorCasal: reserva.quarto.valor_casal,
+    valorPessoaAdicional: reserva.quarto.valor_pessoa_adicional,
+    adultos: reserva.quantidade_adultos,
+    criancas: criancas
+      .filter((c) => c.idade != null)
+      .map((c) => ({ idade: c.idade as number })),
+  });
+
+  const shareAdulto =
+    valores.adultosEquivalentes > 0
+      ? valores.valorHospedagem / valores.adultosEquivalentes
+      : 0;
+
+  const itens: ItemHospedagem[] = [];
+  let numeroAdulto = 1;
+  itens.push({
+    label: `Adulto ${numeroAdulto++}: ${reserva.hospede_principal.nome}`,
+    valor: shareAdulto,
+  });
+  for (const adulto of acompanhantesAdultos) {
+    itens.push({
+      label: `Adulto ${numeroAdulto++}: ${adulto.nome ?? "Acompanhante"}`,
+      valor: shareAdulto,
+    });
+  }
+
+  const multiplasCriancas = criancas.length > 1;
+  criancas.forEach((crianca, index) => {
+    const idade = crianca.idade ?? 0;
+    const contaComoAdulto = idade >= 12;
+    const prefixo = multiplasCriancas ? `Criança ${index + 1}` : "Criança";
+    const nomeParte = crianca.nome ? `: ${crianca.nome}` : "";
+    itens.push({
+      label: `${prefixo}${nomeParte} (${idade} ${idade === 1 ? "ano" : "anos"})`,
+      valor: contaComoAdulto ? shareAdulto : crianca.valor,
+    });
+  });
+
+  return itens;
+}
 
 interface QuartoCentralDrawerProps {
   open: boolean;
@@ -59,7 +131,7 @@ export function QuartoCentralDrawer({
 }: QuartoCentralDrawerProps) {
   const [quarto, setQuarto] = React.useState<QuartoDetalhado | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [reservaAtivaId, setReservaAtivaId] = React.useState<string | null>(
+  const [reservaRelevante, setReservaRelevante] = React.useState<ReservaDetalhada | null>(
     null,
   );
 
@@ -71,17 +143,22 @@ export function QuartoCentralDrawer({
   const [adicionarConsumoOpen, setAdicionarConsumoOpen] = React.useState(false);
   const [removingId, setRemovingId] = React.useState<string | null>(null);
 
+  // Só se pode lançar consumo com o hóspede já hospedado (check-in feito) —
+  // uma reserva apenas confirmada, aguardando chegada, não conta.
+  const reservaAtivaId =
+    reservaRelevante?.status === "checkin_realizado" ? reservaRelevante.id : null;
+
   React.useEffect(() => {
     if (!open || !quartoId) return;
     const timeout = setTimeout(async () => {
       setLoading(true);
       try {
-        const [data, reservaAtiva] = await Promise.all([
+        const [data, reserva] = await Promise.all([
           getQuartoById(quartoId),
-          getReservaAtivaPorQuarto(quartoId),
+          getReservaRelevantePorQuarto(quartoId),
         ]);
         setQuarto(data);
-        setReservaAtivaId(reservaAtiva?.id ?? null);
+        setReservaRelevante(reserva);
       } finally {
         setLoading(false);
       }
@@ -130,6 +207,34 @@ export function QuartoCentralDrawer({
     (total, item) => total + item.valor_total,
     0,
   );
+
+  const detalhamentoHospedagem = React.useMemo(
+    () => (reservaRelevante ? montarDetalhamentoHospedagem(reservaRelevante) : []),
+    [reservaRelevante],
+  );
+
+  const eventosHistorico = React.useMemo(() => {
+    const eventosReserva = (reservaRelevante?.historico ?? []).map((evento) => ({
+      id: `reserva-${evento.id}`,
+      titulo: reservaHistoricoEventoLabels[evento.evento] ?? evento.evento,
+      descricao: evento.descricao ?? "",
+      data: evento.created_at,
+      tipo: "reserva" as const,
+    }));
+    const eventosConsumo = historico.map((evento) => ({
+      id: `consumo-${evento.id}`,
+      titulo:
+        evento.tipo === "consumo_quarto" ? "Consumo lançado" : "Item removido / devolvido",
+      descricao: `${evento.produto.nome} · ${Math.abs(evento.quantidade)} un · ${
+        evento.valor_total != null ? currency.format(evento.valor_total) : "-"
+      } · ${evento.usuario?.nome ?? "Usuário do sistema"}`,
+      data: evento.created_at,
+      tipo: "consumo" as const,
+    }));
+    return [...eventosReserva, ...eventosConsumo].sort((a, b) =>
+      b.data.localeCompare(a.data),
+    );
+  }, [reservaRelevante, historico]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -259,12 +364,75 @@ export function QuartoCentralDrawer({
                 </div>
               </TabsContent>
 
-              <TabsContent value="hospedes" className="px-6 py-6">
-                <EmptyTabState
-                  icon={Users}
-                  message="Nenhum hóspede hospedado."
-                  hint="Esta aba será integrada ao módulo de Reservas."
-                />
+              <TabsContent value="hospedes" className="space-y-4 px-6 py-6">
+                {!reservaRelevante ? (
+                  <EmptyTabState
+                    icon={Users}
+                    message="Nenhum hóspede hospedado."
+                    hint="Assim que uma reserva for confirmada para este quarto, os hóspedes aparecem aqui."
+                  />
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-light p-4">
+                      <div>
+                        <p className="font-display text-base font-semibold text-primary-dark">
+                          {reservaRelevante.codigo}
+                        </p>
+                        <p className="text-xs text-gray-text">
+                          {formatDate(reservaRelevante.data_entrada)} — {formatDate(reservaRelevante.data_saida)}
+                        </p>
+                      </div>
+                      <ReservaStatusBadge status={reservaRelevante.status} />
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-text">
+                        Hóspedes
+                      </p>
+                      <ul className="space-y-2">
+                        <li className="flex items-center justify-between rounded-xl border border-gray-light p-3">
+                          <div>
+                            <p className="text-sm font-medium text-primary-dark">
+                              {reservaRelevante.hospede_principal.nome}
+                            </p>
+                            <p className="text-xs text-gray-text">
+                              {formatPhone(reservaRelevante.hospede_principal.telefone)}
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium text-gray-text">Titular</span>
+                        </li>
+                        {reservaRelevante.hospedes
+                          .filter((h) => h.tipo === "adulto")
+                          .map((hospede) => (
+                            <li
+                              key={hospede.id}
+                              className="flex items-center justify-between rounded-xl border border-gray-light p-3"
+                            >
+                              <p className="text-sm font-medium text-primary-dark">
+                                {hospede.nome || "Acompanhante"}
+                              </p>
+                              <span className="text-xs font-medium text-gray-text">Adulto</span>
+                            </li>
+                          ))}
+                        {reservaRelevante.hospedes
+                          .filter((h) => h.tipo === "crianca")
+                          .map((hospede) => (
+                            <li
+                              key={hospede.id}
+                              className="flex items-center justify-between rounded-xl border border-gray-light p-3"
+                            >
+                              <p className="text-sm font-medium text-primary-dark">
+                                {hospede.nome || "Criança"}
+                              </p>
+                              <span className="text-xs font-medium text-gray-text">
+                                {hospede.idade} {hospede.idade === 1 ? "ano" : "anos"}
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
               </TabsContent>
 
               <TabsContent value="consumo" className="space-y-4 px-6 py-6">
@@ -386,38 +554,47 @@ export function QuartoCentralDrawer({
               </TabsContent>
 
               <TabsContent value="pagamentos" className="space-y-4 px-6 py-6">
-                <div className="space-y-3 rounded-2xl border border-gray-light p-5">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-text">Hospedagem</span>
-                    <span className="font-medium text-primary-dark">
-                      {currency.format(quarto.valor_diaria)}
-                    </span>
+                {!reservaRelevante ? (
+                  <EmptyTabState
+                    icon={Package}
+                    message="Nenhuma hospedagem em andamento."
+                    hint="O valor da hospedagem aparece aqui assim que houver uma reserva confirmada para este quarto."
+                  />
+                ) : (
+                  <div className="space-y-3 rounded-2xl border border-gray-light p-5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-text">
+                      Hospedagem
+                    </p>
+                    {detalhamentoHospedagem.map((item) => (
+                      <div key={item.label} className="flex items-center justify-between text-sm">
+                        <span className="text-gray-text">{item.label}</span>
+                        <span className="font-medium text-primary-dark">
+                          {currency.format(item.valor)}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between border-t border-gray-light pt-3 text-sm">
+                      <span className="font-semibold text-primary-dark">
+                        Subtotal hospedagem
+                      </span>
+                      <span className="font-medium text-primary-dark">
+                        {currency.format(reservaRelevante.valor_total)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-text">Consumos</span>
+                      <span className="font-medium text-primary-dark">
+                        {currency.format(consumoValorTotal)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-gray-light pt-3 text-sm">
+                      <span className="font-semibold text-primary-dark">Total</span>
+                      <span className="font-sans text-base font-semibold text-primary-dark">
+                        {currency.format(reservaRelevante.valor_total + consumoValorTotal)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-text">Consumos</span>
-                    <span className="font-medium text-primary-dark">
-                      {currency.format(consumoValorTotal)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-text">Descontos</span>
-                    <span className="font-medium text-status-ocupado">
-                      {currency.format(0)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between border-t border-gray-light pt-3 text-sm">
-                    <span className="font-semibold text-primary-dark">
-                      Total
-                    </span>
-                    <span className="font-sans text-base font-semibold text-primary-dark">
-                      {currency.format(quarto.valor_diaria + consumoValorTotal)}
-                    </span>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-text">
-                  Valor da hospedagem ilustrativo. A integração com Reservas e
-                  Caixa será feita futuramente.
-                </p>
+                )}
               </TabsContent>
 
               <TabsContent value="historico" className="space-y-4 px-6 py-6">
@@ -425,44 +602,41 @@ export function QuartoCentralDrawer({
                   <div className="flex min-h-[20vh] items-center justify-center">
                     <Loader2 className="size-5 animate-spin text-primary" />
                   </div>
-                ) : historico.length === 0 ? (
+                ) : eventosHistorico.length === 0 ? (
                   <EmptyTabState
                     icon={History}
                     message="Nenhum histórico disponível."
-                    hint="Consumos lançados e removidos deste quarto aparecerão aqui."
+                    hint="Eventos da reserva (confirmação, check-in, check-out) e consumos lançados neste quarto aparecerão aqui."
                   />
                 ) : (
                   <ul className="space-y-3">
-                    {historico.map((evento) => (
+                    {eventosHistorico.map((evento) => (
                       <li
                         key={evento.id}
                         className="flex items-start gap-3 rounded-xl border border-gray-light p-3"
                       >
                         <span
                           className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
-                            evento.tipo === "consumo_quarto"
-                              ? "bg-status-checkout-light text-status-checkout"
-                              : "bg-status-disponivel-light text-status-disponivel"
+                            evento.tipo === "reserva"
+                              ? "bg-status-confirmada-light text-status-confirmada"
+                              : "bg-status-checkout-light text-status-checkout"
                           }`}
                         >
-                          <Package className="size-4" />
+                          {evento.tipo === "reserva" ? (
+                            <History className="size-4" />
+                          ) : (
+                            <Package className="size-4" />
+                          )}
                         </span>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-primary-dark">
-                            {evento.tipo === "consumo_quarto"
-                              ? "Consumo lançado"
-                              : "Item removido / devolvido"}{" "}
-                            · {evento.produto.nome}
+                            {evento.titulo}
                           </p>
-                          <p className="text-xs text-gray-text">
-                            {Math.abs(evento.quantidade)} un ·{" "}
-                            {evento.valor_total != null
-                              ? currency.format(evento.valor_total)
-                              : "-"}{" "}
-                            · {evento.usuario?.nome ?? "Usuário do sistema"}
-                          </p>
+                          {evento.descricao && (
+                            <p className="text-xs text-gray-text">{evento.descricao}</p>
+                          )}
                           <p className="text-xs text-gray-text/70">
-                            {dateTimeFormatter.format(new Date(evento.created_at))}
+                            {dateTimeFormatter.format(new Date(evento.data))}
                           </p>
                         </div>
                       </li>

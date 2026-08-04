@@ -64,6 +64,19 @@ export function statusReservaBadgeClass(status: StatusReserva) {
   return statusReservaBadgeClasses[status];
 }
 
+/** Rótulos dos eventos gravados em reserva_historico — usado na tela de
+ * detalhe da reserva e na aba Histórico da Central do Quarto. */
+export const reservaHistoricoEventoLabels: Record<string, string> = {
+  criada: "Reserva criada",
+  editada: "Reserva editada",
+  confirmada: "Reserva confirmada",
+  cancelada: "Reserva cancelada",
+  no_show: "Marcada como no-show",
+  status_alterado: "Status alterado",
+  checkin_realizado: "Check-in realizado",
+  checkout_realizado: "Check-out realizado",
+};
+
 export function statusReservaDotClass(status: StatusReserva) {
   return statusReservaDotClasses[status];
 }

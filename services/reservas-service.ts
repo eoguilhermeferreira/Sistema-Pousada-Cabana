@@ -64,6 +64,42 @@ export async function getReservaAtivaPorQuarto(
   return data as unknown as ReservaComRelacoes | null;
 }
 
+/** Reserva relevante pra mostrar na Central do Quarto: prioriza quem já
+ * está com check-in em andamento; se não houver, a próxima reserva já
+ * confirmada aguardando check-in — a partir da confirmação já dá pra ver
+ * quem vai ficar no quarto, sem esperar o check-in acontecer. */
+export async function getReservaRelevantePorQuarto(
+  quartoId: string,
+): Promise<ReservaDetalhada | null> {
+  const supabase = createClient();
+
+  const { data: checkinAtivo, error: checkinError } = await supabase
+    .from("reservas")
+    .select("id")
+    .eq("quarto_id", quartoId)
+    .eq("status", "checkin_realizado")
+    .order("data_entrada", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (checkinError) throw checkinError;
+
+  if (checkinAtivo) return getReservaById(checkinAtivo.id);
+
+  const { data: confirmada, error: confirmadaError } = await supabase
+    .from("reservas")
+    .select("id")
+    .eq("quarto_id", quartoId)
+    .eq("status", "confirmada")
+    .order("data_entrada", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (confirmadaError) throw confirmadaError;
+
+  if (confirmada) return getReservaById(confirmada.id);
+
+  return null;
+}
+
 export async function getReservaById(id: string): Promise<ReservaDetalhada> {
   const supabase = createClient();
 

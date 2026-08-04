@@ -30,7 +30,7 @@ import {
   getReservaById,
   marcarNoShowReserva,
 } from "@/services/reservas-service";
-import type { ReservaDetalhada } from "@/types/reserva";
+import { reservaHistoricoEventoLabels, type ReservaDetalhada } from "@/types/reserva";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -54,17 +54,6 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
 function formatDate(value: string) {
   return dateFormatter.format(new Date(`${value}T00:00:00`));
 }
-
-const eventoLabels: Record<string, string> = {
-  criada: "Reserva criada",
-  editada: "Reserva editada",
-  confirmada: "Reserva confirmada",
-  cancelada: "Reserva cancelada",
-  no_show: "Marcada como no-show",
-  status_alterado: "Status alterado",
-  checkin_realizado: "Check-in realizado",
-  checkout_realizado: "Check-out realizado",
-};
 
 interface ReservaDetalheContentProps {
   reservaId: string;
@@ -389,7 +378,7 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
                 {reserva.historico.map((evento) => (
                   <li key={evento.id} className="text-sm">
                     <p className="font-medium text-primary-dark">
-                      {eventoLabels[evento.evento] ?? evento.evento}
+                      {reservaHistoricoEventoLabels[evento.evento] ?? evento.evento}
                     </p>
                     {evento.descricao && (
                       <p className="text-xs text-gray-text">{evento.descricao}</p>

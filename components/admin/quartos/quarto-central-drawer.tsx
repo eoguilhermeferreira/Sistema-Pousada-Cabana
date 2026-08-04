@@ -375,7 +375,7 @@ export function QuartoCentralDrawer({
                   <>
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-light p-4">
                       <div>
-                        <p className="font-display text-base font-semibold text-primary-dark">
+                        <p className="font-sans text-base font-semibold tabular-nums text-primary-dark">
                           {reservaRelevante.codigo}
                         </p>
                         <p className="text-xs text-gray-text">

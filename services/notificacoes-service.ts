@@ -2,6 +2,13 @@ import { createClient } from "@/lib/supabase/client";
 import { dateKey } from "@/lib/calendar-grid";
 import type { NotificacaoSistema } from "@/types/configuracao";
 
+/** Assinatura estável do conjunto atual de itens (ids ordenados e unidos)
+ * — muda sempre que um item entra ou sai do grupo, mesmo que a contagem
+ * total continue igual a uma versão anterior já vista. */
+function versaoDeIds(ids: (string | null | undefined)[]): string {
+  return ids.filter((id): id is string => Boolean(id)).sort().join(",");
+}
+
 /** Central de notificações da Etapa 13 — reaproveita os mesmos sinais dos
  * Alertas Inteligentes do Dashboard (Etapa 10), sem alterar aquele módulo,
  * e soma os itens específicos desta etapa (nota fiscal pendente e chatbot
@@ -60,6 +67,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `${qtd} reserva${qtd > 1 ? "s" : ""} do site aguardando confirmação.`,
       severidade: "critico",
       href: "/admin/reservas",
+      versao: versaoDeIds((reservasAguardandoConfirmacao ?? []).map((r) => r.id)),
     });
   }
 
@@ -71,6 +79,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `${semEstoque.length} produto${semEstoque.length > 1 ? "s" : ""} sem estoque.`,
       severidade: "critico",
       href: "/admin/estoque",
+      versao: versaoDeIds(semEstoque.map((p) => p.id)),
     });
   }
 
@@ -82,6 +91,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `Quarto${(quartosLimpeza ?? []).length > 1 ? "s" : ""} ${numeros}.`,
       severidade: "atencao",
       href: "/admin/quartos",
+      versao: versaoDeIds((quartosLimpeza ?? []).map((q) => q.numero)),
     });
   }
 
@@ -93,6 +103,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `Quarto${(quartosManutencao ?? []).length > 1 ? "s" : ""} ${numeros}.`,
       severidade: "atencao",
       href: "/admin/quartos",
+      versao: versaoDeIds((quartosManutencao ?? []).map((q) => q.numero)),
     });
   }
 
@@ -103,6 +114,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: "Há um caixa em aberto no momento.",
       severidade: "info",
       href: "/admin/caixa",
+      versao: caixaAberto.id,
     });
   }
 
@@ -113,6 +125,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `${(checkinsHoje ?? []).length} check-in${(checkinsHoje ?? []).length > 1 ? "s" : ""} previsto${(checkinsHoje ?? []).length > 1 ? "s" : ""}.`,
       severidade: "info",
       href: "/admin/checkin-checkout",
+      versao: versaoDeIds((checkinsHoje ?? []).map((r) => r.id)),
     });
   }
 
@@ -123,6 +136,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `${(checkoutsHoje ?? []).length} check-out${(checkoutsHoje ?? []).length > 1 ? "s" : ""} previsto${(checkoutsHoje ?? []).length > 1 ? "s" : ""} para hoje.`,
       severidade: "info",
       href: "/admin/checkin-checkout",
+      versao: versaoDeIds((checkoutsHoje ?? []).map((r) => r.id)),
     });
   }
 
@@ -137,6 +151,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `${pendentesNota.length} hospedagem${pendentesNota.length > 1 ? "ns" : ""} finalizada${pendentesNota.length > 1 ? "s" : ""} sem nota fiscal emitida.`,
       severidade: "atencao",
       href: "/admin/nota-fiscal/historico",
+      versao: versaoDeIds(pendentesNota.map((r) => r.id)),
     });
   }
 
@@ -147,6 +162,7 @@ export async function listNotificacoesSistema(): Promise<NotificacaoSistema[]> {
       descricao: `${(conversasAguardando ?? []).length} conversa${(conversasAguardando ?? []).length > 1 ? "s" : ""} aguardando atendimento humano.`,
       severidade: "atencao",
       href: "/admin/chatbot",
+      versao: versaoDeIds((conversasAguardando ?? []).map((c) => c.id)),
     });
   }
 

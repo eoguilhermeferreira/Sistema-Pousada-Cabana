@@ -58,4 +58,12 @@ export interface NotificacaoSistema {
   descricao: string;
   severidade: "critico" | "atencao" | "info";
   href?: string;
+  /** Identifica exatamente quais itens estão gerando este alerta agora
+   * (ex.: ids das reservas pendentes, unidos e ordenados) — usada pra
+   * decidir se a pessoa já "viu" esta notificação. Sem isso, duas
+   * situações diferentes com a mesma contagem (ex.: "1 reserva pendente"
+   * ontem e "1 reserva pendente" hoje, mas de reservas diferentes)
+   * ficariam indistinguíveis e a bolinha vermelha não apareceria pra uma
+   * reserva nova. Se omitida, cai de volta pra descricao. */
+  versao?: string;
 }

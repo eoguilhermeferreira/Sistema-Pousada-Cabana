@@ -11,6 +11,7 @@ import { ReservasTable } from "@/components/admin/reservas/reservas-table";
 import { ReservaWizardModal } from "@/components/admin/reservas/wizard/reserva-wizard-modal";
 import {
   cancelarReserva,
+  confirmarReserva,
   getReservaById,
   listReservas,
 } from "@/services/reservas-service";
@@ -34,6 +35,9 @@ export function ReservasPageContent() {
   const [cancelingReserva, setCancelingReserva] = React.useState<ReservaComRelacoes | null>(null);
   const [canceling, setCanceling] = React.useState(false);
   const [cancelError, setCancelError] = React.useState("");
+
+  const [confirmingId, setConfirmingId] = React.useState<string | null>(null);
+  const [confirmError, setConfirmError] = React.useState("");
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -152,6 +156,21 @@ export function ReservasPageContent() {
     setWizardOpen(true);
   }
 
+  async function handleConfirmar(reserva: ReservaComRelacoes) {
+    setConfirmingId(reserva.id);
+    setConfirmError("");
+    try {
+      await confirmarReserva(reserva.id);
+      await recarregarSilencioso();
+    } catch (error) {
+      setConfirmError(
+        getErrorMessage(error) || "Não foi possível confirmar a reserva.",
+      );
+    } finally {
+      setConfirmingId(null);
+    }
+  }
+
   function handleCancelRequest(reserva: ReservaComRelacoes) {
     setCancelingReserva(reserva);
     setCancelError("");
@@ -197,11 +216,19 @@ export function ReservasPageContent() {
 
       <ReservasFilters filtros={filtros} onChange={setFiltros} categorias={categorias} />
 
+      {confirmError && (
+        <p className="rounded-xl bg-status-ocupado-light px-4 py-3 text-sm font-medium text-status-ocupado">
+          {confirmError}
+        </p>
+      )}
+
       <ReservasTable
         reservas={filtered}
         loading={loading}
         onEdit={handleEdit}
         onCancel={handleCancelRequest}
+        onConfirm={handleConfirmar}
+        confirmingId={confirmingId}
       />
 
       <ReservaWizardModal

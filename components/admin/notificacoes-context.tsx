@@ -61,11 +61,7 @@ export function NotificacoesProvider({ children }: { children: React.ReactNode }
   }, [notificacoes]);
 
   const marcarTodasComoVistas = React.useCallback(() => {
-    setVistas(
-      marcarVistas(
-        notificacoesRef.current.map((n) => ({ id: n.id, descricao: n.descricao })),
-      ),
-    );
+    setVistas(marcarVistas(notificacoesRef.current));
   }, []);
 
   // Entrar na aba de uma notificação (link do sino, do Alertas
@@ -80,7 +76,7 @@ export function NotificacoesProvider({ children }: { children: React.ReactNode }
     setVistas((prev) => {
       const jaVistas = relevantes.every((n) => estaVista(prev, n));
       if (jaVistas) return prev;
-      return marcarVistas(relevantes.map((n) => ({ id: n.id, descricao: n.descricao })));
+      return marcarVistas(relevantes);
     });
   }, [pathname]);
 

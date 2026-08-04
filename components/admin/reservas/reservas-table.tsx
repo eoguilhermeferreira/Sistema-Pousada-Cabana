@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarX2, Eye, Pencil, XCircle } from "lucide-react";
+import { CalendarX2, CheckCircle2, Eye, Loader2, Pencil, XCircle } from "lucide-react";
 
 import { ReservaStatusBadge } from "@/components/admin/reservas/reserva-status-badge";
 import { formatCpf } from "@/lib/cpf";
@@ -27,6 +27,8 @@ interface ReservasTableProps {
   loading: boolean;
   onEdit: (reserva: ReservaComRelacoes) => void;
   onCancel: (reserva: ReservaComRelacoes) => void;
+  onConfirm: (reserva: ReservaComRelacoes) => void;
+  confirmingId?: string | null;
 }
 
 const columns = [
@@ -47,6 +49,8 @@ export function ReservasTable({
   loading,
   onEdit,
   onCancel,
+  onConfirm,
+  confirmingId,
 }: ReservasTableProps) {
   if (!loading && reservas.length === 0) {
     return (
@@ -139,6 +143,22 @@ export function ReservasTable({
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-end gap-1.5">
+                        {reserva.status === "reservada" && (
+                          <button
+                            type="button"
+                            onClick={() => onConfirm(reserva)}
+                            disabled={confirmingId === reserva.id}
+                            className="flex size-8 items-center justify-center rounded-lg text-status-disponivel transition-colors duration-200 hover:bg-status-disponivel-light disabled:opacity-50"
+                            title="Confirmar reserva"
+                          >
+                            {confirmingId === reserva.id ? (
+                              <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="size-4" />
+                            )}
+                            <span className="sr-only">Confirmar reserva</span>
+                          </button>
+                        )}
                         <Link
                           href={`/admin/reservas/${reserva.id}`}
                           className="flex size-8 items-center justify-center rounded-lg text-gray-text transition-colors duration-200 hover:bg-primary-light hover:text-primary"

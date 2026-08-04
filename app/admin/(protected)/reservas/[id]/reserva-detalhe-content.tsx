@@ -163,7 +163,7 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
             Voltar para Reservas
           </Link>
           <div className="mt-2 flex items-center gap-3">
-            <h1 className="font-display text-2xl font-semibold text-primary-dark">
+            <h1 className="font-sans text-2xl font-semibold tabular-nums text-primary-dark">
               {reserva.codigo}
             </h1>
             <ReservaStatusBadge status={reserva.status} />

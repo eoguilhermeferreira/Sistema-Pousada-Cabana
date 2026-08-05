@@ -2330,6 +2330,17 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      registrar_evento_chatbot: {
+        Args: {
+          p_aguardando_humano?: boolean
+          p_chave_api: string
+          p_hospede_nome?: string
+          p_mensagem?: string
+          p_remetente?: string
+          p_remote_jid: string
+        }
+        Returns: string
+      }
       registrar_movimentacao_estoque: {
         Args: {
           p_motivo?: string

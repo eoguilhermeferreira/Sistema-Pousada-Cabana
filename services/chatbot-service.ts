@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { enviarWhatsapp } from "@/lib/whatsapp-confirmacao";
 import type { ChatbotConversa, ChatbotMensagem } from "@/types/chatbot";
 
 export async function listConversas(): Promise<ChatbotConversa[]> {
@@ -42,14 +43,14 @@ export async function encerrarConversa(conversaId: string) {
   if (error) throw error;
 }
 
-// Resposta manual da recepção — fica registrada no histórico da conversa.
-// Quando a integração com o Chatnex estiver ativa, este mesmo envio também
-// deverá disparar a mensagem real no WhatsApp (a implementar junto com a
-// integração).
+// Resposta manual da recepção — fica registrada no histórico da conversa e
+// é enviada de verdade pelo WhatsApp via ChatNex (se a integração já
+// estiver configurada; senão, fica só no histórico).
 export async function enviarMensagemStaff(
   conversaId: string,
   usuarioId: string,
   conteudo: string,
+  hospedeTelefone: string | null,
 ) {
   const supabase = createClient();
   const agora = new Date().toISOString();
@@ -74,4 +75,8 @@ export async function enviarMensagemStaff(
     })
     .eq("id", conversaId);
   if (conversaError) throw conversaError;
+
+  if (hospedeTelefone) {
+    await enviarWhatsapp(hospedeTelefone, conteudo);
+  }
 }

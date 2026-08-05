@@ -36,10 +36,32 @@ export function montarMensagemConfirmacaoReserva(
 
 /** Números salvos no sistema são só DDD+número (ex.: 14996905526); o ChatNex
  * espera o formato completo com o 55 do Brasil na frente. */
-function paraNumeroWhatsapp(telefone: string): string | null {
+export function paraNumeroWhatsapp(telefone: string): string | null {
   const digitos = telefone.replace(/\D/g, "");
   if (!digitos) return null;
   return digitos.startsWith("55") ? digitos : `55${digitos}`;
+}
+
+/** Envia qualquer mensagem pelo ChatNex — usada tanto pela confirmação
+ * automática de reserva quanto pela resposta manual da recepção no Chatbot.
+ * Retorna true/false em vez de lançar exceção: quem chama decide como
+ * reagir a uma falha (nunca deve travar o fluxo principal por causa dela). */
+export async function enviarWhatsapp(
+  numero: string,
+  mensagem: string,
+): Promise<boolean> {
+  try {
+    const resposta = await fetch("/api/integracoes/chatnex/enviar-mensagem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to: numero, message: mensagem }),
+    });
+    if (!resposta.ok) return false;
+    const dados = await resposta.json().catch(() => null);
+    return dados?.skipped ? false : true;
+  } catch {
+    return false;
+  }
 }
 
 /** Dispara a mensagem de confirmação pelo ChatNex — se a integração ainda
@@ -51,15 +73,5 @@ export async function enviarConfirmacaoWhatsapp(
 ): Promise<void> {
   const to = paraNumeroWhatsapp(reserva.hospede_principal.telefone);
   if (!to) return;
-
-  try {
-    await fetch("/api/integracoes/chatnex/enviar-mensagem", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ to, message: montarMensagemConfirmacaoReserva(reserva) }),
-    });
-  } catch {
-    // Falha de rede ao chamar o WhatsApp não deve travar o fluxo de
-    // confirmação da reserva — a recepção já confirmou, o resto é bônus.
-  }
+  await enviarWhatsapp(to, montarMensagemConfirmacaoReserva(reserva));
 }

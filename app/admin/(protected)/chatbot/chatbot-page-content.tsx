@@ -113,7 +113,12 @@ export function ChatbotPageContent() {
     setEnviando(true);
     setErro("");
     try {
-      await enviarMensagemStaff(selecionadaId, usuario.id, conteudo);
+      await enviarMensagemStaff(
+        selecionadaId,
+        usuario.id,
+        conteudo,
+        conversaSelecionada?.hospede_telefone ?? null,
+      );
       await Promise.all([carregarMensagens(selecionadaId), carregarConversas()]);
     } catch (error) {
       setErro(getErrorMessage(error) || "Não foi possível enviar a mensagem.");

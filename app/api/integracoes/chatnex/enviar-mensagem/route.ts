@@ -17,6 +17,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
+  // Sem isso, qualquer conta logada (inclusive cliente do site, não só
+  // equipe) conseguiria usar esta rota pra mandar WhatsApp em nome da
+  // pousada pra qualquer número.
+  const { data: ehStaff } = await supabase.rpc("is_staff");
+  if (!ehStaff) {
+    return NextResponse.json(
+      { error: "Apenas a equipe pode enviar mensagens." },
+      { status: 403 },
+    );
+  }
+
   const { to, message } = (await request.json()) as {
     to?: string;
     message?: string;

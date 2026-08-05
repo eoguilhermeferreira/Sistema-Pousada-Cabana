@@ -33,6 +33,7 @@ export interface NotaFiscalPdfData {
     telefone: string;
     email: string;
     enderecoCompleto: string;
+    cepFormatado: string;
   };
   tomador: {
     nome: string;
@@ -41,6 +42,7 @@ export interface NotaFiscalPdfData {
     email: string;
     empresa: string;
     enderecoCompleto: string;
+    cepFormatado: string;
   };
   servico: NotaFiscalPdfServico;
   produtos: NotaFiscalPdfProduto[];
@@ -130,18 +132,53 @@ async function montarDocumento(dados: NotaFiscalPdfData) {
     y += 2;
   }
 
-  bloco("Prestador do serviço", [
-    dados.empresa.razaoSocial,
-    `CNPJ: ${dados.empresa.cnpjFormatado || "—"}  ·  Inscrição Municipal: ${dados.empresa.inscricaoMunicipal || "—"}`,
-    dados.empresa.enderecoCompleto,
-    [dados.empresa.telefone, dados.empresa.email].filter(Boolean).join("  ·  "),
+  // Cada campo em sua própria linha, com o título (Nome, CPF, Telefone...)
+  // separado do valor — mais fácil de ler e mais parecido com uma nota
+  // fiscal profissional do que texto corrido.
+  function blocoCampos(titulo: string, campos: Array<[string, string]>) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(14, 77, 164);
+    doc.text(titulo.toUpperCase(), margem, y);
+    doc.setTextColor(0);
+    y += 5;
+
+    for (const [label, valor] of campos) {
+      if (!valor) continue;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      const rotulo = `${label}: `;
+      doc.text(rotulo, margem, y);
+      const rotuloLargura = doc.getTextWidth(rotulo);
+
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0);
+      const valorLinhas = doc.splitTextToSize(valor, larguraUtil - rotuloLargura);
+      doc.text(valorLinhas, margem + rotuloLargura, y);
+      y += Math.max(4.6, valorLinhas.length * 4.4);
+    }
+    y += 2;
+  }
+
+  blocoCampos("Prestador do serviço", [
+    ["Nome", dados.empresa.razaoSocial],
+    ["CNPJ", dados.empresa.cnpjFormatado || "—"],
+    ["Inscrição Municipal", dados.empresa.inscricaoMunicipal || "—"],
+    ["Telefone", dados.empresa.telefone],
+    ["E-mail", dados.empresa.email],
+    ["Endereço", dados.empresa.enderecoCompleto],
+    ["CEP", dados.empresa.cepFormatado],
   ]);
 
-  bloco("Tomador do serviço", [
-    dados.tomador.nome,
-    `CPF/CNPJ: ${dados.tomador.documentoFormatado}${dados.tomador.empresa ? `  ·  ${dados.tomador.empresa}` : ""}`,
-    [dados.tomador.telefoneFormatado, dados.tomador.email].filter(Boolean).join("  ·  "),
-    dados.tomador.enderecoCompleto,
+  blocoCampos("Tomador do serviço", [
+    ["Nome", dados.tomador.nome],
+    ["CPF/CNPJ", dados.tomador.documentoFormatado],
+    ["Empresa", dados.tomador.empresa],
+    ["Telefone", dados.tomador.telefoneFormatado],
+    ["E-mail", dados.tomador.email],
+    ["Endereço", dados.tomador.enderecoCompleto],
+    ["CEP", dados.tomador.cepFormatado],
   ]);
 
   bloco("Dados da nota", [

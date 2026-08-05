@@ -28,6 +28,8 @@ function formatCompetencia(value: string) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+/** Endereço e CEP são campos próprios na nota — CEP não entra mais junto
+ * com o resto do endereço, cada um aparece com seu título. */
 function montarEndereco(partes: {
   rua: string | null;
   numero: string | null;
@@ -36,13 +38,15 @@ function montarEndereco(partes: {
   cidade: string | null;
   estado: string | null;
   cep: string | null;
-}) {
+}): { enderecoCompleto: string; cepFormatado: string } {
   const linha1 = [partes.rua, partes.numero].filter(Boolean).join(", ");
   const linha2 = [partes.bairro, partes.cidade && partes.estado ? `${partes.cidade}/${partes.estado}` : partes.cidade]
     .filter(Boolean)
     .join(" — ");
-  const cep = partes.cep ? `CEP ${formatCep(partes.cep)}` : "";
-  return [linha1, partes.complemento, linha2, cep].filter(Boolean).join(" · ");
+  return {
+    enderecoCompleto: [linha1, partes.complemento, linha2].filter(Boolean).join(" · "),
+    cepFormatado: partes.cep ? formatCep(partes.cep) : "",
+  };
 }
 
 export function montarDadosPdf(
@@ -63,7 +67,7 @@ export function montarDadosPdf(
       inscricaoMunicipal: empresa.inscricao_municipal,
       telefone: empresa.telefone ? formatPhone(empresa.telefone) : "",
       email: empresa.email,
-      enderecoCompleto: montarEndereco({
+      ...montarEndereco({
         rua: empresa.endereco || null,
         numero: null,
         complemento: null,
@@ -79,7 +83,7 @@ export function montarDadosPdf(
       telefoneFormatado: nota.tomador_telefone ? formatPhone(nota.tomador_telefone) : "",
       email: nota.tomador_email ?? "",
       empresa: nota.tomador_empresa ?? "",
-      enderecoCompleto: montarEndereco({
+      ...montarEndereco({
         rua: nota.tomador_rua,
         numero: nota.tomador_numero,
         complemento: nota.tomador_complemento,

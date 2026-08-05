@@ -18,8 +18,20 @@ function montarEnderecoTomador(form: NotaFiscalFormValues) {
   ]
     .filter(Boolean)
     .join(" — ");
-  const cep = form.tomadorCep ? `CEP ${formatCep(form.tomadorCep)}` : "";
-  return [linha1, form.tomadorComplemento, linha2, cep].filter(Boolean).join(" · ");
+  return [linha1, form.tomadorComplemento, linha2].filter(Boolean).join(" · ");
+}
+
+/** Uma linha "Rótulo: valor" — cada dado do tomador (nome, CPF, telefone,
+ * e-mail, endereço, CEP) aparece com o próprio título, em vez de tudo
+ * junto separado por ponto. */
+function CampoNota({ label, valor }: { label: string; valor: string }) {
+  if (!valor) return null;
+  return (
+    <div className="flex gap-2 text-xs">
+      <span className="w-20 shrink-0 font-medium text-gray-text">{label}</span>
+      <span className="text-primary-dark">{valor}</span>
+    </div>
+  );
 }
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -79,20 +91,21 @@ export function PreVisualizacaoNota({
 
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-text">Tomador</p>
-              <p className="text-primary-dark">{form.tomadorNome || "—"}</p>
-              <p className="text-xs text-gray-text">
-                {form.tomadorDocumento ? formatCpfCnpj(form.tomadorDocumento) : "—"}
-                {form.tomadorTelefone ? ` · ${formatPhone(form.tomadorTelefone)}` : ""}
-              </p>
-              {form.tomadorEmpresa && (
-                <p className="text-xs text-gray-text">{form.tomadorEmpresa}</p>
-              )}
-              {form.tomadorEmail && (
-                <p className="text-xs text-gray-text">{form.tomadorEmail}</p>
-              )}
-              {montarEnderecoTomador(form) && (
-                <p className="text-xs text-gray-text">{montarEnderecoTomador(form)}</p>
-              )}
+              <div className="mt-2 space-y-1">
+                <CampoNota label="Nome" valor={form.tomadorNome} />
+                <CampoNota
+                  label="CPF"
+                  valor={form.tomadorDocumento ? formatCpfCnpj(form.tomadorDocumento) : ""}
+                />
+                <CampoNota label="Empresa" valor={form.tomadorEmpresa} />
+                <CampoNota
+                  label="Telefone"
+                  valor={form.tomadorTelefone ? formatPhone(form.tomadorTelefone) : ""}
+                />
+                <CampoNota label="E-mail" valor={form.tomadorEmail} />
+                <CampoNota label="Endereço" valor={montarEnderecoTomador(form)} />
+                <CampoNota label="CEP" valor={form.tomadorCep ? formatCep(form.tomadorCep) : ""} />
+              </div>
             </div>
 
             <div>

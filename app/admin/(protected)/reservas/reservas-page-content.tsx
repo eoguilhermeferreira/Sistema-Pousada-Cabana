@@ -163,7 +163,8 @@ export function ReservasPageContent() {
     try {
       await confirmarReserva(reserva.id);
       await recarregarSilencioso();
-      void enviarConfirmacaoWhatsapp(reserva);
+      const detalhada = await getReservaById(reserva.id);
+      void enviarConfirmacaoWhatsapp(detalhada);
     } catch (error) {
       setConfirmError(
         getErrorMessage(error) || "Não foi possível confirmar a reserva.",

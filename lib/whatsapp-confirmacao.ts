@@ -1,4 +1,6 @@
-import type { ReservaComRelacoes } from "@/types/reserva";
+import { formatCpf } from "@/lib/cpf";
+import { formatPhone } from "@/lib/phone";
+import type { ReservaDetalhada } from "@/types/reserva";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -16,22 +18,55 @@ function formatDate(value: string) {
 }
 
 export function montarMensagemConfirmacaoReserva(
-  reserva: ReservaComRelacoes,
+  reserva: ReservaDetalhada,
 ): string {
-  const totalHospedes = reserva.quantidade_adultos + reserva.quantidade_criancas;
+  const titular = reserva.hospede_principal;
+  const acompanhantesAdultos = reserva.hospedes.filter((h) => h.tipo === "adulto");
+  const criancas = reserva.hospedes.filter((h) => h.tipo === "crianca");
 
-  return [
-    `Olá, ${reserva.hospede_principal.nome}! Sua reserva na Pousada Cabana foi confirmada.`,
+  const linhas = [
+    `A Pousada Cabana agradece pela preferência, ${titular.nome}! Sua reserva foi confirmada. 🌿`,
     "",
     `Código da reserva: ${reserva.codigo}`,
     `Quarto: ${reserva.quarto.numero} (${reserva.quarto.categoria.nome})`,
-    `Check-in: ${formatDate(reserva.data_entrada)}`,
-    `Check-out: ${formatDate(reserva.data_saida)}`,
-    `Hóspedes: ${totalHospedes}`,
+    `Check-in: ${formatDate(reserva.data_entrada)}, a partir das 14h`,
+    `Check-out: ${formatDate(reserva.data_saida)}, até as 12h`,
     `Valor total: ${currency.format(reserva.valor_total)}`,
     "",
-    "Apresente este código na recepção no dia do check-in.",
-  ].join("\n");
+    "Confira os dados do titular da reserva:",
+    `Nome: ${titular.nome}`,
+    `CPF: ${formatCpf(titular.cpf)}`,
+    `Telefone: ${formatPhone(titular.telefone)}`,
+    ...(titular.email ? [`E-mail: ${titular.email}`] : []),
+    "",
+    `Adultos: ${reserva.quantidade_adultos}`,
+  ];
+
+  if (acompanhantesAdultos.length > 0) {
+    linhas.push(
+      "Acompanhantes:",
+      ...acompanhantesAdultos.map((a) => `- ${a.nome || "Nome não informado"}`),
+    );
+  }
+
+  if (criancas.length > 0) {
+    linhas.push(
+      "Crianças:",
+      ...criancas.map(
+        (c) =>
+          `- ${c.nome || "Nome não informado"}${c.idade !== null ? `, ${c.idade} anos` : ""}`,
+      ),
+    );
+  }
+
+  linhas.push(
+    "",
+    "Por favor, confira se está tudo certo com os dados acima e nos confirme por aqui. Se algo estiver errado, é só nos avisar que ajustamos.",
+    "",
+    "Apresente o código da reserva na recepção no dia do check-in.",
+  );
+
+  return linhas.join("\n");
 }
 
 /** Números salvos no sistema são só DDD+número (ex.: 14996905526); o ChatNex
@@ -69,7 +104,7 @@ export async function enviarWhatsapp(
  * em branco), a rota apenas ignora o envio sem gerar erro. Nunca lança
  * exceção: confirmar a reserva não pode falhar por causa do WhatsApp. */
 export async function enviarConfirmacaoWhatsapp(
-  reserva: ReservaComRelacoes,
+  reserva: ReservaDetalhada,
 ): Promise<void> {
   const to = paraNumeroWhatsapp(reserva.hospede_principal.telefone);
   if (!to) return;

@@ -25,33 +25,33 @@ export function montarMensagemConfirmacaoReserva(
   const criancas = reserva.hospedes.filter((h) => h.tipo === "crianca");
 
   const linhas = [
-    `A Pousada Cabana agradece pela preferência, ${titular.nome}! Sua reserva foi confirmada. 🌿`,
+    `*A Pousada Cabana agradece pela preferência, ${titular.nome}!* Sua reserva foi confirmada.`,
     "",
-    `Código da reserva: ${reserva.codigo}`,
-    `Quarto: ${reserva.quarto.numero} (${reserva.quarto.categoria.nome})`,
-    `Check-in: ${formatDate(reserva.data_entrada)}, a partir das 14h`,
-    `Check-out: ${formatDate(reserva.data_saida)}, até as 12h`,
-    `Valor total: ${currency.format(reserva.valor_total)}`,
+    `*Código da reserva:* ${reserva.codigo}`,
+    `*Quarto:* ${reserva.quarto.numero} (${reserva.quarto.categoria.nome})`,
+    `*Check-in:* ${formatDate(reserva.data_entrada)}, a partir das 14h`,
+    `*Check-out:* ${formatDate(reserva.data_saida)}, até as 12h`,
+    `*Valor total:* ${currency.format(reserva.valor_total)}`,
     "",
-    "Confira os dados do titular da reserva:",
-    `Nome: ${titular.nome}`,
-    `CPF: ${formatCpf(titular.cpf)}`,
-    `Telefone: ${formatPhone(titular.telefone)}`,
-    ...(titular.email ? [`E-mail: ${titular.email}`] : []),
+    "*Dados do titular da reserva:*",
+    `*Nome:* ${titular.nome}`,
+    `*CPF:* ${formatCpf(titular.cpf)}`,
+    `*Telefone:* ${formatPhone(titular.telefone)}`,
+    ...(titular.email ? [`*E-mail:* ${titular.email}`] : []),
     "",
-    `Adultos: ${reserva.quantidade_adultos}`,
+    `*Adultos:* ${reserva.quantidade_adultos}`,
   ];
 
   if (acompanhantesAdultos.length > 0) {
     linhas.push(
-      "Acompanhantes:",
+      "*Acompanhantes:*",
       ...acompanhantesAdultos.map((a) => `- ${a.nome || "Nome não informado"}`),
     );
   }
 
   if (criancas.length > 0) {
     linhas.push(
-      "Crianças:",
+      "*Crianças:*",
       ...criancas.map(
         (c) =>
           `- ${c.nome || "Nome não informado"}${c.idade !== null ? `, ${c.idade} anos` : ""}`,

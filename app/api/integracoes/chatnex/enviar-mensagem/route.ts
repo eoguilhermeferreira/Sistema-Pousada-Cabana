@@ -65,8 +65,19 @@ export async function POST(request: Request) {
       body: JSON.stringify({ to, message }),
     });
 
-    const corpo = await resposta.json().catch(() => null);
+    const textoCorpo = await resposta.text();
+    const corpo = (() => {
+      try {
+        return JSON.parse(textoCorpo);
+      } catch {
+        return null;
+      }
+    })();
+
     if (!resposta.ok) {
+      console.error(
+        `[chatnex] ${baseUrl}/api/integrations/send-message respondeu ${resposta.status}: ${textoCorpo}`,
+      );
       return NextResponse.json(
         { error: corpo?.error || `ChatNex respondeu ${resposta.status}.` },
         { status: 502 },
@@ -74,7 +85,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(corpo ?? { success: true });
-  } catch {
+  } catch (error) {
+    console.error(`[chatnex] falha ao conectar em ${baseUrl}:`, error);
     return NextResponse.json(
       { error: "Não foi possível conectar ao ChatNex." },
       { status: 502 },

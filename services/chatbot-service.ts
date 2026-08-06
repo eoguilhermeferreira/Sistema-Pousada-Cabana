@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import { enviarWhatsapp } from "@/lib/whatsapp-confirmacao";
+import { enviarWhatsapp, reativarIaChatnex } from "@/lib/whatsapp-confirmacao";
 import type { ChatbotConversa, ChatbotMensagem } from "@/types/chatbot";
 
 export async function listConversas(): Promise<ChatbotConversa[]> {
@@ -34,13 +34,22 @@ export async function assumirAtendimento(conversaId: string, usuarioId: string) 
   if (error) throw error;
 }
 
-export async function encerrarConversa(conversaId: string) {
+// `identificadorExterno` é o remoteJid da conversa (chatbot_conversas.identificador_externo)
+// — usado pra avisar o ChatNex que a IA pode voltar a responder esse número.
+export async function encerrarConversa(
+  conversaId: string,
+  identificadorExterno: string | null,
+) {
   const supabase = createClient();
   const { error } = await supabase
     .from("chatbot_conversas")
     .update({ status: "encerrada", aguardando_humano: false })
     .eq("id", conversaId);
   if (error) throw error;
+
+  if (identificadorExterno) {
+    void reativarIaChatnex(identificadorExterno);
+  }
 }
 
 // Resposta manual da recepção — fica registrada no histórico da conversa e

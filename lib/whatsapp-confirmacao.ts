@@ -110,3 +110,25 @@ export async function enviarConfirmacaoWhatsapp(
   if (!to) return;
   await enviarWhatsapp(to, montarMensagemConfirmacaoReserva(reserva));
 }
+
+/** Avisa o ChatNex que o atendimento humano de uma conversa terminou, pra
+ * IA voltar a responder aquele número — chamado quando a recepção clica em
+ * "Finalizado" no Chatbot. `identificadorExterno` é o remoteJid completo
+ * (ex.: "5511999999999@s.whatsapp.net") salvo em chatbot_conversas. Nunca
+ * lança exceção: encerrar a conversa não pode falhar por causa disso. */
+export async function reativarIaChatnex(
+  identificadorExterno: string,
+): Promise<boolean> {
+  try {
+    const resposta = await fetch("/api/integracoes/chatnex/reativar-ia", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ remoteJid: identificadorExterno }),
+    });
+    if (!resposta.ok) return false;
+    const dados = await resposta.json().catch(() => null);
+    return dados?.skipped ? false : true;
+  } catch {
+    return false;
+  }
+}

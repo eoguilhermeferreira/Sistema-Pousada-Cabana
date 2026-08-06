@@ -146,7 +146,10 @@ export function ChatbotPageContent() {
     setEncerrando(true);
     setErro("");
     try {
-      await encerrarConversa(selecionadaId);
+      await encerrarConversa(
+        selecionadaId,
+        conversaSelecionada?.identificador_externo ?? null,
+      );
       await carregarConversas();
     } catch (error) {
       setErro(getErrorMessage(error) || "Não foi possível encerrar a conversa.");

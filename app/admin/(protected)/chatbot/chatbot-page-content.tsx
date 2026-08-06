@@ -93,13 +93,45 @@ export function ChatbotPageContent() {
           debounceConversas = setTimeout(carregarConversas, 400);
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        // Reconecta sozinho quando a conexão cai (rede, notebook saindo do
+        // modo de espera) — recarrega assim que reconectar, sem precisar
+        // de F5.
+        if (status === "SUBSCRIBED") {
+          carregarConversas();
+          if (selecionadaId) carregarMensagens(selecionadaId);
+        }
+      });
 
     return () => {
       if (debounceConversas) clearTimeout(debounceConversas);
       supabase.removeChannel(channel);
     };
-  }, [carregarConversas, selecionadaId]);
+  }, [carregarConversas, carregarMensagens, selecionadaId]);
+
+  // Rede de segurança: recarrega sozinho a cada 20s e sempre que a aba
+  // volta a ficar visível/em foco, mesmo que o Realtime fique
+  // momentaneamente sem conexão.
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      carregarConversas();
+      if (selecionadaId) carregarMensagens(selecionadaId);
+    }, 20000);
+
+    function handleVisibilidade() {
+      if (document.visibilityState !== "visible") return;
+      carregarConversas();
+      if (selecionadaId) carregarMensagens(selecionadaId);
+    }
+    window.addEventListener("visibilitychange", handleVisibilidade);
+    window.addEventListener("focus", handleVisibilidade);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("visibilitychange", handleVisibilidade);
+      window.removeEventListener("focus", handleVisibilidade);
+    };
+  }, [carregarConversas, carregarMensagens, selecionadaId]);
 
   const conversaSelecionada = conversas.find((c) => c.id === selecionadaId) ?? null;
 

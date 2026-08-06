@@ -23,10 +23,9 @@ interface NotificacoesContextValue {
 
 const NotificacoesContext = React.createContext<NotificacoesContextValue | null>(null);
 
-/** Demais tabelas cuja mudança deve atualizar a lista de notificações, mas
- * sem tocar som — o alerta sonoro é só pros dois eventos que realmente
- * precisam de atenção imediata da recepção (reserva nova e chatbot
- * pedindo humano), tratados à parte abaixo. */
+/** Demais tabelas cuja mudança deve atualizar a lista de notificações —
+ * o alerta sonoro em si é decidido dentro de `recarregar`, comparando os
+ * ids dos grupos "com som" (ver GRUPOS_COM_SOM) antes/depois da recarga. */
 const TABELAS_RECARGA_SILENCIOSA = [
   "produtos",
   "quartos",
@@ -34,15 +33,48 @@ const TABELAS_RECARGA_SILENCIOSA = [
   "notas_fiscais",
 ] as const;
 
+/** Notificações cujo surgimento deve tocar o som — reserva nova aguardando
+ * confirmação e chatbot pedindo atendimento humano. */
+const GRUPOS_COM_SOM = ["reservas-aguardando-confirmacao", "chatbot-aguardando"] as const;
+
+function idsDoGrupo(dados: NotificacaoSistema[], grupoId: string): Set<string> {
+  const item = dados.find((n) => n.id === grupoId);
+  return new Set(item?.versao ? item.versao.split(",").filter(Boolean) : []);
+}
+
 export function NotificacoesProvider({ children }: { children: React.ReactNode }) {
   const [notificacoes, setNotificacoes] = React.useState<NotificacaoSistema[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [vistas, setVistas] = React.useState(() => getVistas());
   const pathname = usePathname();
 
+  // Guarda o último conjunto de ids de cada grupo "com som" — null até a
+  // primeira carga (pra nunca tocar som por algo que já estava pendente
+  // antes da tela abrir, só por item realmente novo).
+  const gruposAnterioresRef = React.useRef<Record<string, Set<string>> | null>(null);
+
+  // Recarrega a lista de notificações e toca o som quando um item novo
+  // aparece num dos grupos urgentes. Funciona não importa quem chamou —
+  // evento do Realtime, o poll de segurança ou a aba voltando a ficar
+  // visível — então o alerta nunca depende só da conexão do Realtime
+  // estar de pé nesse exato momento.
   const recarregar = React.useCallback(async () => {
     try {
-      setNotificacoes(await listNotificacoesSistema());
+      const dados = await listNotificacoesSistema();
+
+      if (gruposAnterioresRef.current) {
+        const anteriores = gruposAnterioresRef.current;
+        const temNovo = GRUPOS_COM_SOM.some((grupoId) => {
+          const atuais = idsDoGrupo(dados, grupoId);
+          return [...atuais].some((id) => !anteriores[grupoId].has(id));
+        });
+        if (temNovo) playNotificationSound();
+      }
+      gruposAnterioresRef.current = Object.fromEntries(
+        GRUPOS_COM_SOM.map((grupoId) => [grupoId, idsDoGrupo(dados, grupoId)]),
+      ) as Record<string, Set<string>>;
+
+      setNotificacoes(dados);
     } finally {
       setLoading(false);
     }
@@ -105,55 +137,54 @@ export function NotificacoesProvider({ children }: { children: React.ReactNode }
       debounce = setTimeout(recarregar, 800);
     };
 
+    // O som é decidido dentro de `recarregar` (comparando o antes/depois de
+    // cada grupo), não aqui — assim ele funciona do mesmo jeito não importa
+    // se quem disparou a recarga foi este evento do Realtime, o poll de
+    // segurança ou a aba voltando a ficar visível.
     const channel = supabase
       .channel("notificacoes-admin-realtime")
-      // Reserva nova (site ou lançada manualmente) já chega com status —
-      // toca o som só quando nasce "aguardando confirmação".
+      .on("postgres_changes", { event: "*", schema: "public", table: "reservas" }, agendarRecarga)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "reservas" },
-        (payload) => {
-          if ((payload.new as { status?: string } | null)?.status === "reservada") {
-            playNotificationSound();
-          }
-          agendarRecarga();
-        },
-      )
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "reservas" }, agendarRecarga)
-      // Conversa do chatbot passando a precisar de atendimento humano —
-      // seja uma conversa nova, seja uma existente que acabou de escalar.
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chatbot_conversas" },
-        (payload) => {
-          if ((payload.new as { aguardando_humano?: boolean } | null)?.aguardando_humano) {
-            playNotificationSound();
-          }
-          agendarRecarga();
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "chatbot_conversas" },
-        (payload) => {
-          const novo = payload.new as { aguardando_humano?: boolean } | null;
-          const antigo = payload.old as { aguardando_humano?: boolean } | null;
-          if (novo?.aguardando_humano && !antigo?.aguardando_humano) {
-            playNotificationSound();
-          }
-          agendarRecarga();
-        },
+        { event: "*", schema: "public", table: "chatbot_conversas" },
+        agendarRecarga,
       );
 
     for (const tabela of TABELAS_RECARGA_SILENCIOSA) {
       channel.on("postgres_changes", { event: "*", schema: "public", table: tabela }, agendarRecarga);
     }
 
-    channel.subscribe();
+    // Reconecta o canal quando a conexão cai (troca de rede, notebook saiu
+    // do modo de espera, etc.) — sem isso o canal fica "morto" até um F5.
+    channel.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        recarregar();
+      }
+    });
 
     return () => {
       if (debounce) clearTimeout(debounce);
       supabase.removeChannel(channel);
+    };
+  }, [recarregar]);
+
+  // Rede de segurança: mesmo que o Realtime fique momentaneamente sem
+  // conexão, a lista é recarregada sozinha a cada 25s e sempre que a aba
+  // volta a ficar visível/em foco — cobre notebook que dormiu, troca de
+  // aba, Wi-Fi que caiu etc., sem precisar de F5.
+  React.useEffect(() => {
+    const interval = setInterval(recarregar, 25000);
+
+    function handleVisibilidade() {
+      if (document.visibilityState === "visible") recarregar();
+    }
+    window.addEventListener("visibilitychange", handleVisibilidade);
+    window.addEventListener("focus", recarregar);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("visibilitychange", handleVisibilidade);
+      window.removeEventListener("focus", recarregar);
     };
   }, [recarregar]);
 

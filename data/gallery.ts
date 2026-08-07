@@ -40,4 +40,16 @@ export const galleryImages: GalleryImage[] = [
     width: 1200,
     height: 1600,
   },
+  {
+    src: "/images/galeria/cozinha.jpg",
+    alt: "Cozinha da Pousada Cabana com fogão, micro-ondas e frigobar",
+    width: 1200,
+    height: 1600,
+  },
+  {
+    src: "/images/galeria/corredor-escada.jpg",
+    alt: "Corredor e escada da Pousada Cabana",
+    width: 1200,
+    height: 1600,
+  },
 ];

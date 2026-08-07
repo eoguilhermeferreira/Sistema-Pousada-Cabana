@@ -44,7 +44,11 @@ export function Gallery() {
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
                   className={cn(
-                    "relative overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    // aspect-square garante altura mesmo no mobile, onde
+                    // sm:auto-rows não se aplica — sem isso a foto (position:
+                    // absolute do `fill`) não empurra altura nenhuma pro grid
+                    // e a linha inteira colapsa a 0px.
+                    "relative aspect-square overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     mosaicSpans[index % mosaicSpans.length],
                   )}
                 >

@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Info,
   LogOut,
+  Menu,
   Settings,
   TriangleAlert,
   User as UserIcon,
@@ -50,7 +51,13 @@ function initials(nome: string) {
   return (first + last).toUpperCase();
 }
 
-export function Topbar({ usuario }: { usuario: Usuario }) {
+export function Topbar({
+  usuario,
+  onOpenMenu,
+}: {
+  usuario: Usuario;
+  onOpenMenu: () => void;
+}) {
   const router = useRouter();
   const now = useCurrentTime();
   const { notificacoes, notificacoesNaoVistas, marcarTodasComoVistas } = useNotificacoes();
@@ -96,16 +103,26 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
   const timeLabel = now ? timeFormatter.format(now) : "--:--:--";
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-light bg-white px-6 print:hidden">
-      <div className="flex items-baseline gap-2 text-sm text-gray-text">
-        <span>{dateLabel}</span>
-        <span className="text-gray-text/40">•</span>
-        <span className="font-sans tabular-nums font-medium text-primary-dark">
-          {timeLabel}
-        </span>
+    <header className="flex h-16 items-center justify-between gap-2 border-b border-gray-light bg-white px-4 sm:px-6 print:hidden">
+      <div className="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          aria-label="Abrir menu"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark md:hidden"
+        >
+          <Menu className="size-5" strokeWidth={1.75} />
+        </button>
+        <div className="hidden items-baseline gap-2 truncate text-sm text-gray-text sm:flex">
+          <span>{dateLabel}</span>
+          <span className="text-gray-text/40">•</span>
+          <span className="font-sans tabular-nums font-medium text-primary-dark">
+            {timeLabel}
+          </span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <div ref={notifRef} className="relative">
           <button
             type="button"
@@ -126,7 +143,7 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-full z-30 mt-2 w-80 overflow-hidden rounded-2xl border border-gray-light bg-white shadow-xl">
+            <div className="absolute right-0 top-full z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-light bg-white shadow-xl">
               <div className="border-b border-gray-light px-4 py-3">
                 <p className="text-sm font-semibold text-primary-dark">Notificações</p>
               </div>
@@ -188,7 +205,7 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
             <span className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
               {initials(usuario.nome)}
             </span>
-            <span className="text-left leading-tight">
+            <span className="hidden text-left leading-tight sm:block">
               <span className="block text-sm font-medium text-primary-dark">
                 {usuario.nome}
               </span>
@@ -200,7 +217,7 @@ export function Topbar({ usuario }: { usuario: Usuario }) {
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-2xl border border-gray-light bg-white py-2 shadow-xl">
+            <div className="absolute right-0 top-full z-30 mt-2 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-light bg-white py-2 shadow-xl">
               <Link
                 href="/admin/configuracoes"
                 onClick={() => setMenuOpen(false)}

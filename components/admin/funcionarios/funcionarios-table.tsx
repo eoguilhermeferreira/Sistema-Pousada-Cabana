@@ -64,7 +64,97 @@ export function FuncionariosTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm">
+    <>
+      {/* Celular: cards empilhados — a tabela com 8 colunas não cabe numa
+       * tela de 360-400px sem esconder ações atrás de scroll horizontal. */}
+      <div className="space-y-3 md:hidden">
+        {loading &&
+          Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-24 animate-pulse rounded-2xl border border-gray-light bg-white"
+            />
+          ))}
+
+        {!loading &&
+          funcionarios.map((funcionario) => {
+            const ultimoPonto = ultimosPontos.get(funcionario.id);
+            return (
+              <div
+                key={funcionario.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => onOpen(funcionario)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") onOpen(funcionario);
+                }}
+                className="rounded-2xl border border-gray-light bg-white p-4 shadow-sm"
+              >
+                <div className="flex items-start gap-3">
+                  <HospedeAvatar
+                    nome={funcionario.nome}
+                    fotoUrl={funcionario.foto_url}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-primary-dark">
+                      {funcionario.nome}
+                    </p>
+                    <p className="truncate text-xs text-gray-text">
+                      {cargoLabels[funcionario.cargo]} ·{" "}
+                      {turnoLabels[funcionario.turno as keyof typeof turnoLabels]}
+                    </p>
+                  </div>
+                  <FuncionarioStatusBadge
+                    status={funcionario.status as "ativo" | "inativo"}
+                  />
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-gray-light pt-3 text-xs text-gray-text">
+                  <span>{formatPhone(funcionario.telefone)}</span>
+                  <span>
+                    {ultimoPonto ? (
+                      <>
+                        {tipoPontoLabels[
+                          ultimoPonto.tipo as keyof typeof tipoPontoLabels
+                        ] ?? ultimoPonto.tipo}{" "}
+                        · {timeFormatter.format(new Date(ultimoPonto.registrado_em))}
+                      </>
+                    ) : (
+                      "Sem ponto registrado"
+                    )}
+                  </span>
+                </div>
+
+                <div
+                  className="mt-3 flex items-center justify-end gap-2 border-t border-gray-light pt-3"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onEdit(funcionario)}
+                    className="flex h-10 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-gray-text transition-colors duration-200 hover:bg-primary-light hover:text-primary"
+                  >
+                    <Pencil className="size-4" />
+                    Editar
+                  </button>
+                  {podeExcluir && (
+                    <button
+                      type="button"
+                      onClick={() => onDelete(funcionario)}
+                      className="flex h-10 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-gray-text transition-colors duration-200 hover:bg-status-ocupado-light hover:text-status-ocupado"
+                    >
+                      <Trash2 className="size-4" />
+                      Excluir
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+      </div>
+
+      {/* Telas médias e maiores: tabela completa. */}
+      <div className="hidden overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm md:block">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[960px] text-left text-sm">
           <thead>
@@ -166,6 +256,7 @@ export function FuncionariosTable({
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, X } from "lucide-react";
 
 import { adminNavItems } from "@/lib/admin-nav";
 import { podeAcessarRota } from "@/lib/permissions";
@@ -14,9 +15,13 @@ import { cn } from "@/lib/utils";
 export function Sidebar({
   collapsed,
   onToggle,
+  mobileOpen,
+  onCloseMobile,
 }: {
   collapsed: boolean;
   onToggle: () => void;
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
 }) {
   const pathname = usePathname();
   const usuarioAtual = useUsuarioAtual();
@@ -28,11 +33,26 @@ export function Sidebar({
     notificacoesNaoVistas.map((notificacao) => notificacao.href).filter(Boolean),
   );
 
+  // No drawer mobile o menu sempre mostra os rótulos por completo (o modo
+  // "recolhido" só faz sentido pra sidebar fixa do desktop) — e trocar de
+  // página fecha o drawer sozinho, sem precisar tocar fora.
+  const iconOnly = collapsed && !mobileOpen;
+  const primeiraRenderizacao = React.useRef(true);
+  React.useEffect(() => {
+    if (primeiraRenderizacao.current) {
+      primeiraRenderizacao.current = false;
+      return;
+    }
+    onCloseMobile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-gray-light bg-white transition-[width] duration-300 ease-out print:hidden",
-        collapsed ? "w-20" : "w-64",
+        "fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-gray-light bg-white transition-transform duration-300 ease-out print:hidden md:translate-x-0 md:transition-[width]",
+        mobileOpen ? "translate-x-0" : "-translate-x-full",
+        collapsed ? "md:w-20" : "md:w-64",
       )}
     >
       <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-gray-light px-4">
@@ -43,8 +63,8 @@ export function Sidebar({
           height={36}
           className="h-9 w-auto shrink-0 object-contain"
         />
-        {!collapsed && (
-          <div className="min-w-0 leading-tight">
+        {!iconOnly && (
+          <div className="min-w-0 flex-1 leading-tight">
             <p className="truncate text-sm font-semibold text-primary-dark">
               Pousada Cabana
             </p>
@@ -53,6 +73,14 @@ export function Sidebar({
             </p>
           </div>
         )}
+        <button
+          type="button"
+          onClick={onCloseMobile}
+          aria-label="Fechar menu"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark md:hidden"
+        >
+          <X className="size-5" strokeWidth={1.75} />
+        </button>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -66,10 +94,10 @@ export function Sidebar({
             <Link
               key={item.href}
               href={item.href}
-              title={collapsed ? item.label : undefined}
+              title={iconOnly ? item.label : undefined}
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200",
-                collapsed && "justify-center px-0",
+                iconOnly && "md:justify-center md:px-0",
                 active
                   ? "bg-primary-light text-primary-dark"
                   : "text-gray-text hover:bg-gray-light hover:text-primary-dark",
@@ -84,7 +112,7 @@ export function Sidebar({
                   <span className="absolute -right-1 -top-1 size-2 rounded-full bg-status-ocupado" />
                 )}
               </span>
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!iconOnly && <span className="truncate">{item.label}</span>}
             </Link>
           );
         })}
@@ -94,7 +122,7 @@ export function Sidebar({
         type="button"
         onClick={onToggle}
         aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-        className="flex h-12 shrink-0 items-center justify-center gap-2 border-t border-gray-light text-sm font-medium text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark"
+        className="hidden h-12 shrink-0 items-center justify-center gap-2 border-t border-gray-light text-sm font-medium text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark md:flex"
       >
         {collapsed ? (
           <ChevronsRight className="size-4" strokeWidth={1.75} />

@@ -294,8 +294,8 @@ export function FuncionarioFormModal({
           title={isEditing ? "Editar Funcionário" : "Novo Funcionário"}
           className="max-w-3xl"
         >
-          <form onSubmit={handleSubmit}>
-            <div className="max-h-[70vh] space-y-6 overflow-y-auto px-6 py-6">
+          <form onSubmit={handleSubmit} className="flex flex-col">
+            <div className="space-y-6 px-6 py-6">
               <div className="flex flex-wrap items-center gap-4">
                 <HospedeAvatar nome={values.nome} fotoUrl={fotoUrl} size="lg" />
                 <div className="flex flex-wrap gap-2">
@@ -346,7 +346,7 @@ export function FuncionarioFormModal({
                     placeholder="Nome completo do funcionário"
                   />
                 </Field>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field label="CPF" required error={errors.cpf}>
                     <Input
                       value={values.cpf}
@@ -363,7 +363,7 @@ export function FuncionarioFormModal({
                     />
                   </Field>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field label="Telefone" required error={errors.telefone}>
                     <Input
                       value={values.telefone}
@@ -400,7 +400,7 @@ export function FuncionarioFormModal({
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-text">
                   Endereço
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field
                     label={checkingCep ? "CEP (buscando...)" : "CEP"}
                     error={errors.cep}
@@ -428,7 +428,7 @@ export function FuncionarioFormModal({
                     placeholder="Preenchido automaticamente pelo CEP"
                   />
                 </Field>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field label="Complemento" error={errors.complemento}>
                     <Input
                       value={values.complemento}
@@ -444,7 +444,7 @@ export function FuncionarioFormModal({
                     />
                   </Field>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field label="Cidade" error={errors.cidade}>
                     <Input
                       value={values.cidade}
@@ -467,7 +467,7 @@ export function FuncionarioFormModal({
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-text">
                   Cargo e turno
                 </h3>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <Field label="Cargo" required error={errors.cargo}>
                     <select
                       className={selectClass}
@@ -518,7 +518,7 @@ export function FuncionarioFormModal({
                     </Field>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field
                     label="Data de admissão"
                     required
@@ -574,7 +574,7 @@ export function FuncionarioFormModal({
                     almoço ou a saída final acontecem fora do horário.
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
                   <Field label="Entrada" error={errors.horario_entrada}>
                     <Input
                       type="time"
@@ -653,7 +653,7 @@ export function FuncionarioFormModal({
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-gray-light px-6 py-4">
+            <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-gray-light bg-white px-6 py-4">
               <Button
                 type="button"
                 variant="ghost"

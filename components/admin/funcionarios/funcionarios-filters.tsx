@@ -76,7 +76,7 @@ export function FuncionariosFilters({
           <PopoverPrimitive.Content
             align="end"
             sideOffset={8}
-            className="z-50 w-80 rounded-2xl border border-gray-light bg-white p-4 shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+            className="z-50 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-light bg-white p-4 shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
           >
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-primary-dark">Filtros</p>

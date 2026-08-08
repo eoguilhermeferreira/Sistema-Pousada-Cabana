@@ -152,18 +152,18 @@ export function FuncionarioPainelDrawer({
           </div>
         ) : (
           <Tabs defaultValue="resumo" className="flex h-full flex-col">
-            <div className="flex items-center justify-between gap-3 px-6 pt-5">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-5">
+              <div className="flex min-w-0 items-center gap-3">
                 <HospedeAvatar
                   nome={funcionario.nome}
                   fotoUrl={funcionario.foto_url}
                   size="md"
                 />
-                <div>
-                  <p className="font-display text-base font-semibold text-primary-dark">
+                <div className="min-w-0">
+                  <p className="truncate font-display text-base font-semibold text-primary-dark">
                     {funcionario.nome}
                   </p>
-                  <div className="mt-0.5 flex items-center gap-2">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2">
                     <span className="text-xs text-gray-text">
                       {cargoLabels[funcionario.cargo]}
                     </span>
@@ -177,7 +177,7 @@ export function FuncionarioPainelDrawer({
                 size="sm"
                 variant="outline"
                 onClick={() => onEdit(funcionario)}
-                className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
+                className="shrink-0 border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
               >
                 <Pencil className="size-4" />
                 Editar
@@ -294,7 +294,8 @@ export function FuncionarioPainelDrawer({
                   <EmptyState message="Nenhum ponto registrado ainda." />
                 ) : (
                   <div className="overflow-hidden rounded-2xl border border-gray-light">
-                    <table className="w-full text-left text-sm">
+                    <div className="overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-left text-sm">
                       <thead>
                         <tr className="border-b border-gray-light bg-admin-bg/60">
                           {[
@@ -376,6 +377,7 @@ export function FuncionarioPainelDrawer({
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
               </TabsContent>
@@ -500,7 +502,7 @@ function PontoCell({
       <button
         type="button"
         onClick={onClick}
-        className={`rounded-lg px-2 py-1 text-left transition-colors duration-200 hover:bg-primary-light hover:text-primary ${
+        className={`min-h-9 rounded-lg px-2 py-1.5 text-left transition-colors duration-200 hover:bg-primary-light hover:text-primary ${
           ponto ? "text-gray-text" : "text-gray-text/50"
         }`}
         title={ponto ? "Corrigir ponto" : "Lançar ponto manualmente"}

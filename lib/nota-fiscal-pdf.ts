@@ -323,6 +323,13 @@ export async function gerarNotaFiscalPdf(dados: NotaFiscalPdfData) {
   doc.save(`nota-fiscal-${dados.numeroFormatado.replace("/", "-")}.pdf`);
 }
 
+/** Mesmo PDF, mas como Blob em vez de disparar o download — usado pra
+ * enviar a nota por WhatsApp (upload no Storage + link). */
+export async function gerarNotaFiscalPdfBlob(dados: NotaFiscalPdfData): Promise<Blob> {
+  const doc = await montarDocumento(dados);
+  return doc.output("blob");
+}
+
 export async function imprimirNotaFiscalPdf(dados: NotaFiscalPdfData) {
   // A janela precisa ser aberta de forma síncrona, ainda dentro do clique do
   // usuário — se abrirmos só depois do await (import do jsPDF, fetch do logo),

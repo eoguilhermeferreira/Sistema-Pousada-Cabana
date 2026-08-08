@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/client";
 import { onlyDigits } from "@/lib/cpf";
+import { formatNumeroNota } from "@/types/nota-fiscal";
+import { gerarNotaFiscalPdfBlob } from "@/lib/nota-fiscal-pdf";
+import { montarDadosPdf } from "@/lib/nota-fiscal-mapper";
+import { enviarWhatsapp, paraNumeroWhatsapp } from "@/lib/whatsapp-confirmacao";
 import { listConsumosPorReserva } from "@/services/consumo-service";
 import { getReservaById } from "@/services/reservas-service";
 import { enviarParaPrefeitura } from "@/services/nota-fiscal-integracao-service";
@@ -14,6 +18,8 @@ import {
   type NotaFiscalInsert,
   type ProdutoNotaInput,
 } from "@/types/nota-fiscal";
+
+const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 const EMPRESA_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -342,4 +348,51 @@ export async function listNotas(filtros: FiltrosHistoricoNotas): Promise<NotaFis
       String(nota.numero).includes(term) ||
       (termDigits && nota.tomador_documento.includes(termDigits)),
   );
+}
+
+// ---------------------------------------------------------------------------
+// Envio por WhatsApp (gera o PDF, sobe no Storage e manda o link pro cliente)
+// ---------------------------------------------------------------------------
+export async function enviarNotaFiscalWhatsapp(
+  nota: NotaFiscalComProdutos,
+  empresa: EmpresaConfiguracao,
+): Promise<void> {
+  const numero = paraNumeroWhatsapp(nota.tomador_telefone ?? "");
+  if (!numero) {
+    throw new Error("O tomador não tem telefone cadastrado.");
+  }
+
+  const blob = await gerarNotaFiscalPdfBlob(montarDadosPdf(nota, empresa));
+
+  const supabase = createClient();
+  const caminho = `${nota.id}.pdf`;
+  const { error: uploadError } = await supabase.storage
+    .from("notas-fiscais-pdf")
+    .upload(caminho, blob, { contentType: "application/pdf", upsert: true });
+  if (uploadError) throw uploadError;
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("notas-fiscais-pdf").getPublicUrl(caminho);
+
+  const numeroFormatado = formatNumeroNota(nota.numero, nota.serie);
+  const mensagem = [
+    `*Nota Fiscal — ${empresa.nome_fantasia || "Pousada Cabana"}*`,
+    "",
+    `Olá, ${nota.tomador_nome}! Segue sua nota fiscal.`,
+    "",
+    `*Nota nº:* ${numeroFormatado}`,
+    `*Valor:* ${currency.format(nota.valor_final)}`,
+    "",
+    `PDF: ${publicUrl}`,
+    "",
+    "Qualquer dúvida, é só responder por aqui.",
+  ].join("\n");
+
+  const enviado = await enviarWhatsapp(numero, mensagem);
+  if (!enviado) {
+    throw new Error(
+      "Não foi possível enviar pelo WhatsApp. Confira se o ChatNex está conectado em Configurações > Integrações.",
+    );
+  }
 }

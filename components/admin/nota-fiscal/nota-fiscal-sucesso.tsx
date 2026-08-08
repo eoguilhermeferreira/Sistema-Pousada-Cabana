@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle2, Download, FilePlus2, Loader2, Mail, Printer } from "lucide-react";
+import { CheckCircle2, Download, FilePlus2, Loader2, Mail, MessageCircle, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/supabase-error";
 import { formatNumeroNota, statusNotaLabels, type EmpresaConfiguracao, type NotaFiscalComProdutos } from "@/types/nota-fiscal";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -16,6 +17,7 @@ interface NotaFiscalSucessoProps {
   error?: string;
   onImprimir: () => void;
   onBaixarPdf: () => void;
+  onEnviarWhatsapp: () => Promise<void>;
   onNovaNota: () => void;
 }
 
@@ -25,10 +27,14 @@ export function NotaFiscalSucesso({
   error,
   onImprimir,
   onBaixarPdf,
+  onEnviarWhatsapp,
   onNovaNota,
 }: NotaFiscalSucessoProps) {
   const [enviandoEmail, setEnviandoEmail] = React.useState(false);
   const [emailEnviado, setEmailEnviado] = React.useState(false);
+  const [enviandoWhatsapp, setEnviandoWhatsapp] = React.useState(false);
+  const [whatsappEnviado, setWhatsappEnviado] = React.useState(false);
+  const [whatsappErro, setWhatsappErro] = React.useState("");
 
   async function handleEnviarEmail() {
     setEnviandoEmail(true);
@@ -37,6 +43,19 @@ export function NotaFiscalSucesso({
     await new Promise((resolve) => setTimeout(resolve, 700));
     setEnviandoEmail(false);
     setEmailEnviado(true);
+  }
+
+  async function handleEnviarWhatsapp() {
+    setEnviandoWhatsapp(true);
+    setWhatsappErro("");
+    try {
+      await onEnviarWhatsapp();
+      setWhatsappEnviado(true);
+    } catch (err) {
+      setWhatsappErro(getErrorMessage(err) || "Não foi possível enviar pelo WhatsApp.");
+    } finally {
+      setEnviandoWhatsapp(false);
+    }
   }
 
   return (
@@ -80,7 +99,13 @@ export function NotaFiscalSucesso({
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {whatsappErro && (
+        <p className="rounded-2xl border border-status-ocupado/30 bg-status-ocupado-light px-5 py-4 text-left text-sm font-medium text-status-ocupado">
+          {whatsappErro}
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Button
           type="button"
           variant="outline"
@@ -98,6 +123,20 @@ export function NotaFiscalSucesso({
         >
           <Download className="size-4" />
           Baixar PDF
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleEnviarWhatsapp}
+          disabled={enviandoWhatsapp || whatsappEnviado}
+          className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
+        >
+          {enviandoWhatsapp ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <MessageCircle className="size-4" />
+          )}
+          {whatsappEnviado ? "Enviado" : "Enviar WhatsApp"}
         </Button>
         <Button
           type="button"

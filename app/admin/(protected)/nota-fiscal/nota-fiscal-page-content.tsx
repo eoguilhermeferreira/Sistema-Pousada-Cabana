@@ -21,6 +21,7 @@ import { montarDadosPdf } from "@/lib/nota-fiscal-mapper";
 import {
   cancelarNota,
   emitirNota,
+  enviarNotaFiscalWhatsapp,
   getEmpresaConfiguracao,
   getNotaById,
   getNotaPorReserva,
@@ -269,6 +270,13 @@ export function NotaFiscalPageContent() {
     }
   }
 
+  async function handleEnviarWhatsapp() {
+    if (!notaId) return;
+    const nota = await getNotaById(notaId);
+    const empresaAtual = empresa ?? (await getEmpresaConfiguracao());
+    await enviarNotaFiscalWhatsapp(nota, empresaAtual);
+  }
+
   async function handleConfirmarCancelamento() {
     if (!notaId) return;
     setCancelando(true);
@@ -301,6 +309,7 @@ export function NotaFiscalPageContent() {
         error={error}
         onImprimir={handleImprimir}
         onBaixarPdf={handleBaixarPdf}
+        onEnviarWhatsapp={handleEnviarWhatsapp}
         onNovaNota={handleNovaNota}
       />
     );

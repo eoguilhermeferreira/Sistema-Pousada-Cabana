@@ -2404,6 +2404,8 @@ export type Database = {
         | "financeiro"
         | "limpeza"
         | "gerente"
+        | "cozinha"
+        | "lavanderia"
       forma_pagamento: "pix" | "dinheiro" | "cartao_debito" | "cartao_credito"
       sexo_hospede: "masculino" | "feminino" | "outro"
       status_hospede: "ativo" | "inativo"
@@ -2560,6 +2562,8 @@ export const Constants = {
         "financeiro",
         "limpeza",
         "gerente",
+        "cozinha",
+        "lavanderia",
       ],
       forma_pagamento: ["pix", "dinheiro", "cartao_debito", "cartao_credito"],
       sexo_hospede: ["masculino", "feminino", "outro"],

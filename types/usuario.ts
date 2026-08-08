@@ -9,6 +9,8 @@ export const cargoLabels: Record<CargoUsuario, string> = {
   recepcao: "Recepção",
   financeiro: "Financeiro",
   limpeza: "Limpeza",
+  cozinha: "Cozinha",
+  lavanderia: "Lavanderia",
 };
 
 export const cargoOptions: CargoUsuario[] = [

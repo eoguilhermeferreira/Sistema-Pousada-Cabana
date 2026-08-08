@@ -6,8 +6,9 @@ import { ListFilter, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { cargoLabels, cargoOptions, type CargoUsuario } from "@/types/usuario";
+import { cargoLabels, type CargoUsuario } from "@/types/usuario";
 import {
+  cargoFuncionarioOptions,
   emptyFiltrosFuncionarios,
   statusFuncionarioLabels,
   turnoLabels,
@@ -126,7 +127,7 @@ export function FuncionariosFilters({
                   }
                 >
                   <option value="">Todos</option>
-                  {cargoOptions.map((cargo) => (
+                  {cargoFuncionarioOptions.map((cargo) => (
                     <option key={cargo} value={cargo}>
                       {cargoLabels[cargo]}
                     </option>

@@ -90,6 +90,25 @@ export const permissoesPorCargo: Record<CargoUsuario, PermissoesCargo> = {
     relatoriosPermitidos: [],
     navegacao: ["/admin/dashboard", "/admin/quartos", "/admin/checkin-checkout"],
   },
+  // Cozinha e lavanderia são cargos de funcionário (ficha/ponto), sem tela
+  // própria de sistema ainda — mesma navegação restrita da limpeza caso
+  // algum dia ganhem login.
+  cozinha: {
+    label: "Cozinha",
+    podeExcluirFuncionarios: false,
+    podeVerSalario: false,
+    podeCorrigirPonto: false,
+    relatoriosPermitidos: [],
+    navegacao: ["/admin/dashboard", "/admin/quartos", "/admin/checkin-checkout"],
+  },
+  lavanderia: {
+    label: "Lavanderia",
+    podeExcluirFuncionarios: false,
+    podeVerSalario: false,
+    podeCorrigirPonto: false,
+    relatoriosPermitidos: [],
+    navegacao: ["/admin/dashboard", "/admin/quartos", "/admin/checkin-checkout"],
+  },
 };
 
 export function podeAcessarRota(cargo: CargoUsuario, href: string): boolean {

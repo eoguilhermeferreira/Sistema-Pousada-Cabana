@@ -18,6 +18,17 @@ export const statusFuncionarioLabels: Record<StatusFuncionario, string> = {
 
 export const turnoOptions: Turno[] = ["manha", "tarde", "noite", "integral"];
 
+// Cargo aqui reaproveita o mesmo enum de usuarios.cargo (cargo_usuario), mas
+// só esses 4 fazem sentido como função de funcionário na pousada — os
+// demais valores do enum (administrador, gerente, financeiro) são níveis de
+// acesso ao sistema, cadastrados em Configurações > Usuários.
+export const cargoFuncionarioOptions: CargoUsuario[] = [
+  "limpeza",
+  "recepcao",
+  "cozinha",
+  "lavanderia",
+];
+
 export const turnoLabels: Record<Turno, string> = {
   manha: "Manhã",
   tarde: "Tarde",

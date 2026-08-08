@@ -14,8 +14,8 @@ import {
   emptyFiltrosRelatorioFuncionarios,
   type LinhaRelatorioFuncionario,
 } from "@/types/relatorio";
-import { cargoLabels, cargoOptions } from "@/types/usuario";
-import type { Funcionario } from "@/types/funcionario";
+import { cargoLabels } from "@/types/usuario";
+import { cargoFuncionarioOptions, type Funcionario } from "@/types/funcionario";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -93,7 +93,7 @@ export function RelatorioFuncionarios({ funcionarios }: { funcionarios: Funciona
             onChange={(e) => setFiltros((f) => ({ ...f, cargo: e.target.value as typeof f.cargo }))}
           >
             <option value="">Todos</option>
-            {cargoOptions.map((cargo) => (
+            {cargoFuncionarioOptions.map((cargo) => (
               <option key={cargo} value={cargo}>
                 {cargoLabels[cargo]}
               </option>

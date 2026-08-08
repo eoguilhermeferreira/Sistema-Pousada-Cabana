@@ -21,6 +21,7 @@ import {
   uploadFuncionarioFoto,
 } from "@/services/funcionarios-service";
 import {
+  cargoFuncionarioOptions,
   emptyFuncionarioForm,
   funcionarioToFormValues,
   statusFuncionarioLabels,
@@ -29,7 +30,7 @@ import {
   type Funcionario,
   type FuncionarioFormValues,
 } from "@/types/funcionario";
-import { cargoLabels, cargoOptions, type CargoUsuario } from "@/types/usuario";
+import { cargoLabels, type CargoUsuario } from "@/types/usuario";
 
 const selectClass =
   "flex h-11 w-full rounded-xl border border-gray-text/20 bg-white px-4 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50";
@@ -479,7 +480,7 @@ export function FuncionarioFormModal({
                       }
                     >
                       <option value="">Selecione</option>
-                      {cargoOptions.map((cargo) => (
+                      {cargoFuncionarioOptions.map((cargo) => (
                         <option key={cargo} value={cargo}>
                           {cargoLabels[cargo]}
                         </option>

@@ -117,7 +117,9 @@ export function ReservasTable({
                         {reserva.hospede_principal.nome}
                       </p>
                       <p className="text-xs text-gray-text">
-                        {formatCpf(reserva.hospede_principal.cpf)}
+                        {reserva.hospede_principal.cpf
+                          ? formatCpf(reserva.hospede_principal.cpf)
+                          : "CPF não informado"}
                       </p>
                     </td>
                     <td className="px-5 py-3 text-gray-text">

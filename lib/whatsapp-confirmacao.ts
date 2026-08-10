@@ -35,8 +35,8 @@ export function montarMensagemConfirmacaoReserva(
     "",
     "*Dados do titular da reserva:*",
     `*Nome:* ${titular.nome}`,
-    `*CPF:* ${formatCpf(titular.cpf)}`,
-    `*Telefone:* ${formatPhone(titular.telefone)}`,
+    ...(titular.cpf ? [`*CPF:* ${formatCpf(titular.cpf)}`] : []),
+    ...(titular.telefone ? [`*Telefone:* ${formatPhone(titular.telefone)}`] : []),
     ...(titular.email ? [`*E-mail:* ${titular.email}`] : []),
     "",
     `*Adultos:* ${reserva.quantidade_adultos}`,
@@ -106,7 +106,7 @@ export async function enviarWhatsapp(
 export async function enviarConfirmacaoWhatsapp(
   reserva: ReservaDetalhada,
 ): Promise<void> {
-  const to = paraNumeroWhatsapp(reserva.hospede_principal.telefone);
+  const to = paraNumeroWhatsapp(reserva.hospede_principal.telefone ?? "");
   if (!to) return;
   await enviarWhatsapp(to, montarMensagemConfirmacaoReserva(reserva));
 }

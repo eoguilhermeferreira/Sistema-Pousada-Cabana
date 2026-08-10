@@ -58,7 +58,7 @@ export function SelecionarReservaModal({
         (r) =>
           r.codigo.toLowerCase().includes(term) ||
           r.hospede_principal.nome.toLowerCase().includes(term) ||
-          r.hospede_principal.cpf.includes(term) ||
+          (r.hospede_principal.cpf ?? "").includes(term) ||
           r.quarto.numero.toLowerCase().includes(term) ||
           (r.hospede_principal.empresa ?? "").toLowerCase().includes(term),
       )
@@ -134,7 +134,10 @@ export function SelecionarReservaModal({
                       <span className="font-mono text-xs text-gray-text">{reserva.codigo}</span>
                     </div>
                     <p className="truncate text-xs text-gray-text">
-                      {formatCpf(reserva.hospede_principal.cpf)} · Quarto {reserva.quarto.numero} ·{" "}
+                      {reserva.hospede_principal.cpf
+                        ? `${formatCpf(reserva.hospede_principal.cpf)} · `
+                        : ""}
+                      Quarto {reserva.quarto.numero} ·{" "}
                       {formatDate(reserva.data_entrada)} → {formatDate(reserva.data_saida)}
                     </p>
                   </div>

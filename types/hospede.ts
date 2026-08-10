@@ -63,8 +63,8 @@ export const emptyHospedeForm: HospedeFormValues = {
 export function hospedeToFormValues(hospede: Hospede): HospedeFormValues {
   return {
     nome: hospede.nome,
-    cpf: hospede.cpf,
-    telefone: hospede.telefone,
+    cpf: hospede.cpf ?? "",
+    telefone: hospede.telefone ?? "",
     telefone_secundario: hospede.telefone_secundario ?? "",
     email: hospede.email ?? "",
     sexo: hospede.sexo ?? "",

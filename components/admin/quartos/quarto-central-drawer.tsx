@@ -396,7 +396,11 @@ export function QuartoCentralDrawer({
                               {reservaRelevante.hospede_principal.nome}
                             </p>
                             <p className="text-xs text-gray-text">
-                              {formatPhone(reservaRelevante.hospede_principal.telefone)}
+                              {reservaRelevante.hospede_principal.telefone
+                                ? formatPhone(
+                                    reservaRelevante.hospede_principal.telefone,
+                                  )
+                                : "Não informado"}
                             </p>
                           </div>
                           <span className="text-xs font-medium text-gray-text">Titular</span>

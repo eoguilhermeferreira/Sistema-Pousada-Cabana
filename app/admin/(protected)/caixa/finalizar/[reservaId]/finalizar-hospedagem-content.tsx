@@ -250,7 +250,9 @@ export function FinalizarHospedagemContent({
                   {reserva.hospede_principal.nome}
                 </p>
                 <p className="text-sm text-gray-text">
-                  {formatCpf(reserva.hospede_principal.cpf)}
+                  {reserva.hospede_principal.cpf
+                    ? formatCpf(reserva.hospede_principal.cpf)
+                    : "CPF não informado"}
                 </p>
               </div>
             </div>
@@ -258,7 +260,9 @@ export function FinalizarHospedagemContent({
               <div>
                 <p className="text-xs text-gray-text">Telefone</p>
                 <p className="text-sm font-medium text-primary-dark">
-                  {formatPhone(reserva.hospede_principal.telefone)}
+                  {reserva.hospede_principal.telefone
+                    ? formatPhone(reserva.hospede_principal.telefone)
+                    : "Não informado"}
                 </p>
               </div>
               {reserva.hospede_principal.empresa && (

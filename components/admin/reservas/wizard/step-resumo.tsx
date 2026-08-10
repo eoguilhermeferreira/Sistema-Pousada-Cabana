@@ -69,7 +69,12 @@ export function StepResumo({
           </p>
           <p className="text-sm font-medium text-primary-dark">{hospede.nome}</p>
           <p className="text-xs text-gray-text">
-            {formatCpf(hospede.cpf)} · {formatPhone(hospede.telefone)}
+            {[
+              hospede.cpf ? formatCpf(hospede.cpf) : null,
+              hospede.telefone ? formatPhone(hospede.telefone) : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
           {hospede.empresa && (
             <p className="text-xs text-gray-text">{hospede.empresa}</p>

@@ -84,7 +84,9 @@ export function OperacaoCard({
           </span>
           <span className="flex items-center gap-1">
             <Phone className="size-3.5" />
-            {formatPhone(reserva.hospede_principal.telefone)}
+            {reserva.hospede_principal.telefone
+              ? formatPhone(reserva.hospede_principal.telefone)
+              : "Não informado"}
           </span>
           <span className="font-mono">{reserva.codigo}</span>
         </div>

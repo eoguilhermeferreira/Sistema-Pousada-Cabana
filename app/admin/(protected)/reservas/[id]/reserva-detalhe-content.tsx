@@ -241,14 +241,18 @@ export function ReservaDetalheContent({ reservaId }: ReservaDetalheContentProps)
                   {reserva.hospede_principal.nome}
                 </p>
                 <p className="text-sm text-gray-text">
-                  {formatCpf(reserva.hospede_principal.cpf)}
+                  {reserva.hospede_principal.cpf
+                    ? formatCpf(reserva.hospede_principal.cpf)
+                    : "CPF não informado"}
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 border-t border-gray-light pt-4">
               <div className="flex items-center gap-2 text-sm text-primary-dark">
                 <Phone className="size-4 text-gray-text" />
-                {formatPhone(reserva.hospede_principal.telefone)}
+                {reserva.hospede_principal.telefone
+                  ? formatPhone(reserva.hospede_principal.telefone)
+                  : "Não informado"}
               </div>
               {reserva.hospede_principal.empresa && (
                 <div className="flex items-center gap-2 text-sm text-primary-dark">

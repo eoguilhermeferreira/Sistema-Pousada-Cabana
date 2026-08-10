@@ -119,8 +119,8 @@ export function ReservasPageContent() {
         const matches =
           reserva.codigo.toLowerCase().includes(term) ||
           reserva.hospede_principal.nome.toLowerCase().includes(term) ||
-          reserva.hospede_principal.cpf.includes(term) ||
-          reserva.hospede_principal.telefone.includes(term) ||
+          (reserva.hospede_principal.cpf ?? "").includes(term) ||
+          (reserva.hospede_principal.telefone ?? "").includes(term) ||
           (reserva.hospede_principal.empresa ?? "").toLowerCase().includes(term) ||
           reserva.quarto.numero.toLowerCase().includes(term);
         if (!matches) return false;

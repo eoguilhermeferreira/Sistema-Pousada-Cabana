@@ -17,6 +17,12 @@ interface StepHospedeProps {
   onChange: (hospede: Hospede | null) => void;
 }
 
+function contatoResumo(cpf: string | null, telefone: string | null) {
+  return [cpf ? formatCpf(cpf) : null, telefone ? formatPhone(telefone) : null]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 export function StepHospede({ hospede, onChange }: StepHospedeProps) {
   const [searchInput, setSearchInput] = React.useState("");
   const [resultados, setResultados] = React.useState<Hospede[]>([]);
@@ -53,7 +59,7 @@ export function StepHospede({ hospede, onChange }: StepHospedeProps) {
             <div>
               <p className="font-medium text-primary-dark">{hospede.nome}</p>
               <p className="text-xs text-gray-text">
-                {formatCpf(hospede.cpf)} · {formatPhone(hospede.telefone)}
+                {contatoResumo(hospede.cpf, hospede.telefone)}
                 {hospede.empresa && ` · ${hospede.empresa}`}
               </p>
             </div>
@@ -121,7 +127,7 @@ export function StepHospede({ hospede, onChange }: StepHospedeProps) {
                   {item.nome}
                 </p>
                 <p className="truncate text-xs text-gray-text">
-                  {formatCpf(item.cpf)} · {formatPhone(item.telefone)}
+                  {contatoResumo(item.cpf, item.telefone)}
                   {item.empresa && ` · ${item.empresa}`}
                 </p>
               </div>

@@ -95,7 +95,10 @@ export function HospedeView({ open, onOpenChange, hospede }: HospedeViewProps) {
           <div className="space-y-4">
             <SectionTitle icon={User}>Dados pessoais</SectionTitle>
             <div className="grid grid-cols-2 gap-4">
-              <InfoRow label="CPF" value={formatCpf(hospede.cpf)} />
+              <InfoRow
+                label="CPF"
+                value={hospede.cpf ? formatCpf(hospede.cpf) : null}
+              />
               <InfoRow
                 label="Sexo"
                 value={hospede.sexo ? sexoLabels[hospede.sexo] : null}
@@ -110,7 +113,10 @@ export function HospedeView({ open, onOpenChange, hospede }: HospedeViewProps) {
           <div className="space-y-4">
             <SectionTitle icon={Phone}>Contato</SectionTitle>
             <div className="grid grid-cols-2 gap-4">
-              <InfoRow label="Telefone" value={formatPhone(hospede.telefone)} />
+              <InfoRow
+                label="Telefone"
+                value={hospede.telefone ? formatPhone(hospede.telefone) : null}
+              />
               <InfoRow
                 label="Telefone secundário"
                 value={

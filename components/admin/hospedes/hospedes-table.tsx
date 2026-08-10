@@ -95,10 +95,10 @@ export function HospedesTable({
                     </div>
                   </td>
                   <td className="px-5 py-3 text-gray-text">
-                    {formatCpf(hospede.cpf)}
+                    {hospede.cpf ? formatCpf(hospede.cpf) : "—"}
                   </td>
                   <td className="px-5 py-3 text-gray-text">
-                    {formatPhone(hospede.telefone)}
+                    {hospede.telefone ? formatPhone(hospede.telefone) : "—"}
                   </td>
                   <td className="px-5 py-3 text-gray-text">
                     {hospede.empresa || "—"}

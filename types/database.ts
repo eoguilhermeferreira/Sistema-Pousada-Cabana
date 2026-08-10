@@ -770,7 +770,7 @@ export type Database = {
           cep: string | null
           cidade: string | null
           complemento: string | null
-          cpf: string
+          cpf: string | null
           created_at: string
           data_nascimento: string | null
           email: string | null
@@ -785,7 +785,7 @@ export type Database = {
           rua: string | null
           sexo: Database["public"]["Enums"]["sexo_hospede"] | null
           status: Database["public"]["Enums"]["status_hospede"]
-          telefone: string
+          telefone: string | null
           telefone_secundario: string | null
           updated_at: string
         }
@@ -794,7 +794,7 @@ export type Database = {
           cep?: string | null
           cidade?: string | null
           complemento?: string | null
-          cpf: string
+          cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
           email?: string | null
@@ -809,7 +809,7 @@ export type Database = {
           rua?: string | null
           sexo?: Database["public"]["Enums"]["sexo_hospede"] | null
           status?: Database["public"]["Enums"]["status_hospede"]
-          telefone: string
+          telefone?: string | null
           telefone_secundario?: string | null
           updated_at?: string
         }
@@ -818,7 +818,7 @@ export type Database = {
           cep?: string | null
           cidade?: string | null
           complemento?: string | null
-          cpf?: string
+          cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
           email?: string | null
@@ -833,7 +833,7 @@ export type Database = {
           rua?: string | null
           sexo?: Database["public"]["Enums"]["sexo_hospede"] | null
           status?: Database["public"]["Enums"]["status_hospede"]
-          telefone?: string
+          telefone?: string | null
           telefone_secundario?: string | null
           updated_at?: string
         }

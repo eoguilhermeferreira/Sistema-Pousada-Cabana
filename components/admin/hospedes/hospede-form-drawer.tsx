@@ -152,8 +152,8 @@ export function HospedeFormDrawer({
   function validate(): Record<string, string> {
     const nextErrors: Record<string, string> = {};
     if (!values.nome.trim()) nextErrors.nome = "Informe o nome completo.";
-    if (!isValidCpf(values.cpf)) nextErrors.cpf = "CPF inválido.";
-    if (!isValidPhone(values.telefone))
+    if (values.cpf && !isValidCpf(values.cpf)) nextErrors.cpf = "CPF inválido.";
+    if (values.telefone && !isValidPhone(values.telefone))
       nextErrors.telefone = "Telefone inválido.";
     if (
       values.telefone_secundario &&
@@ -162,8 +162,7 @@ export function HospedeFormDrawer({
       nextErrors.telefone_secundario = "Telefone inválido.";
     if (values.email && !/^\S+@\S+\.\S+$/.test(values.email))
       nextErrors.email = "E-mail inválido.";
-    if (!isValidCep(values.cep)) nextErrors.cep = "CEP inválido.";
-    if (!values.numero.trim()) nextErrors.numero = "Informe o número.";
+    if (values.cep && !isValidCep(values.cep)) nextErrors.cep = "CEP inválido.";
     return nextErrors;
   }
 
@@ -179,30 +178,32 @@ export function HospedeFormDrawer({
 
     setSaving(true);
     try {
-      const cpfDigits = onlyDigits(values.cpf);
-      const duplicate = await cpfExists(cpfDigits, hospede?.id);
-      if (duplicate) {
-        setErrors((prev) => ({
-          ...prev,
-          cpf: "Já existe um hóspede cadastrado com este CPF.",
-        }));
-        setSaving(false);
-        return;
+      const cpfDigits = values.cpf ? onlyDigits(values.cpf) : "";
+      if (cpfDigits) {
+        const duplicate = await cpfExists(cpfDigits, hospede?.id);
+        if (duplicate) {
+          setErrors((prev) => ({
+            ...prev,
+            cpf: "Já existe um hóspede cadastrado com este CPF.",
+          }));
+          setSaving(false);
+          return;
+        }
       }
 
       const payload = {
         nome: values.nome.trim(),
-        cpf: cpfDigits,
-        telefone: onlyDigits(values.telefone),
+        cpf: cpfDigits || null,
+        telefone: values.telefone ? onlyDigits(values.telefone) : null,
         telefone_secundario: values.telefone_secundario
           ? onlyDigits(values.telefone_secundario)
           : null,
         email: values.email.trim() || null,
         sexo: values.sexo || null,
         data_nascimento: values.data_nascimento || null,
-        cep: onlyDigits(values.cep),
+        cep: values.cep ? onlyDigits(values.cep) : null,
         rua: values.rua.trim() || null,
-        numero: values.numero.trim(),
+        numero: values.numero.trim() || null,
         complemento: values.complemento.trim() || null,
         bairro: values.bairro.trim() || null,
         cidade: values.cidade.trim() || null,
@@ -279,7 +280,7 @@ export function HospedeFormDrawer({
                 />
               </Field>
               <div className="grid grid-cols-2 gap-4">
-                <Field label="CPF" required error={errors.cpf}>
+                <Field label="CPF" error={errors.cpf}>
                   <Input
                     value={values.cpf}
                     onChange={(e) =>
@@ -310,7 +311,7 @@ export function HospedeFormDrawer({
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Telefone" required error={errors.telefone}>
+                <Field label="Telefone" error={errors.telefone}>
                   <Input
                     value={values.telefone}
                     onChange={(e) =>
@@ -365,7 +366,6 @@ export function HospedeFormDrawer({
               <div className="grid grid-cols-2 gap-4">
                 <Field
                   label={checkingCep ? "CEP (buscando...)" : "CEP"}
-                  required
                   error={errors.cep}
                 >
                   <Input
@@ -378,7 +378,7 @@ export function HospedeFormDrawer({
                     inputMode="numeric"
                   />
                 </Field>
-                <Field label="Número" required error={errors.numero}>
+                <Field label="Número" error={errors.numero}>
                   <Input
                     value={values.numero}
                     onChange={(e) => setField("numero", e.target.value)}

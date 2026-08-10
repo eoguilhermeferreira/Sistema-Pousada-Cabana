@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 
 import type { QuartoDetalhado } from "@/types/quarto";
-import { getComodidadeIcon } from "@/types/quarto";
+import {
+  getComodidadeIcon,
+  quartoDisponivelParaReserva,
+  statusQuartoBadgeClass,
+  statusQuartoLabels,
+} from "@/types/quarto";
+import { cn } from "@/lib/utils";
 import { quartoSlug } from "@/lib/quarto-slug";
 import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
@@ -39,6 +45,7 @@ export function RoomCard({
   const capa = quarto.fotos[0]?.url;
 
   const adultos = Math.max(1, adultosProp ?? 1);
+  const disponivel = quartoDisponivelParaReserva(quarto.status);
 
   const guestsQuery = new URLSearchParams();
   guestsQuery.set("adults", String(adultos));
@@ -85,6 +92,16 @@ export function RoomCard({
         <Badge variant="solid" className="absolute left-4 top-4">
           {quarto.categoria.nome}
         </Badge>
+        {!disponivel && (
+          <Badge
+            className={cn(
+              "absolute right-4 top-4",
+              statusQuartoBadgeClass(quarto.status),
+            )}
+          >
+            {statusQuartoLabels[quarto.status]}
+          </Badge>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -126,8 +143,15 @@ export function RoomCard({
           </div>
 
           <div onClick={(e) => e.stopPropagation()}>
-            <Button className="w-full" size="sm" onClick={() => onReservar?.(quarto)}>
-              Reservar com estes hóspedes
+            <Button
+              className="w-full"
+              size="sm"
+              disabled={!disponivel}
+              onClick={() => onReservar?.(quarto)}
+            >
+              {disponivel
+                ? "Reservar com estes hóspedes"
+                : `Indisponível (${statusQuartoLabels[quarto.status]})`}
             </Button>
           </div>
 

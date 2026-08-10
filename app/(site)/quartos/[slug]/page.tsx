@@ -8,7 +8,12 @@ import { getQuartoSiteByNumero } from "@/services/site-quartos-service";
 import { numeroFromSlug } from "@/lib/quarto-slug";
 import { getCategoriaDescricaoFallback } from "@/data/categoria-descriptions";
 import { checkinCheckoutTexto } from "@/lib/checkin-checkout";
-import { getComodidadeIcon } from "@/types/quarto";
+import {
+  getComodidadeIcon,
+  quartoDisponivelParaReserva,
+  statusQuartoBadgeClass,
+  statusQuartoLabels,
+} from "@/types/quarto";
 import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
 import { RoomName } from "@/components/quartos/room-name";
@@ -57,7 +62,14 @@ export default async function RoomPage({
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_320px]">
         <div>
-          <Badge variant="default">{quarto.categoria.nome}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="default">{quarto.categoria.nome}</Badge>
+            {!quartoDisponivelParaReserva(quarto.status) && (
+              <Badge className={statusQuartoBadgeClass(quarto.status)}>
+                {statusQuartoLabels[quarto.status]}
+              </Badge>
+            )}
+          </div>
           <h1 className="mt-3 font-display text-3xl font-semibold text-primary-dark sm:text-4xl">
             <RoomName name={`Quarto ${quarto.numero}`} />
           </h1>

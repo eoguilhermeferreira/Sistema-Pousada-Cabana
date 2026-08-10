@@ -4,6 +4,7 @@ import * as React from "react";
 import { useSearchParams } from "next/navigation";
 
 import type { QuartoDetalhado } from "@/types/quarto";
+import { quartoDisponivelParaReserva, statusQuartoLabels } from "@/types/quarto";
 import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
 import { Button } from "@/components/ui/button";
 import { ReservationModal } from "@/components/quartos/reservation-modal";
@@ -26,6 +27,7 @@ export function GuestSummary({ quarto }: { quarto: QuartoDetalhado }) {
     .filter((age) => Number.isFinite(age) && age >= 0);
   const checkin = searchParams.get("checkin") ?? "";
   const checkout = searchParams.get("checkout") ?? "";
+  const disponivel = quartoDisponivelParaReserva(quarto.status);
 
   if (adults === 0 && childrenAges.length === 0) return null;
 
@@ -66,8 +68,14 @@ export function GuestSummary({ quarto }: { quarto: QuartoDetalhado }) {
         </span>
       </div>
 
-      <Button className="mt-4 w-full" onClick={() => setOpen(true)}>
-        Reservar com estes hóspedes
+      <Button
+        className="mt-4 w-full"
+        disabled={!disponivel}
+        onClick={() => setOpen(true)}
+      >
+        {disponivel
+          ? "Reservar com estes hóspedes"
+          : `Indisponível (${statusQuartoLabels[quarto.status]})`}
       </Button>
 
       <ReservationModal

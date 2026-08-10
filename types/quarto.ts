@@ -78,6 +78,15 @@ export function statusQuartoDotClass(status: StatusQuarto) {
   return statusQuartoDotClasses[status];
 }
 
+/** No site público, um quarto só pode ser reservado online quando está
+ * disponível agora — reservado/ocupado/em limpeza continuam visíveis na
+ * listagem (pra não sumir do site), só ficam com o botão de reserva
+ * desabilitado e um selo de status, evitando duas pessoas reservando o
+ * mesmo quarto. */
+export function quartoDisponivelParaReserva(status: StatusQuarto): boolean {
+  return status === "disponivel";
+}
+
 export const comodidadeIcons: Record<string, LucideIcon> = {
   tv: Tv,
   wifi: Wifi,

@@ -22,22 +22,33 @@ export function RoomGallery({
             <button
               type="button"
               aria-label={`Ver foto ${index + 1} de ${roomName}`}
-              className="overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="overflow-hidden rounded-xl bg-gray-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               {url ? (
                 <div className="relative aspect-square w-full">
-                  <Image src={url} alt={`${roomName} - foto ${index + 1}`} fill className="object-cover" />
+                  <Image
+                    src={url}
+                    alt={`${roomName} - foto ${index + 1}`}
+                    fill
+                    className="object-contain"
+                  />
                 </div>
               ) : (
                 <MediaPlaceholder className="aspect-square w-full" />
               )}
             </button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="flex items-center justify-center bg-transparent p-0 shadow-none">
             {url ? (
-              <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                <Image src={url} alt={`${roomName} - foto ${index + 1}`} fill className="object-cover" />
-              </div>
+              // Sem width/height salvos no banco pra essa foto — usamos o
+              // tamanho natural da imagem (max-h/w-auto) em vez do
+              // next/image, que exige dimensões conhecidas pra não usar `fill`.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={url}
+                alt={`${roomName} - foto ${index + 1}`}
+                className="max-h-[85vh] w-auto max-w-full rounded-xl object-contain"
+              />
             ) : (
               <MediaPlaceholder className="aspect-video w-full rounded-xl" />
             )}

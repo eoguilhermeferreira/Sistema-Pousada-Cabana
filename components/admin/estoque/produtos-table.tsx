@@ -1,9 +1,20 @@
 "use client";
 
-import { ArrowLeftRight, ImageOff, PackageSearch, Pencil, Trash2 } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ImageOff,
+  PackagePlus,
+  PackageSearch,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 
 import { ProdutoStatusBadge } from "@/components/admin/estoque/produto-status-badge";
-import type { ProdutoComCategoria } from "@/types/produto";
+import {
+  localizacaoEstoqueLabels,
+  localizacaoEstoqueOptions,
+  type ProdutoComCategoria,
+} from "@/types/produto";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -15,6 +26,7 @@ interface ProdutosTableProps {
   loading: boolean;
   onEdit: (produto: ProdutoComCategoria) => void;
   onMovimentar: (produto: ProdutoComCategoria) => void;
+  onRepor: (produto: ProdutoComCategoria) => void;
   onDelete: (produto: ProdutoComCategoria) => void;
 }
 
@@ -22,7 +34,8 @@ const columns = [
   "Código",
   "Produto",
   "Categoria",
-  "Quantidade",
+  "Depósito",
+  "Locais",
   "Valor",
   "Status",
   "",
@@ -33,6 +46,7 @@ export function ProdutosTable({
   loading,
   onEdit,
   onMovimentar,
+  onRepor,
   onDelete,
 }: ProdutosTableProps) {
   if (!loading && produtos.length === 0) {
@@ -54,7 +68,7 @@ export function ProdutosTable({
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1080px] text-left text-sm">
+        <table className="w-full min-w-[1220px] text-left text-sm">
           <thead>
             <tr className="border-b border-gray-light bg-admin-bg/60">
               {columns.map((column) => (
@@ -116,6 +130,23 @@ export function ProdutosTable({
                   <td className="px-5 py-3 text-gray-text">
                     {produto.quantidade} {produto.unidade}
                   </td>
+                  <td className="px-5 py-3 text-gray-text">
+                    <div className="flex flex-col gap-0.5">
+                      {localizacaoEstoqueOptions.map((localizacao) => {
+                        const item = produto.localizacoes.find(
+                          (l) => l.localizacao === localizacao,
+                        );
+                        return (
+                          <span key={localizacao} className="text-xs">
+                            {localizacaoEstoqueLabels[localizacao]}:{" "}
+                            <span className="font-medium text-primary-dark">
+                              {item?.quantidade ?? 0}
+                            </span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </td>
                   <td className="px-5 py-3 font-medium text-primary-dark">
                     {currency.format(produto.valor_venda)}
                   </td>
@@ -124,6 +155,15 @@ export function ProdutosTable({
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onRepor(produto)}
+                        className="flex size-8 items-center justify-center rounded-lg text-gray-text transition-colors duration-200 hover:bg-primary-light hover:text-primary"
+                        title="Repor estoque (geladeira/prateleira)"
+                      >
+                        <PackagePlus className="size-4" />
+                        <span className="sr-only">Repor estoque</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => onMovimentar(produto)}

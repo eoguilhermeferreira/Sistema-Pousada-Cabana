@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   CategoriaProduto,
+  LocalizacaoEstoque,
   MovimentacaoComRelacoes,
   Produto,
   ProdutoComCategoria,
@@ -24,7 +25,7 @@ export async function listProdutos(): Promise<ProdutoComCategoria[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("produtos")
-    .select("*, categoria:categorias_produto(*)")
+    .select("*, categoria:categorias_produto(*), localizacoes:produto_localizacoes(*)")
     .order("nome", { ascending: true });
 
   if (error) throw error;
@@ -111,6 +112,22 @@ export async function registrarMovimentacaoEstoque(
   const { error } = await supabase.rpc("registrar_movimentacao_estoque", {
     p_produto_id: produtoId,
     p_tipo: tipo,
+    p_quantidade: quantidade,
+    p_motivo: motivo || undefined,
+  });
+  if (error) throw error;
+}
+
+export async function reporLocalizacaoEstoque(
+  produtoId: string,
+  localizacao: LocalizacaoEstoque,
+  quantidade: number,
+  motivo?: string,
+) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("repor_localizacao_estoque", {
+    p_produto_id: produtoId,
+    p_localizacao: localizacao,
     p_quantidade: quantidade,
     p_motivo: motivo || undefined,
   });

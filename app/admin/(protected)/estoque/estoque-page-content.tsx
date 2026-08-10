@@ -10,6 +10,7 @@ import { ProdutosFilters } from "@/components/admin/estoque/produtos-filters";
 import { ProdutosTable } from "@/components/admin/estoque/produtos-table";
 import { ProdutoFormModal } from "@/components/admin/estoque/produto-form-modal";
 import { MovimentarEstoqueModal } from "@/components/admin/estoque/movimentar-estoque-modal";
+import { ReporLocalizacaoModal } from "@/components/admin/estoque/repor-localizacao-modal";
 import {
   deleteProduto,
   listCategoriasProduto,
@@ -44,6 +45,10 @@ export function EstoquePageContent() {
 
   const [movimentarOpen, setMovimentarOpen] = React.useState(false);
   const [movimentandoProduto, setMovimentandoProduto] =
+    React.useState<ProdutoComCategoria | null>(null);
+
+  const [reporOpen, setReporOpen] = React.useState(false);
+  const [repondoProduto, setRepondoProduto] =
     React.useState<ProdutoComCategoria | null>(null);
 
   const [deleteOpen, setDeleteOpen] = React.useState(false);
@@ -129,6 +134,11 @@ export function EstoquePageContent() {
     setMovimentarOpen(true);
   }
 
+  function handleRepor(produto: ProdutoComCategoria) {
+    setRepondoProduto(produto);
+    setReporOpen(true);
+  }
+
   function handleDeleteRequest(produto: ProdutoComCategoria) {
     setDeletingProduto(produto);
     setDeleteError("");
@@ -185,6 +195,7 @@ export function EstoquePageContent() {
         loading={loading}
         onEdit={handleEdit}
         onMovimentar={handleMovimentar}
+        onRepor={handleRepor}
         onDelete={handleDeleteRequest}
       />
 
@@ -200,6 +211,13 @@ export function EstoquePageContent() {
         open={movimentarOpen}
         onOpenChange={setMovimentarOpen}
         produto={movimentandoProduto}
+        onSaved={load}
+      />
+
+      <ReporLocalizacaoModal
+        open={reporOpen}
+        onOpenChange={setReporOpen}
+        produto={repondoProduto}
         onSaved={load}
       />
 

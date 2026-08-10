@@ -15,8 +15,22 @@ export type TipoMovimentacaoManual = Extract<
 
 export type QuartoConsumo = Tables<"quarto_consumos">;
 
+export type ProdutoLocalizacao = Tables<"produto_localizacoes">;
+export type LocalizacaoEstoque = ProdutoLocalizacao["localizacao"];
+
+export const localizacaoEstoqueOptions: LocalizacaoEstoque[] = [
+  "geladeira",
+  "prateleira",
+];
+
+export const localizacaoEstoqueLabels: Record<LocalizacaoEstoque, string> = {
+  geladeira: "Geladeira",
+  prateleira: "Prateleira",
+};
+
 export interface ProdutoComCategoria extends Produto {
   categoria: CategoriaProduto;
+  localizacoes: ProdutoLocalizacao[];
 }
 
 export interface MovimentacaoComRelacoes extends MovimentacaoEstoque {
@@ -91,6 +105,7 @@ export const tipoMovimentacaoLabels: Record<TipoMovimentacaoEstoque, string> = {
   perda: "Perda",
   consumo_quarto: "Consumo em quarto",
   devolucao_quarto: "Devolução de quarto",
+  reposicao: "Reposição",
 };
 
 export const tipoMovimentacaoManualOptions: TipoMovimentacaoManual[] = [

@@ -431,6 +431,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          localizacao: Database["public"]["Enums"]["localizacao_estoque"] | null
           motivo: string | null
           produto_id: string
           quantidade: number
@@ -445,6 +446,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          localizacao?: Database["public"]["Enums"]["localizacao_estoque"] | null
           motivo?: string | null
           produto_id: string
           quantidade: number
@@ -459,6 +461,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          localizacao?: Database["public"]["Enums"]["localizacao_estoque"] | null
           motivo?: string | null
           produto_id?: string
           quantidade?: number
@@ -1373,6 +1376,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      produto_localizacoes: {
+        Row: {
+          created_at: string
+          id: string
+          localizacao: Database["public"]["Enums"]["localizacao_estoque"]
+          produto_id: string
+          quantidade: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          localizacao: Database["public"]["Enums"]["localizacao_estoque"]
+          produto_id: string
+          quantidade?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          localizacao?: Database["public"]["Enums"]["localizacao_estoque"]
+          produto_id?: string
+          quantidade?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produto_localizacoes_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       produtos: {
         Row: {
@@ -2396,6 +2434,35 @@ export type Database = {
         Args: { p_consumo_id: string }
         Returns: undefined
       }
+      repor_localizacao_estoque: {
+        Args: {
+          p_localizacao: Database["public"]["Enums"]["localizacao_estoque"]
+          p_motivo?: string
+          p_produto_id: string
+          p_quantidade: number
+        }
+        Returns: {
+          created_at: string
+          id: string
+          localizacao: Database["public"]["Enums"]["localizacao_estoque"] | null
+          motivo: string | null
+          produto_id: string
+          quantidade: number
+          quarto_id: string | null
+          reserva_id: string | null
+          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number | null
+          valor_unitario: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "estoque"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       cargo_usuario:
@@ -2407,6 +2474,7 @@ export type Database = {
         | "cozinha"
         | "lavanderia"
       forma_pagamento: "pix" | "dinheiro" | "cartao_debito" | "cartao_credito"
+      localizacao_estoque: "geladeira" | "prateleira"
       sexo_hospede: "masculino" | "feminino" | "outro"
       status_hospede: "ativo" | "inativo"
       status_quarto:
@@ -2429,6 +2497,7 @@ export type Database = {
         | "perda"
         | "consumo_quarto"
         | "devolucao_quarto"
+        | "reposicao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2566,6 +2635,7 @@ export const Constants = {
         "lavanderia",
       ],
       forma_pagamento: ["pix", "dinheiro", "cartao_debito", "cartao_credito"],
+      localizacao_estoque: ["geladeira", "prateleira"],
       sexo_hospede: ["masculino", "feminino", "outro"],
       status_hospede: ["ativo", "inativo"],
       status_quarto: [
@@ -2590,6 +2660,7 @@ export const Constants = {
         "perda",
         "consumo_quarto",
         "devolucao_quarto",
+        "reposicao",
       ],
     },
   },

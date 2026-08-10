@@ -3,8 +3,6 @@
 import * as React from "react";
 import { ChevronDown, Users } from "lucide-react";
 
-import { getComodidadeIcon } from "@/types/quarto";
-import type { Comodidade } from "@/types/quarto";
 import { GuestPicker } from "@/components/quartos/guest-picker";
 import { summarizeGuests, type Guest } from "@/lib/guest-composition";
 import { cn } from "@/lib/utils";
@@ -12,12 +10,10 @@ import { cn } from "@/lib/utils";
 export interface RoomFiltersState {
   categoriaId: string;
   maxPrice: number;
-  comodidadeIds: string[];
 }
 
 export function RoomFilters({
   categorias,
-  comodidades,
   priceRange,
   state,
   onChange,
@@ -25,7 +21,6 @@ export function RoomFilters({
   onChangeGuests,
 }: {
   categorias: { id: string; nome: string }[];
-  comodidades: Comodidade[];
   priceRange: { min: number; max: number };
   state: RoomFiltersState;
   onChange: (next: RoomFiltersState) => void;
@@ -45,16 +40,6 @@ export function RoomFilters({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [pickerOpen]);
-
-  function toggleComodidade(id: string) {
-    const has = state.comodidadeIds.includes(id);
-    onChange({
-      ...state,
-      comodidadeIds: has
-        ? state.comodidadeIds.filter((c) => c !== id)
-        : [...state.comodidadeIds, id],
-    });
-  }
 
   return (
     <div className="flex flex-col gap-6 rounded-2xl border border-gray-light bg-white p-5">
@@ -129,35 +114,6 @@ export function RoomFilters({
           </div>
         )}
       </div>
-
-      {comodidades.length > 0 && (
-        <div>
-          <span className="text-xs font-medium uppercase tracking-wide text-gray-text">
-            Comodidades
-          </span>
-          <div className="mt-2 flex flex-col gap-2">
-            {comodidades.map((comodidade) => {
-              const Icon = getComodidadeIcon(comodidade.icone);
-              const checked = state.comodidadeIds.includes(comodidade.id);
-              return (
-                <label
-                  key={comodidade.id}
-                  className="flex cursor-pointer items-center gap-2 text-sm text-gray-text"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleComodidade(comodidade.id)}
-                    className="size-4 rounded border-gray-light accent-primary"
-                  />
-                  <Icon className="size-4 text-primary" strokeWidth={1.75} />
-                  {comodidade.nome}
-                </label>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

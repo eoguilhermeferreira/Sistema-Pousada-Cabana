@@ -9,7 +9,6 @@ import { numeroFromSlug } from "@/lib/quarto-slug";
 import { getCategoriaDescricaoFallback } from "@/data/categoria-descriptions";
 import { checkinCheckoutTexto } from "@/lib/checkin-checkout";
 import {
-  getComodidadeIcon,
   quartoDisponivelParaReserva,
   statusQuartoBadgeClass,
   statusQuartoLabels,
@@ -88,28 +87,6 @@ export default async function RoomPage({
           </div>
 
           <p className="mt-6 max-w-2xl leading-relaxed text-gray-text">{descricao}</p>
-
-          {quarto.comodidades.length > 0 && (
-            <div className="mt-8">
-              <h2 className="font-display text-lg font-semibold text-primary-dark">
-                Características
-              </h2>
-              <div className="mt-4 flex flex-col gap-3">
-                {quarto.comodidades.map((comodidade) => {
-                  const Icon = getComodidadeIcon(comodidade.icone);
-                  return (
-                    <div
-                      key={comodidade.id}
-                      className="flex items-center gap-2 text-sm text-gray-text"
-                    >
-                      <Icon className="size-4 text-primary" strokeWidth={1.75} />
-                      {comodidade.nome}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           <div className="mt-8">
             <ChildrenPolicyNotice />

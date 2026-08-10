@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import type { Comodidade, QuartoDetalhado } from "@/types/quarto";
+import type { QuartoDetalhado } from "@/types/quarto";
 import { RoomCard } from "@/components/quartos/room-card";
 import { RoomFilters, type RoomFiltersState } from "@/components/quartos/room-filters";
 import { ReservationModal } from "@/components/quartos/reservation-modal";
@@ -26,14 +26,6 @@ export function RoomsExplorer({
     return Array.from(map.values());
   }, [quartos]);
 
-  const comodidades = React.useMemo(() => {
-    const map = new Map<string, Comodidade>();
-    quartos.forEach((quarto) => {
-      quarto.comodidades.forEach((comodidade) => map.set(comodidade.id, comodidade));
-    });
-    return Array.from(map.values());
-  }, [quartos]);
-
   const priceRange = React.useMemo(
     () => ({
       min: Math.min(...quartos.map((q) => q.valor_diaria)),
@@ -52,7 +44,6 @@ export function RoomsExplorer({
   const [filters, setFilters] = React.useState<RoomFiltersState>({
     categoriaId: "",
     maxPrice: priceRange.max,
-    comodidadeIds: [],
   });
 
   // Composição de hóspedes (adultos + crianças com idade) — a mesma usada
@@ -78,12 +69,6 @@ export function RoomsExplorer({
     if (filters.categoriaId && quarto.categoria.id !== filters.categoriaId) return false;
     if (quarto.valor_diaria > filters.maxPrice) return false;
     if (quarto.capacidade_maxima < guests.length) return false;
-    if (
-      !filters.comodidadeIds.every((id) =>
-        quarto.comodidades.some((c) => c.id === id),
-      )
-    )
-      return false;
     return true;
   });
 
@@ -96,7 +81,6 @@ export function RoomsExplorer({
       <aside>
         <RoomFilters
           categorias={categorias}
-          comodidades={comodidades}
           priceRange={priceRange}
           state={filters}
           onChange={setFilters}
@@ -120,8 +104,8 @@ export function RoomsExplorer({
               Nenhum quarto encontrado
             </p>
             <p className="mt-2 max-w-sm text-sm text-gray-text">
-              Tente ajustar os filtros de categoria, preço, hóspedes ou comodidades
-              para ver mais opções.
+              Tente ajustar os filtros de categoria, preço ou hóspedes para ver
+              mais opções.
             </p>
           </div>
         ) : (

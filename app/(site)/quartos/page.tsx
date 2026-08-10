@@ -54,7 +54,7 @@ export default async function QuartosPage({
         <p className="mt-3 text-gray-text">
           {hasValidDates
             ? "Mostrando apenas os quartos disponíveis para o período pesquisado."
-            : "Filtre por categoria, preço e comodidades para encontrar a acomodação ideal para a sua estadia."}
+            : "Filtre por categoria e preço para encontrar a acomodação ideal para a sua estadia."}
         </p>
       </div>
 

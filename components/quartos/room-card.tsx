@@ -6,7 +6,6 @@ import { Users } from "lucide-react";
 
 import type { QuartoDetalhado } from "@/types/quarto";
 import {
-  getComodidadeIcon,
   quartoDisponivelParaReserva,
   statusQuartoBadgeClass,
   statusQuartoLabels,
@@ -41,7 +40,6 @@ export function RoomCard({
 }) {
   const router = useRouter();
   const slug = quartoSlug(quarto.numero);
-  const visibleAmenities = quarto.comodidades.slice(0, 4);
   const capa = quarto.fotos[0]?.url;
 
   const adultos = Math.max(1, adultosProp ?? 1);
@@ -115,21 +113,6 @@ export function RoomCard({
               ? "1 hóspede"
               : `até ${quarto.capacidade_maxima}`}
           </span>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          {visibleAmenities.map((comodidade) => {
-            const Icon = getComodidadeIcon(comodidade.icone);
-            return (
-              <span
-                key={comodidade.id}
-                title={comodidade.nome}
-                className="flex items-center gap-1.5 text-xs text-gray-text"
-              >
-                <Icon className="size-4 text-primary" strokeWidth={1.75} />
-              </span>
-            );
-          })}
         </div>
 
         <div className="mt-auto space-y-3 pt-2">

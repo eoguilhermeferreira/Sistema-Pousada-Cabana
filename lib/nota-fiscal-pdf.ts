@@ -163,7 +163,6 @@ async function montarDocumento(dados: NotaFiscalPdfData) {
 
   blocoCampos("Prestador do serviço", [
     ["Razão Social", dados.empresa.razaoSocial],
-    ["Nome Fantasia", dados.empresa.nomeFantasia],
     ["CNPJ", dados.empresa.cnpjFormatado || "—"],
     ["Inscrição Municipal", dados.empresa.inscricaoMunicipal || "—"],
     ["Telefone", dados.empresa.telefone],

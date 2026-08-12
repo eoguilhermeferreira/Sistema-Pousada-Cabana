@@ -106,6 +106,8 @@ export const tipoMovimentacaoLabels: Record<TipoMovimentacaoEstoque, string> = {
   consumo_quarto: "Consumo em quarto",
   devolucao_quarto: "Devolução de quarto",
   reposicao: "Reposição",
+  venda_balcao: "Venda no balcão",
+  consumo_funcionario: "Consumo de funcionário",
 };
 
 export const tipoMovimentacaoManualOptions: TipoMovimentacaoManual[] = [

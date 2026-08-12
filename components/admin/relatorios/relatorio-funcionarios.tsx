@@ -18,6 +18,7 @@ import { cargoLabels } from "@/types/usuario";
 import { cargoFuncionarioOptions, type Funcionario } from "@/types/funcionario";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 function formatDate(value: string) {
   return dateFormatter.format(new Date(`${value}T00:00:00`));
@@ -61,6 +62,18 @@ export function RelatorioFuncionarios({ funcionarios }: { funcionarios: Funciona
     },
     { header: "Faltas", align: "right", render: (r) => String(r.faltas), valor: (r) => r.faltas },
     { header: "Atrasos", align: "right", render: (r) => String(r.atrasos), valor: (r) => r.atrasos },
+    {
+      header: "Produtos consumidos",
+      align: "right",
+      render: (r) => String(r.produtosConsumidos),
+      valor: (r) => r.produtosConsumidos,
+    },
+    {
+      header: "Valor consumido",
+      align: "right",
+      render: (r) => currency.format(r.valorConsumido),
+      valor: (r) => r.valorConsumido,
+    },
   ];
 
   return (
@@ -102,7 +115,8 @@ export function RelatorioFuncionarios({ funcionarios }: { funcionarios: Funciona
         </label>
         <p className="max-w-xs text-xs text-gray-text">
           Atrasos e faltas são estimados a partir do turno cadastrado — use como
-          referência, não como registro oficial de ponto.
+          referência, não como registro oficial de ponto. Produtos consumidos
+          são saída de estoque, não receita.
         </p>
       </RelatorioFiltrosBar>
 

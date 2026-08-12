@@ -7,6 +7,7 @@ import { AbrirCaixaModal } from "@/components/admin/caixa/abrir-caixa-modal";
 import { FecharCaixaModal } from "@/components/admin/caixa/fechar-caixa-modal";
 import { HospedagensPendentesList } from "@/components/admin/caixa/hospedagens-pendentes-list";
 import { HistoricoCaixas } from "@/components/admin/caixa/historico-caixas";
+import { VendasBalcaoSection } from "@/components/admin/caixa/vendas-balcao-section";
 import {
   getCaixaAberto,
   listHistoricoCaixas,
@@ -80,6 +81,8 @@ export function CaixaPageContent() {
       />
 
       <HospedagensPendentesList pendentes={pendentes} loading={loading} />
+
+      <VendasBalcaoSection caixaAbertoId={caixa?.id ?? null} />
 
       <HistoricoCaixas historico={historico} loading={loading} />
 

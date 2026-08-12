@@ -124,6 +124,8 @@ export interface RelatorioFinanceiroResumo {
   lucroBruto: number;
   receitaHospedagem: number;
   receitaConsumo: number;
+  /** Receita de vendas no balcão finalizadas no período (não vem de `pagamentos`). */
+  receitaVendaBalcao: number;
 }
 
 export interface LinhaRelatorioFinanceiro {
@@ -156,6 +158,10 @@ export interface RelatorioEstoqueResumo {
   saidas: number;
   perdas: number;
   ajustes: number;
+  /** Unidades saídas do estoque via Venda no Balcão. */
+  vendidosBalcao: number;
+  /** Unidades saídas do estoque via Consumo de Funcionários (não é venda). */
+  consumidosFuncionarios: number;
 }
 
 export interface LinhaRelatorioEstoque {
@@ -192,6 +198,9 @@ export interface LinhaRelatorioFuncionario {
   intervalos: number;
   faltas: number;
   atrasos: number;
+  /** Consumo interno (não é venda nem receita) — apenas para controle de estoque. */
+  produtosConsumidos: number;
+  valorConsumido: number;
 }
 
 // ---------------------------------------------------------------------------

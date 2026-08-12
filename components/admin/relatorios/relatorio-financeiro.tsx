@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { DollarSign, Receipt, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { DollarSign, Receipt, ShoppingBag, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
 import {
   RelatorioFiltrosBar,
@@ -98,6 +98,12 @@ export function RelatorioFinanceiro() {
             icon={Receipt}
             label="Hospedagem x Produtos"
             value={`${currency.format(resumo.receitaHospedagem)} / ${currency.format(resumo.receitaConsumo)}`}
+          />
+          <StatCard
+            icon={ShoppingBag}
+            label="Venda no Balcão (no período)"
+            value={currency.format(resumo.receitaVendaBalcao)}
+            accent="disponivel"
           />
         </div>
       )}

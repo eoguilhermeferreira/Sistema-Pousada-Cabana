@@ -8,6 +8,7 @@ import {
   Loader2,
   Pencil,
   Phone,
+  Plus,
   ShieldCheck,
   Users,
   X,
@@ -19,20 +20,27 @@ import { Button } from "@/components/ui/button";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { FuncionarioStatusBadge } from "@/components/admin/funcionarios/funcionario-status-badge";
 import { CorrigirPontoModal } from "@/components/admin/funcionarios/corrigir-ponto-modal";
+import { RegistrarConsumoFuncionarioModal } from "@/components/admin/funcionarios/registrar-consumo-funcionario-modal";
 import { useUsuarioAtual } from "@/components/admin/usuario-context";
 import { formatCpf } from "@/lib/cpf";
 import { formatPhone } from "@/lib/phone";
 import { permissoesPorCargo } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/client";
+import { dateKey } from "@/lib/calendar-grid";
 import {
   getFuncionarioById,
   listHistoricoFuncionario,
 } from "@/services/funcionarios-service";
 import { listPontosPorFuncionario } from "@/services/pontos-service";
+import { listConsumosPorFuncionario } from "@/services/funcionario-consumo-service";
 import { agruparPontosPorDia, formatarStatusPonto } from "@/types/ponto";
 import { turnoLabels, type Funcionario, type FuncionarioHistorico } from "@/types/funcionario";
 import type { Ponto, TipoPonto } from "@/types/ponto";
 import { cargoLabels } from "@/types/usuario";
+import {
+  emptyFiltrosConsumoFuncionario,
+  type FuncionarioConsumoComRelacoes,
+} from "@/types/funcionario-consumo";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
@@ -89,6 +97,15 @@ export function FuncionarioPainelDrawer({
     ponto: Ponto | null;
   } | null>(null);
 
+  const [consumos, setConsumos] = React.useState<FuncionarioConsumoComRelacoes[]>(
+    [],
+  );
+  const [consumosLoading, setConsumosLoading] = React.useState(true);
+  const [filtrosConsumo, setFiltrosConsumo] = React.useState(
+    emptyFiltrosConsumoFuncionario,
+  );
+  const [registrarConsumoOpen, setRegistrarConsumoOpen] = React.useState(false);
+
   React.useEffect(() => {
     if (!open || !funcionarioId) return;
     const timeout = setTimeout(async () => {
@@ -140,6 +157,47 @@ export function FuncionarioPainelDrawer({
 
   const dias = React.useMemo(() => agruparPontosPorDia(pontos), [pontos]);
 
+  const loadConsumos = React.useCallback(async () => {
+    if (!funcionarioId) return;
+    setConsumosLoading(true);
+    try {
+      const hoje = dateKey(new Date());
+      let dataInicio: string | undefined;
+      let dataFim: string | undefined;
+      if (filtrosConsumo.periodo === "hoje") {
+        dataInicio = hoje;
+        dataFim = hoje;
+      } else if (filtrosConsumo.periodo === "semana") {
+        const inicio = new Date();
+        inicio.setDate(inicio.getDate() - inicio.getDay());
+        dataInicio = dateKey(inicio);
+        dataFim = hoje;
+      } else if (filtrosConsumo.periodo === "mes") {
+        const inicio = new Date();
+        inicio.setDate(1);
+        dataInicio = dateKey(inicio);
+        dataFim = hoje;
+      } else {
+        dataInicio = filtrosConsumo.dataInicio || undefined;
+        dataFim = filtrosConsumo.dataFim || undefined;
+      }
+
+      setConsumos(
+        await listConsumosPorFuncionario(funcionarioId, dataInicio, dataFim),
+      );
+    } finally {
+      setConsumosLoading(false);
+    }
+  }, [funcionarioId, filtrosConsumo]);
+
+  React.useEffect(() => {
+    if (!open || !funcionarioId) return;
+    const timeout = setTimeout(() => {
+      loadConsumos();
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [open, funcionarioId, loadConsumos]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -187,6 +245,7 @@ export function FuncionarioPainelDrawer({
             <TabsList className="mt-5">
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
               <TabsTrigger value="pontos">Pontos</TabsTrigger>
+              <TabsTrigger value="consumo">Consumo</TabsTrigger>
               <TabsTrigger value="historico">Histórico</TabsTrigger>
               <TabsTrigger value="permissoes">Permissões</TabsTrigger>
             </TabsList>
@@ -382,6 +441,124 @@ export function FuncionarioPainelDrawer({
                 )}
               </TabsContent>
 
+              <TabsContent value="consumo" className="space-y-4 px-6 py-6">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs font-medium text-gray-text">
+                      Período
+                    </span>
+                    <select
+                      className="flex h-10 w-full min-w-[180px] rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      value={filtrosConsumo.periodo}
+                      onChange={(e) =>
+                        setFiltrosConsumo((prev) => ({
+                          ...prev,
+                          periodo: e.target.value as typeof filtrosConsumo.periodo,
+                        }))
+                      }
+                    >
+                      <option value="hoje">Hoje</option>
+                      <option value="semana">Esta semana</option>
+                      <option value="mes">Este mês</option>
+                      <option value="personalizado">Período personalizado</option>
+                    </select>
+                  </label>
+
+                  {filtrosConsumo.periodo === "personalizado" && (
+                    <>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs font-medium text-gray-text">De</span>
+                        <input
+                          type="date"
+                          className="flex h-10 rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          value={filtrosConsumo.dataInicio}
+                          onChange={(e) =>
+                            setFiltrosConsumo((prev) => ({
+                              ...prev,
+                              dataInicio: e.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs font-medium text-gray-text">Até</span>
+                        <input
+                          type="date"
+                          className="flex h-10 rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          value={filtrosConsumo.dataFim}
+                          onChange={(e) =>
+                            setFiltrosConsumo((prev) => ({
+                              ...prev,
+                              dataFim: e.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                    </>
+                  )}
+
+                  <Button
+                    size="sm"
+                    className="ml-auto"
+                    onClick={() => setRegistrarConsumoOpen(true)}
+                  >
+                    <Plus className="size-4" />
+                    Registrar consumo
+                  </Button>
+                </div>
+
+                {consumosLoading ? (
+                  <p className="text-sm text-gray-text">Carregando...</p>
+                ) : consumos.length === 0 ? (
+                  <EmptyState message="Nenhum consumo registrado nesse período." />
+                ) : (
+                  <div className="overflow-hidden rounded-2xl border border-gray-light">
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[560px] text-left text-sm">
+                        <thead>
+                          <tr className="border-b border-gray-light bg-admin-bg/60">
+                            {["Data", "Horário", "Produto", "Qtd.", "Registrado por"].map(
+                              (col) => (
+                                <th
+                                  key={col}
+                                  className="px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text"
+                                >
+                                  {col}
+                                </th>
+                              ),
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {consumos.map((consumo) => (
+                            <tr
+                              key={consumo.id}
+                              className="border-b border-gray-light last:border-0"
+                            >
+                              <td className="px-3 py-2 text-primary-dark">
+                                {dateFormatter.format(new Date(consumo.created_at))}
+                              </td>
+                              <td className="px-3 py-2 text-gray-text">
+                                {timeFormatter.format(new Date(consumo.created_at))}
+                              </td>
+                              <td className="px-3 py-2 text-primary-dark">
+                                {consumo.produto.nome}
+                              </td>
+                              <td className="px-3 py-2 text-gray-text">
+                                {consumo.quantidade} {consumo.produto.unidade}
+                              </td>
+                              <td className="px-3 py-2 text-gray-text">
+                                {consumo.registradoPor?.nome ?? "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
               <TabsContent value="historico" className="px-6 py-6">
                 {historico.length === 0 ? (
                   <EmptyState message="Nenhum histórico disponível." />
@@ -458,6 +635,15 @@ export function FuncionarioPainelDrawer({
           tipo={correcaoAlvo.tipo}
           pontoExistente={correcaoAlvo.ponto}
           onSaved={reloadPontos}
+        />
+      )}
+
+      {funcionarioId && (
+        <RegistrarConsumoFuncionarioModal
+          open={registrarConsumoOpen}
+          onOpenChange={setRegistrarConsumoOpen}
+          funcionarioId={funcionarioId}
+          onRegistrado={loadConsumos}
         />
       )}
     </Sheet>

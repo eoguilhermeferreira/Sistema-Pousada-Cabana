@@ -430,6 +430,7 @@ export type Database = {
       estoque: {
         Row: {
           created_at: string
+          funcionario_id: string | null
           id: string
           localizacao: Database["public"]["Enums"]["localizacao_estoque"] | null
           motivo: string | null
@@ -442,9 +443,11 @@ export type Database = {
           usuario_id: string | null
           valor_total: number | null
           valor_unitario: number | null
+          venda_balcao_id: string | null
         }
         Insert: {
           created_at?: string
+          funcionario_id?: string | null
           id?: string
           localizacao?: Database["public"]["Enums"]["localizacao_estoque"] | null
           motivo?: string | null
@@ -457,9 +460,11 @@ export type Database = {
           usuario_id?: string | null
           valor_total?: number | null
           valor_unitario?: number | null
+          venda_balcao_id?: string | null
         }
         Update: {
           created_at?: string
+          funcionario_id?: string | null
           id?: string
           localizacao?: Database["public"]["Enums"]["localizacao_estoque"] | null
           motivo?: string | null
@@ -472,6 +477,7 @@ export type Database = {
           usuario_id?: string | null
           valor_total?: number | null
           valor_unitario?: number | null
+          venda_balcao_id?: string | null
         }
         Relationships: [
           {
@@ -500,6 +506,20 @@ export type Database = {
             columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_venda_balcao_id_fkey"
+            columns: ["venda_balcao_id"]
+            isOneToOne: false
+            referencedRelation: "vendas_balcao"
             referencedColumns: ["id"]
           },
         ]
@@ -569,6 +589,68 @@ export type Database = {
           {
             foreignKeyName: "financeiro_usuario_id_fkey"
             columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funcionario_consumos: {
+        Row: {
+          created_at: string
+          funcionario_id: string
+          id: string
+          produto_id: string
+          quantidade: number
+          registrado_por: string | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          created_at?: string
+          funcionario_id: string
+          id?: string
+          produto_id: string
+          quantidade: number
+          registrado_por?: string | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Update: {
+          created_at?: string
+          funcionario_id?: string
+          id?: string
+          produto_id?: string
+          quantidade?: number
+          registrado_por?: string | null
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_consumos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_consumos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios_visivel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_consumos_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_consumos_registrado_por_fkey"
+            columns: ["registrado_por"]
             isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
@@ -2020,6 +2102,150 @@ export type Database = {
         }
         Relationships: []
       }
+      vendas_balcao: {
+        Row: {
+          cancelada_em: string | null
+          cancelada_por: string | null
+          caixa_id: string
+          created_at: string
+          id: string
+          observacao: string | null
+          status: string
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number
+        }
+        Insert: {
+          cancelada_em?: string | null
+          cancelada_por?: string | null
+          caixa_id: string
+          created_at?: string
+          id?: string
+          observacao?: string | null
+          status?: string
+          updated_at?: string
+          usuario_id?: string | null
+          valor_total: number
+        }
+        Update: {
+          cancelada_em?: string | null
+          cancelada_por?: string | null
+          caixa_id?: string
+          created_at?: string
+          id?: string
+          observacao?: string | null
+          status?: string
+          updated_at?: string
+          usuario_id?: string | null
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendas_balcao_caixa_id_fkey"
+            columns: ["caixa_id"]
+            isOneToOne: false
+            referencedRelation: "caixa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendas_balcao_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendas_balcao_cancelada_por_fkey"
+            columns: ["cancelada_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venda_balcao_itens: {
+        Row: {
+          created_at: string
+          id: string
+          produto_id: string
+          quantidade: number
+          valor_total: number
+          valor_unitario: number
+          venda_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          produto_id: string
+          quantidade: number
+          valor_total: number
+          valor_unitario: number
+          venda_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          produto_id?: string
+          quantidade?: number
+          valor_total?: number
+          valor_unitario?: number
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venda_balcao_itens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venda_balcao_itens_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas_balcao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venda_balcao_formas: {
+        Row: {
+          created_at: string
+          forma: Database["public"]["Enums"]["forma_pagamento"]
+          id: string
+          troco: number | null
+          valor: number
+          valor_recebido: number | null
+          venda_id: string
+        }
+        Insert: {
+          created_at?: string
+          forma: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          troco?: number | null
+          valor: number
+          valor_recebido?: number | null
+          venda_id: string
+        }
+        Update: {
+          created_at?: string
+          forma?: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          troco?: number | null
+          valor?: number
+          valor_recebido?: number | null
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venda_balcao_formas_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas_balcao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       funcionarios_visivel: {
@@ -2341,6 +2567,29 @@ export type Database = {
         Args: { p_nova_senha: string; p_usuario_id: string }
         Returns: undefined
       }
+      registrar_consumo_funcionario: {
+        Args: {
+          p_funcionario_id: string
+          p_produto_id: string
+          p_quantidade: number
+        }
+        Returns: {
+          created_at: string
+          funcionario_id: string
+          id: string
+          produto_id: string
+          quantidade: number
+          registrado_por: string | null
+          valor_total: number
+          valor_unitario: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "funcionario_consumos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       registrar_consumo_quarto: {
         Args: {
           p_produto_id: string
@@ -2406,6 +2655,36 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      registrar_venda_balcao: {
+        Args: {
+          p_caixa_id: string
+          p_formas: Json
+          p_itens: Json
+          p_observacao?: string
+        }
+        Returns: {
+          cancelada_em: string | null
+          cancelada_por: string | null
+          caixa_id: string
+          created_at: string
+          id: string
+          observacao: string | null
+          status: string
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendas_balcao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cancelar_venda_balcao: {
+        Args: { p_venda_id: string }
+        Returns: undefined
       }
       registrar_ponto_facial: {
         Args: { p_confianca?: number; p_funcionario_id: string }
@@ -2498,6 +2777,8 @@ export type Database = {
         | "consumo_quarto"
         | "devolucao_quarto"
         | "reposicao"
+        | "venda_balcao"
+        | "consumo_funcionario"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2661,6 +2942,8 @@ export const Constants = {
         "consumo_quarto",
         "devolucao_quarto",
         "reposicao",
+        "venda_balcao",
+        "consumo_funcionario",
       ],
     },
   },

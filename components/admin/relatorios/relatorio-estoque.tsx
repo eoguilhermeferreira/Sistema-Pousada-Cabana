@@ -1,7 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { ArrowDownCircle, ArrowUpCircle, PackageX, Settings2, ShoppingCart, XCircle } from "lucide-react";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  PackageX,
+  Settings2,
+  ShoppingBag,
+  ShoppingCart,
+  UtensilsCrossed,
+  XCircle,
+} from "lucide-react";
 
 import {
   RelatorioFiltrosBar,
@@ -83,6 +92,17 @@ export function RelatorioEstoque({ categorias }: { categorias: CategoriaProduto[
           <StatCard icon={ArrowUpCircle} label="Saídas" value={String(resumo.saidas)} accent="checkout" />
           <StatCard icon={XCircle} label="Perdas" value={String(resumo.perdas)} accent="ocupado" />
           <StatCard icon={Settings2} label="Ajustes" value={String(resumo.ajustes)} />
+          <StatCard
+            icon={ShoppingBag}
+            label="Vendidos no balcão"
+            value={String(resumo.vendidosBalcao)}
+            accent="disponivel"
+          />
+          <StatCard
+            icon={UtensilsCrossed}
+            label="Consumidos por funcionários"
+            value={String(resumo.consumidosFuncionarios)}
+          />
         </div>
       )}
 

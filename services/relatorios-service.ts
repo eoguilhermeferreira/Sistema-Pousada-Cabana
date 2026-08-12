@@ -193,6 +193,7 @@ export async function getRelatorioFinanceiro(
     { data: pagamentosPeriodo, error: pagErr },
     { data: pagamentosSnapshot, error: snapshotErr },
     { data: movimentacoesCaixa, error: caixaErr },
+    { data: vendasBalcao, error: vendasErr },
   ] = await Promise.all([
     supabase
       .from("pagamentos")
@@ -209,10 +210,17 @@ export async function getRelatorioFinanceiro(
       .select("tipo, valor, created_at")
       .gte("created_at", `${filtros.inicio}T00:00:00`)
       .lte("created_at", `${filtros.fim}T23:59:59`),
+    supabase
+      .from("vendas_balcao")
+      .select("valor_total, status")
+      .eq("status", "finalizada")
+      .gte("created_at", `${filtros.inicio}T00:00:00`)
+      .lte("created_at", `${filtros.fim}T23:59:59`),
   ]);
   if (pagErr) throw pagErr;
   if (snapshotErr) throw snapshotErr;
   if (caixaErr) throw caixaErr;
+  if (vendasErr) throw vendasErr;
 
   const somaSnapshot = (filtro: (data: Date) => boolean) =>
     (pagamentosSnapshot ?? [])
@@ -233,6 +241,7 @@ export async function getRelatorioFinanceiro(
     lucroBruto: 0,
     receitaHospedagem: (pagamentosPeriodo ?? []).reduce((t, p) => t + p.valor_hospedagem, 0),
     receitaConsumo: (pagamentosPeriodo ?? []).reduce((t, p) => t + p.valor_consumo, 0),
+    receitaVendaBalcao: (vendasBalcao ?? []).reduce((t, v) => t + v.valor_total, 0),
   };
   resumo.lucroBruto = resumo.entradas - resumo.saidas;
 
@@ -324,6 +333,12 @@ export async function getRelatorioEstoque(
       .filter((m) => m.tipo === "perda")
       .reduce((total, m) => total + m.quantidade, 0),
     ajustes: movimentacoesFiltradas.filter((m) => m.tipo === "ajuste").length,
+    vendidosBalcao: movimentacoesFiltradas
+      .filter((m) => m.tipo === "venda_balcao")
+      .reduce((total, m) => total + Math.abs(m.quantidade), 0),
+    consumidosFuncionarios: movimentacoesFiltradas
+      .filter((m) => m.tipo === "consumo_funcionario")
+      .reduce((total, m) => total + Math.abs(m.quantidade), 0),
   };
 
   const linhas: LinhaRelatorioEstoque[] = movimentacoesFiltradas.map((m) => ({
@@ -360,14 +375,24 @@ export async function getRelatorioFuncionarios(
   if (!funcionarios || funcionarios.length === 0) return [];
 
   const ids = funcionarios.map((f) => f.id);
-  const { data: pontos, error: pontosErr } = await supabase
-    .from("pontos")
-    .select("funcionario_id, tipo, registrado_em")
-    .in("funcionario_id", ids)
-    .gte("registrado_em", `${filtros.inicio}T00:00:00`)
-    .lte("registrado_em", `${filtros.fim}T23:59:59`)
-    .order("registrado_em", { ascending: true });
+  const [{ data: pontos, error: pontosErr }, { data: consumos, error: consumosErr }] =
+    await Promise.all([
+      supabase
+        .from("pontos")
+        .select("funcionario_id, tipo, registrado_em")
+        .in("funcionario_id", ids)
+        .gte("registrado_em", `${filtros.inicio}T00:00:00`)
+        .lte("registrado_em", `${filtros.fim}T23:59:59`)
+        .order("registrado_em", { ascending: true }),
+      supabase
+        .from("funcionario_consumos")
+        .select("funcionario_id, quantidade, valor_total, created_at")
+        .in("funcionario_id", ids)
+        .gte("created_at", `${filtros.inicio}T00:00:00`)
+        .lte("created_at", `${filtros.fim}T23:59:59`),
+    ]);
   if (pontosErr) throw pontosErr;
+  if (consumosErr) throw consumosErr;
 
   return funcionarios.map((f) => {
     const pontosDoFuncionario = (pontos ?? []).filter((p) => p.funcionario_id === f.id);
@@ -417,6 +442,8 @@ export async function getRelatorioFuncionarios(
       }
     }
 
+    const consumosDoFuncionario = (consumos ?? []).filter((c) => c.funcionario_id === f.id);
+
     return {
       funcionarioId: f.id,
       nome: f.nome,
@@ -427,6 +454,8 @@ export async function getRelatorioFuncionarios(
       intervalos,
       faltas,
       atrasos,
+      produtosConsumidos: consumosDoFuncionario.reduce((total, c) => total + c.quantidade, 0),
+      valorConsumido: consumosDoFuncionario.reduce((total, c) => total + c.valor_total, 0),
     };
   });
 }

@@ -572,6 +572,10 @@ export function FuncionarioFormModal({
                     Se preenchidos, o sistema avisa atraso na entrada e no
                     retorno do almoço, e informa quando a saída para o
                     almoço ou a saída final acontecem fora do horário.
+                    Deixe &quot;Saída p/ almoço&quot; em branco se esse
+                    funcionário não tem intervalo — o Bater Ponto já entende
+                    que a 2ª batida do dia é a saída final, sem passar por
+                    almoço.
                   </p>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">

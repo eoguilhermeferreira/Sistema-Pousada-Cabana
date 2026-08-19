@@ -52,16 +52,29 @@ export function CardResumoFinanceiro({
         <Linha label="Valor hospedagem" valor={resumo.valorServicos} />
         <Linha label="Produtos" valor={resumo.valorProdutos} />
         <Linha label="Descontos" valor={resumo.desconto} negativo />
-        <Linha label={`ISS (${issAliquota || 0}% — informativo)`} valor={resumo.issValor} />
+        <Linha label="Base de cálculo do ISS" valor={resumo.baseCalculoIss} />
+        <Linha label={`Alíquota ISS (${issAliquota || 0}%)`} valor={resumo.issValor} />
       </div>
+
+      <p className="pt-2 text-xs text-gray-text">
+        ISS {resumo.issRetido ? "retido pelo tomador" : "não retido — recolhido pela pousada"}
+        {resumo.issRetido && ". O valor abaixo já é o líquido a receber, descontado o ISS retido."}
+      </p>
 
       <div className="mt-2 rounded-xl bg-primary-light px-4 py-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-primary-dark">Valor final</span>
+          <span className="text-sm font-semibold text-primary-dark">
+            {resumo.issRetido ? "Valor líquido a receber" : "Valor final"}
+          </span>
           <span className="font-sans text-xl font-bold text-primary-dark">
-            {currency.format(resumo.valorFinal)}
+            {currency.format(resumo.valorLiquido)}
           </span>
         </div>
+        {resumo.issRetido && resumo.valorLiquido !== resumo.valorFinal && (
+          <p className="mt-1 text-xs text-primary">
+            Valor cobrado do cliente: {currency.format(resumo.valorFinal)}
+          </p>
+        )}
       </div>
 
       <p className="pt-2 text-xs text-gray-text">Atualizado automaticamente conforme os valores da nota.</p>

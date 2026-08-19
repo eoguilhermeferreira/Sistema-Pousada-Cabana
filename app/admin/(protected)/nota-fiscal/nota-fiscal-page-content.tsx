@@ -21,10 +21,12 @@ import { montarDadosPdf } from "@/lib/nota-fiscal-mapper";
 import {
   cancelarNota,
   emitirNota,
+  emitirNotaReal,
   enviarNotaFiscalWhatsapp,
   getEmpresaConfiguracao,
   getNotaById,
   getNotaPorReserva,
+  reabrirNotaRejeitada,
   salvarNota,
 } from "@/services/nota-fiscal-service";
 import type { DadosReservaParaNota } from "@/services/nota-fiscal-service";
@@ -61,6 +63,7 @@ export function NotaFiscalPageContent() {
   const [loadingInicial, setLoadingInicial] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [emitting, setEmitting] = React.useState(false);
+  const [emitindoReal, setEmitindoReal] = React.useState(false);
   const [exporting, setExporting] = React.useState(false);
   const [error, setError] = React.useState("");
 
@@ -73,7 +76,7 @@ export function NotaFiscalPageContent() {
   const [notaEmitida, setNotaEmitida] = React.useState<NotaFiscalComProdutos | null>(null);
   const [veioDoCheckout, setVeioDoCheckout] = React.useState(false);
 
-  const disabled = status === "emitida" || status === "cancelada";
+  const disabled = status === "emitida" || status === "cancelada" || status === "rejeitada";
 
   const aplicarNota = React.useCallback((nota: NotaFiscal, produtosNota: ProdutoNotaInput[]) => {
     setNotaId(nota.id);
@@ -82,6 +85,11 @@ export function NotaFiscalPageContent() {
     setStatus(nota.status as StatusNota);
     setForm(notaFiscalToFormValues(nota));
     setProdutos(produtosNota);
+    setError(
+      nota.status === "rejeitada" && nota.erro_mensagem
+        ? `[${nota.erro_codigo ?? "erro"}] ${nota.erro_mensagem}`
+        : "",
+    );
   }, []);
 
   const resetarFormulario = React.useCallback(() => {
@@ -182,7 +190,10 @@ export function NotaFiscalPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const resumo = React.useMemo(() => calcularResumoNota(form, produtos), [form, produtos]);
+  const resumo = React.useMemo(
+    () => calcularResumoNota(form, produtos, empresa?.iss_retido ?? false),
+    [form, produtos, empresa?.iss_retido],
+  );
 
   function handleChangeForm(patch: Partial<NotaFiscalFormValues>) {
     setForm((prev) => ({ ...prev, ...patch }));
@@ -239,6 +250,46 @@ export function NotaFiscalPageContent() {
       setError(err instanceof Error ? err.message : "Não foi possível emitir a nota.");
     } finally {
       setEmitting(false);
+    }
+  }
+
+  /** Emissão REAL — sempre passa pela rota server-side, que hoje sempre
+   * retorna um erro explicando o que falta (configuração ausente, ou —
+   * quando tudo já está configurado — que o envio ao Webservice ainda não
+   * foi implementado). A nota persiste como "rejeitada" com o motivo exato. */
+  async function handleEmitirReal() {
+    setError("");
+    setEmitindoReal(true);
+    let idParaRecarregar: string | null = null;
+    try {
+      const nota = await salvarNota({ id: notaId ?? undefined, form, produtos });
+      idParaRecarregar = nota.id;
+      setNotaId(nota.id);
+      setNumero(nota.numero);
+      setSerieAtual(nota.serie);
+      await emitirNotaReal(nota.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível emitir a nota.");
+    } finally {
+      try {
+        if (idParaRecarregar) {
+          const atualizada = await getNotaById(idParaRecarregar);
+          setStatus(atualizada.status as StatusNota);
+        }
+      } finally {
+        setEmitindoReal(false);
+      }
+    }
+  }
+
+  async function handleReabrir() {
+    if (!notaId) return;
+    setError("");
+    try {
+      const nota = await reabrirNotaRejeitada(notaId);
+      setStatus(nota.status as StatusNota);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível reabrir a nota.");
     }
   }
 
@@ -337,10 +388,13 @@ export function NotaFiscalPageContent() {
         status={status}
         saving={saving}
         emitting={emitting}
+        emitindoReal={emitindoReal}
         exporting={exporting}
         onNovaNota={handleNovaNota}
         onSalvar={handleSalvar}
         onEmitir={handleEmitir}
+        onEmitirReal={handleEmitirReal}
+        onReabrir={handleReabrir}
         onImprimir={handleImprimir}
         onBaixarPdf={handleBaixarPdf}
         onCancelar={() => setCancelarOpen(true)}

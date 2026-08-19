@@ -5,6 +5,7 @@ import {
   Bell,
   Building2,
   Database,
+  Landmark,
   Plug,
   Settings as SettingsIcon,
   ScrollText,
@@ -22,6 +23,7 @@ import { TabPreferencias } from "@/components/admin/configuracoes/tab-preferenci
 import { TabLogs } from "@/components/admin/configuracoes/tab-logs";
 import { TabNotificacoes } from "@/components/admin/configuracoes/tab-notificacoes";
 import { TabIntegracoes } from "@/components/admin/configuracoes/tab-integracoes";
+import { TabPrefeituraNfse } from "@/components/admin/configuracoes/tab-prefeitura-nfse";
 
 const abas = [
   { value: "pousada", label: "Dados da Pousada", icon: Building2 },
@@ -31,6 +33,7 @@ const abas = [
   { value: "preferencias", label: "Preferências", icon: SettingsIcon },
   { value: "logs", label: "Logs do Sistema", icon: ScrollText },
   { value: "notificacoes", label: "Notificações", icon: Bell },
+  { value: "prefeitura-nfse", label: "Prefeitura / NFS-e", icon: Landmark },
   { value: "integracoes", label: "Integrações", icon: Plug },
 ] as const;
 
@@ -84,6 +87,9 @@ export function ConfiguracoesPageContent() {
           </TabsContent>
           <TabsContent value="notificacoes" className="px-6 py-6">
             <TabNotificacoes />
+          </TabsContent>
+          <TabsContent value="prefeitura-nfse" className="px-6 py-6">
+            <TabPrefeituraNfse />
           </TabsContent>
           <TabsContent value="integracoes" className="px-6 py-6">
             <TabIntegracoes />

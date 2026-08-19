@@ -10,19 +10,29 @@ export type NotaFiscalProdutoInsert = TablesInsert<"notas_fiscais_produtos">;
 export type EmpresaConfiguracao = Tables<"empresa_configuracoes">;
 export type EmpresaConfiguracaoUpdate = TablesUpdate<"empresa_configuracoes">;
 
-export type StatusNota = "rascunho" | "emitida" | "cancelada";
+export type StatusNota = "rascunho" | "processando" | "emitida" | "rejeitada" | "cancelada";
 
 export const statusNotaLabels: Record<StatusNota, string> = {
   rascunho: "Rascunho",
+  processando: "Emitindo...",
   emitida: "Emitida",
+  rejeitada: "Rejeitada",
   cancelada: "Cancelada",
 };
 
-export const statusNotaOptions: StatusNota[] = ["rascunho", "emitida", "cancelada"];
+export const statusNotaOptions: StatusNota[] = [
+  "rascunho",
+  "processando",
+  "emitida",
+  "rejeitada",
+  "cancelada",
+];
 
 const statusNotaBadgeClasses: Record<StatusNota, string> = {
   rascunho: "bg-gray-light text-gray-text",
+  processando: "bg-primary-light text-primary",
   emitida: "bg-status-disponivel-light text-status-disponivel",
+  rejeitada: "bg-status-ocupado-light text-status-ocupado",
   cancelada: "bg-status-ocupado-light text-status-ocupado",
 };
 
@@ -137,17 +147,26 @@ export interface ResumoNotaFiscal {
   valorProdutos: number;
   subtotal: number;
   desconto: number;
+  /** Base sobre a qual a alíquota de ISS incide — só o valor de serviços, não os produtos. */
+  baseCalculoIss: number;
+  issAliquota: number;
   issValor: number;
+  /** true = o ISS é retido pelo tomador e recolhido por ele à Prefeitura (o
+   * prestador recebe o valor líquido); false = o prestador recolhe por conta
+   * própria e recebe o valor cheio. Vem da configuração fiscal da empresa,
+   * não é decidido nota a nota. */
+  issRetido: boolean;
   valorFinal: number;
+  /** Valor final descontado o ISS, apenas quando ISS retido — senão igual a valorFinal. */
+  valorLiquido: number;
 }
 
 /** Cálculo único usado pelo card de resumo, ao salvar/emitir e no PDF —
- * garante que a tela e o documento final sempre mostrem o mesmo valor.
- * O ISS é informativo (imposto do prestador) e não é deduzido do valor
- * cobrado do cliente. */
+ * garante que a tela e o documento final sempre mostrem o mesmo valor. */
 export function calcularResumoNota(
   form: Pick<NotaFiscalFormValues, "servicoQuantidade" | "servicoValorUnitario" | "desconto" | "issAliquota">,
   produtos: ProdutoNotaInput[],
+  issRetido = false,
 ): ResumoNotaFiscal {
   const quantidade = Number(form.servicoQuantidade) || 0;
   const valorUnitario = Number(form.servicoValorUnitario) || 0;
@@ -157,10 +176,23 @@ export function calcularResumoNota(
   const valorServicos = quantidade * valorUnitario;
   const valorProdutos = produtos.reduce((total, item) => total + item.valorTotal, 0);
   const subtotal = valorServicos + valorProdutos;
-  const issValor = (valorServicos * issAliquota) / 100;
+  const baseCalculoIss = valorServicos;
+  const issValor = (baseCalculoIss * issAliquota) / 100;
   const valorFinal = Math.max(0, subtotal - desconto);
+  const valorLiquido = issRetido ? Math.max(0, valorFinal - issValor) : valorFinal;
 
-  return { valorServicos, valorProdutos, subtotal, desconto, issValor, valorFinal };
+  return {
+    valorServicos,
+    valorProdutos,
+    subtotal,
+    desconto,
+    baseCalculoIss,
+    issAliquota,
+    issValor,
+    issRetido,
+    valorFinal,
+    valorLiquido,
+  };
 }
 
 export interface FiltrosHistoricoNotas {
@@ -180,3 +212,26 @@ export const emptyFiltrosHistoricoNotas: FiltrosHistoricoNotas = {
 export function formatNumeroNota(numero: number, serie: string) {
   return `${String(numero).padStart(6, "0")}/${serie}`;
 }
+
+/** Regimes tributários federais — terminologia genérica da Receita Federal,
+ * não específica de Avaré. Confirmar com a contabilidade qual se aplica. */
+export const regimeTributarioOptions = [
+  "Simples Nacional",
+  "Lucro Presumido",
+  "Lucro Real",
+  "Lucro Arbitrado",
+  "MEI",
+] as const;
+
+/** Campo "Regime Especial de Tributação" do padrão ABRASF para NFS-e —
+ * valores do próprio padrão, não inventados. Confirmar com a contabilidade
+ * qual (se algum) se aplica à pousada. */
+export const regimeEspecialTributacaoOptions = [
+  "Nenhum",
+  "Microempresa Municipal",
+  "Estimativa",
+  "Sociedade de Profissionais",
+  "Cooperativa",
+  "MEI — Microempreendedor Individual",
+  "ME EPP — Simples Nacional",
+] as const;

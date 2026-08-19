@@ -262,6 +262,11 @@ export async function excluirRascunho(id: string) {
   if (error) throw error;
 }
 
+/** Emissão SIMULADA — gera um protocolo local só para testar o fluxo (PDF,
+ * histórico, comprovante) sem depender do Webservice oficial. Sempre
+ * disponível, independentemente da integração real estar configurada.
+ * Nunca deve ser confundida com uma emissão real: a nota fica marcada com
+ * ambiente_emissao = "simulado" e um protocolo com prefixo "SIMULADO-". */
 export async function emitirNota(id: string): Promise<NotaFiscal> {
   const supabase = createClient();
 
@@ -282,25 +287,41 @@ export async function emitirNota(id: string): Promise<NotaFiscal> {
     throw new Error("Informe a descrição e o valor do serviço antes de emitir.");
   }
 
+  const { error: claimError } = await supabase.rpc("iniciar_emissao_nota", { p_nota_id: id });
+  if (claimError) throw claimError;
+
   const resultado = await enviarParaPrefeitura(nota);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error: confirmError } = await supabase.rpc("confirmar_emissao_nota", {
+    p_nota_id: id,
+    p_ambiente: "simulado",
+    p_codigo_autenticacao: resultado.codigoAutenticacao,
+    p_protocolo: resultado.protocolo,
+  });
+  if (confirmError) throw confirmError;
+  return data;
+}
 
-  const { data, error: updateError } = await supabase
-    .from("notas_fiscais")
-    .update({
-      status: "emitida",
-      emitida_em: new Date().toISOString(),
-      emitida_por: user?.id ?? null,
-      codigo_autenticacao: resultado.codigoAutenticacao,
-      protocolo_prefeitura: resultado.protocolo,
-    })
-    .eq("id", id)
-    .select()
-    .single();
-  if (updateError) throw updateError;
+/** Emissão REAL — passa pela rota server-side (nunca client-side), que
+ * valida a configuração completa da integração e, hoje, sempre retorna erro
+ * explicando exatamente o que falta (configuração ausente, ou — quando tudo
+ * já está configurado — que o envio ao Webservice ainda não foi
+ * implementado). Nunca marca a nota como emitida sem confirmação real. */
+export async function emitirNotaReal(id: string): Promise<never> {
+  const resposta = await fetch("/api/integracoes/nfse/emitir", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notaId: id }),
+  });
+  const corpo = await resposta.json().catch(() => ({}));
+  throw new Error(corpo.error || `Falha ao emitir (${resposta.status}).`);
+}
+
+/** Corrige e reabre uma nota rejeitada para edição (volta a rascunho). */
+export async function reabrirNotaRejeitada(id: string): Promise<NotaFiscal> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("reabrir_nota_rejeitada", { p_nota_id: id });
+  if (error) throw error;
   return data;
 }
 

@@ -41,7 +41,10 @@ export function TabIntegracoes() {
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
-      setIntegracoes(await listIntegracoes());
+      // "prefeitura" (NFS-e) ganhou sua própria aba dedicada — Prefeitura /
+      // NFS-e — com campos reais em vez do formulário genérico de Chave de
+      // API / Webhook, que não se aplica ao Webservice da Prefeitura.
+      setIntegracoes((await listIntegracoes()).filter((i) => i.chave !== "prefeitura"));
     } finally {
       setLoading(false);
     }

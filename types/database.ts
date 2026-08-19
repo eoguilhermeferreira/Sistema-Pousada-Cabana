@@ -384,14 +384,24 @@ export type Database = {
           cep: string
           cidade: string
           cnpj: string
+          codigo_atividade: string | null
+          codigo_servico_municipal: string | null
           created_at: string
           email: string
           endereco: string
           estado: string
           id: string
+          incentivador_cultural: boolean | null
           inscricao_municipal: string
+          iss_aliquota_padrao: number | null
+          iss_retido: boolean
+          item_lc116: string | null
+          municipio_incidencia: string | null
           nome_fantasia: string
+          optante_simples_nacional: boolean | null
           razao_social: string
+          regime_especial_tributacao: string | null
+          regime_tributario: string | null
           telefone: string
           updated_at: string
         }
@@ -399,14 +409,24 @@ export type Database = {
           cep?: string
           cidade?: string
           cnpj?: string
+          codigo_atividade?: string | null
+          codigo_servico_municipal?: string | null
           created_at?: string
           email?: string
           endereco?: string
           estado?: string
           id?: string
+          incentivador_cultural?: boolean | null
           inscricao_municipal?: string
+          iss_aliquota_padrao?: number | null
+          iss_retido?: boolean
+          item_lc116?: string | null
+          municipio_incidencia?: string | null
           nome_fantasia?: string
+          optante_simples_nacional?: boolean | null
           razao_social?: string
+          regime_especial_tributacao?: string | null
+          regime_tributario?: string | null
           telefone?: string
           updated_at?: string
         }
@@ -414,14 +434,24 @@ export type Database = {
           cep?: string
           cidade?: string
           cnpj?: string
+          codigo_atividade?: string | null
+          codigo_servico_municipal?: string | null
           created_at?: string
           email?: string
           endereco?: string
           estado?: string
           id?: string
+          incentivador_cultural?: boolean | null
           inscricao_municipal?: string
+          iss_aliquota_padrao?: number | null
+          iss_retido?: boolean
+          item_lc116?: string | null
+          municipio_incidencia?: string | null
           nome_fantasia?: string
+          optante_simples_nacional?: boolean | null
           razao_social?: string
+          regime_especial_tributacao?: string | null
+          regime_tributario?: string | null
           telefone?: string
           updated_at?: string
         }
@@ -969,8 +999,101 @@ export type Database = {
         }
         Relationships: []
       }
+      nfse_certificado_digital: {
+        Row: {
+          arquivo_base64: string | null
+          atualizado_em: string
+          atualizado_por: string | null
+          id: string
+          nome_arquivo: string | null
+          senha: string | null
+          titular_cnpj: string | null
+          validade_ate: string | null
+        }
+        Insert: {
+          arquivo_base64?: string | null
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: string
+          nome_arquivo?: string | null
+          senha?: string | null
+          titular_cnpj?: string | null
+          validade_ate?: string | null
+        }
+        Update: {
+          arquivo_base64?: string | null
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: string
+          nome_arquivo?: string | null
+          senha?: string | null
+          titular_cnpj?: string | null
+          validade_ate?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfse_certificado_digital_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfse_integracao_config: {
+        Row: {
+          ambiente: string
+          contato_fiorilli_em: string | null
+          contato_fiorilli_observacao: string | null
+          contato_fiorilli_realizado: boolean
+          created_at: string
+          endpoint_homologacao_abrasf_legado: string | null
+          endpoint_homologacao_nacional: string | null
+          endpoint_producao_abrasf_legado: string | null
+          endpoint_producao_nacional: string | null
+          id: string
+          observacoes: string | null
+          serie_rps: string | null
+          updated_at: string
+          webservice_tipo: string
+        }
+        Insert: {
+          ambiente?: string
+          contato_fiorilli_em?: string | null
+          contato_fiorilli_observacao?: string | null
+          contato_fiorilli_realizado?: boolean
+          created_at?: string
+          endpoint_homologacao_abrasf_legado?: string | null
+          endpoint_homologacao_nacional?: string | null
+          endpoint_producao_abrasf_legado?: string | null
+          endpoint_producao_nacional?: string | null
+          id?: string
+          observacoes?: string | null
+          serie_rps?: string | null
+          updated_at?: string
+          webservice_tipo?: string
+        }
+        Update: {
+          ambiente?: string
+          contato_fiorilli_em?: string | null
+          contato_fiorilli_observacao?: string | null
+          contato_fiorilli_realizado?: boolean
+          created_at?: string
+          endpoint_homologacao_abrasf_legado?: string | null
+          endpoint_homologacao_nacional?: string | null
+          endpoint_producao_abrasf_legado?: string | null
+          endpoint_producao_nacional?: string | null
+          id?: string
+          observacoes?: string | null
+          serie_rps?: string | null
+          updated_at?: string
+          webservice_tipo?: string
+        }
+        Relationships: []
+      }
       notas_fiscais: {
         Row: {
+          ambiente_emissao: string | null
           cancelada_em: string | null
           cancelada_motivo: string | null
           codigo_autenticacao: string | null
@@ -981,6 +1104,9 @@ export type Database = {
           desconto: number
           emitida_em: string | null
           emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
           id: string
           iss_aliquota: number
           iss_valor: number
@@ -1009,8 +1135,10 @@ export type Database = {
           updated_at: string
           valor_final: number
           valor_produtos: number
+          xml_retorno: string | null
         }
         Insert: {
+          ambiente_emissao?: string | null
           cancelada_em?: string | null
           cancelada_motivo?: string | null
           codigo_autenticacao?: string | null
@@ -1021,6 +1149,9 @@ export type Database = {
           desconto?: number
           emitida_em?: string | null
           emitida_por?: string | null
+          erro_codigo?: string | null
+          erro_em?: string | null
+          erro_mensagem?: string | null
           id?: string
           iss_aliquota?: number
           iss_valor?: number
@@ -1049,8 +1180,10 @@ export type Database = {
           updated_at?: string
           valor_final?: number
           valor_produtos?: number
+          xml_retorno?: string | null
         }
         Update: {
+          ambiente_emissao?: string | null
           cancelada_em?: string | null
           cancelada_motivo?: string | null
           codigo_autenticacao?: string | null
@@ -1061,6 +1194,9 @@ export type Database = {
           desconto?: number
           emitida_em?: string | null
           emitida_por?: string | null
+          erro_codigo?: string | null
+          erro_em?: string | null
+          erro_mensagem?: string | null
           id?: string
           iss_aliquota?: number
           iss_valor?: number
@@ -1089,6 +1225,7 @@ export type Database = {
           updated_at?: string
           valor_final?: number
           valor_produtos?: number
+          xml_retorno?: string | null
         }
         Relationships: [
           {
@@ -2685,6 +2822,251 @@ export type Database = {
       cancelar_venda_balcao: {
         Args: { p_venda_id: string }
         Returns: undefined
+      }
+      confirmar_emissao_nota: {
+        Args: {
+          p_ambiente: string
+          p_codigo_autenticacao: string
+          p_nota_id: string
+          p_protocolo: string
+          p_xml_retorno?: string
+        }
+        Returns: {
+          ambiente_emissao: string | null
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
+          created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
+          id: string
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
+          updated_at: string
+          valor_final: number
+          valor_produtos: number
+          xml_retorno: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "notas_fiscais"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      iniciar_emissao_nota: {
+        Args: { p_nota_id: string }
+        Returns: {
+          ambiente_emissao: string | null
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
+          created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
+          id: string
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
+          updated_at: string
+          valor_final: number
+          valor_produtos: number
+          xml_retorno: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "notas_fiscais"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reabrir_nota_rejeitada: {
+        Args: { p_nota_id: string }
+        Returns: {
+          ambiente_emissao: string | null
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
+          created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
+          id: string
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
+          updated_at: string
+          valor_final: number
+          valor_produtos: number
+          xml_retorno: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "notas_fiscais"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      registrar_erro_emissao_nota: {
+        Args: {
+          p_ambiente: string
+          p_codigo: string
+          p_mensagem: string
+          p_nota_id: string
+        }
+        Returns: {
+          ambiente_emissao: string | null
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
+          created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
+          id: string
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
+          updated_at: string
+          valor_final: number
+          valor_produtos: number
+          xml_retorno: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "notas_fiscais"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      remover_certificado_digital_nfse: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      salvar_certificado_digital_nfse: {
+        Args: {
+          p_arquivo_base64: string
+          p_nome_arquivo: string
+          p_senha: string
+          p_titular_cnpj?: string
+          p_validade_ate?: string
+        }
+        Returns: undefined
+      }
+      status_certificado_digital_nfse: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       registrar_ponto_facial: {
         Args: { p_confianca?: number; p_funcionario_id: string }

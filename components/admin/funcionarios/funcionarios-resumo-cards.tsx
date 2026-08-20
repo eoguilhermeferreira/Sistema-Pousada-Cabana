@@ -1,4 +1,4 @@
-import { Clock, Coffee, UserCheck, UserX, Users } from "lucide-react";
+import { CalendarOff, Clock, Coffee, UserCheck, UserX, Users } from "lucide-react";
 
 import { StatCard } from "@/components/admin/stat-card";
 import type { ResumoFuncionarios } from "@/types/funcionario";
@@ -9,12 +9,18 @@ export function FuncionariosResumoCards({
   resumo: ResumoFuncionarios;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <StatCard
         icon={Users}
         label="Funcionários ativos"
         value={String(resumo.ativos)}
         accent="disponivel"
+      />
+      <StatCard
+        icon={CalendarOff}
+        label="De folga"
+        value={String(resumo.deFolga)}
+        accent="checkout"
       />
       <StatCard
         icon={UserX}

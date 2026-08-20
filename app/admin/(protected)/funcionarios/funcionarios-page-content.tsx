@@ -127,6 +127,7 @@ export function FuncionariosPageContent() {
     return {
       ativos: ativos.length,
       inativos: funcionarios.filter((f) => f.status === "inativo").length,
+      deFolga: funcionarios.filter((f) => f.status === "folga").length,
       presentesHoje,
       ausentesHoje,
       emIntervalo,

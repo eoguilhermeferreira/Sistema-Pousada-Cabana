@@ -6,6 +6,7 @@ import { Camera, Loader2, ScanFace, ShieldCheck } from "lucide-react";
 import { Modal, ModalContent } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { CapturaFacialModal } from "@/components/admin/funcionarios/captura-facial-modal";
 import { useUsuarioAtual } from "@/components/admin/usuario-context";
@@ -93,6 +94,7 @@ export function FuncionarioFormModal({
     number[][] | null
   >(null);
   const [capturaOpen, setCapturaOpen] = React.useState(false);
+  const [temAlmoco, setTemAlmoco] = React.useState(true);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [saving, setSaving] = React.useState(false);
   const [checkingCep, setCheckingCep] = React.useState(false);
@@ -108,6 +110,7 @@ export function FuncionarioFormModal({
       setFotoUrl(funcionario?.foto_url ?? null);
       setFotoFile(null);
       setDescritoresFaciais(null);
+      setTemAlmoco(funcionario ? Boolean(funcionario.horario_saida_almoco) : true);
       setErrors({});
       setFormError("");
     }, 0);
@@ -162,6 +165,14 @@ export function FuncionarioFormModal({
     }
   }
 
+  function handleToggleTemAlmoco(checked: boolean) {
+    setTemAlmoco(checked);
+    if (!checked) {
+      setField("horario_saida_almoco", "");
+      setField("duracao_almoco_minutos", "");
+    }
+  }
+
   async function handleCepBlur() {
     if (!isValidCep(values.cep)) return;
     setCheckingCep(true);
@@ -199,6 +210,7 @@ export function FuncionarioFormModal({
     )
       nextErrors.salario = "Valor inválido.";
     if (
+      temAlmoco &&
       values.duracao_almoco_minutos &&
       (Number.isNaN(Number(values.duracao_almoco_minutos)) ||
         Number(values.duracao_almoco_minutos) <= 0)
@@ -253,10 +265,11 @@ export function FuncionarioFormModal({
         observacoes: values.observacoes.trim() || null,
         status: values.status,
         horario_entrada: values.horario_entrada || null,
-        horario_saida_almoco: values.horario_saida_almoco || null,
-        duracao_almoco_minutos: values.duracao_almoco_minutos
-          ? Number(values.duracao_almoco_minutos)
-          : null,
+        horario_saida_almoco: temAlmoco ? values.horario_saida_almoco || null : null,
+        duracao_almoco_minutos:
+          temAlmoco && values.duracao_almoco_minutos
+            ? Number(values.duracao_almoco_minutos)
+            : null,
         horario_saida: values.horario_saida || null,
       };
 
@@ -572,13 +585,34 @@ export function FuncionarioFormModal({
                     Se preenchidos, o sistema avisa atraso na entrada e no
                     retorno do almoço, e informa quando a saída para o
                     almoço ou a saída final acontecem fora do horário.
-                    Deixe &quot;Saída p/ almoço&quot; em branco se esse
-                    funcionário não tem intervalo — o Bater Ponto já entende
-                    que a 2ª batida do dia é a saída final, sem passar por
-                    almoço.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+
+                <label className="flex items-center gap-2.5">
+                  <Checkbox
+                    checked={temAlmoco}
+                    onCheckedChange={(checked) =>
+                      handleToggleTemAlmoco(checked === true)
+                    }
+                  />
+                  <span className="text-sm text-primary-dark">
+                    Este funcionário tem horário de almoço
+                  </span>
+                </label>
+                {!temAlmoco && (
+                  <p className="text-xs text-gray-text">
+                    Sem intervalo — no Bater Ponto, a 2ª batida do dia já
+                    fecha como saída final, sem passar por almoço.
+                  </p>
+                )}
+
+                <div
+                  className={
+                    temAlmoco
+                      ? "grid grid-cols-1 gap-4 sm:grid-cols-4"
+                      : "grid grid-cols-1 gap-4 sm:grid-cols-2"
+                  }
+                >
                   <Field label="Entrada" error={errors.horario_entrada}>
                     <Input
                       type="time"
@@ -588,56 +622,60 @@ export function FuncionarioFormModal({
                       }
                     />
                   </Field>
-                  <Field
-                    label="Saída p/ almoço"
-                    error={errors.horario_saida_almoco}
-                  >
-                    <Input
-                      type="time"
-                      value={values.horario_saida_almoco}
-                      onChange={(e) =>
-                        setField("horario_saida_almoco", e.target.value)
-                      }
-                    />
-                  </Field>
-                  <Field
-                    label="Duração do almoço"
-                    error={errors.duracao_almoco_minutos}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <Input
-                        type="number"
-                        min={0}
-                        value={horasAlmoco || ""}
-                        onChange={(e) => {
-                          const horas = Number(e.target.value) || 0;
-                          setField(
-                            "duracao_almoco_minutos",
-                            String(horas * 60 + minutosAlmoco),
-                          );
-                        }}
-                        placeholder="0"
-                        className="w-16"
-                      />
-                      <span className="text-xs text-gray-text">h</span>
-                      <select
-                        className={selectClass}
-                        value={minutosAlmoco}
-                        onChange={(e) => {
-                          const minutos = Number(e.target.value);
-                          setField(
-                            "duracao_almoco_minutos",
-                            String(horasAlmoco * 60 + minutos),
-                          );
-                        }}
+                  {temAlmoco && (
+                    <>
+                      <Field
+                        label="Saída p/ almoço"
+                        error={errors.horario_saida_almoco}
                       >
-                        <option value={0}>00 min</option>
-                        <option value={15}>15 min</option>
-                        <option value={30}>30 min</option>
-                        <option value={45}>45 min</option>
-                      </select>
-                    </div>
-                  </Field>
+                        <Input
+                          type="time"
+                          value={values.horario_saida_almoco}
+                          onChange={(e) =>
+                            setField("horario_saida_almoco", e.target.value)
+                          }
+                        />
+                      </Field>
+                      <Field
+                        label="Duração do almoço"
+                        error={errors.duracao_almoco_minutos}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Input
+                            type="number"
+                            min={0}
+                            value={horasAlmoco || ""}
+                            onChange={(e) => {
+                              const horas = Number(e.target.value) || 0;
+                              setField(
+                                "duracao_almoco_minutos",
+                                String(horas * 60 + minutosAlmoco),
+                              );
+                            }}
+                            placeholder="0"
+                            className="w-16"
+                          />
+                          <span className="text-xs text-gray-text">h</span>
+                          <select
+                            className={selectClass}
+                            value={minutosAlmoco}
+                            onChange={(e) => {
+                              const minutos = Number(e.target.value);
+                              setField(
+                                "duracao_almoco_minutos",
+                                String(horasAlmoco * 60 + minutos),
+                              );
+                            }}
+                          >
+                            <option value={0}>00 min</option>
+                            <option value={15}>15 min</option>
+                            <option value={30}>30 min</option>
+                            <option value={45}>45 min</option>
+                          </select>
+                        </div>
+                      </Field>
+                    </>
+                  )}
                   <Field label="Saída" error={errors.horario_saida}>
                     <Input
                       type="time"

@@ -5,7 +5,7 @@ export type Funcionario = Tables<"funcionarios">;
 export type FuncionarioInsert = TablesInsert<"funcionarios">;
 export type FuncionarioUpdate = TablesUpdate<"funcionarios">;
 
-export type StatusFuncionario = "ativo" | "inativo";
+export type StatusFuncionario = "ativo" | "inativo" | "folga";
 export type Turno = "manha" | "tarde" | "noite" | "integral";
 
 export type FuncionarioTemplateFacial = Tables<"funcionario_templates_faciais">;
@@ -14,6 +14,7 @@ export type FuncionarioHistorico = Tables<"funcionario_historico">;
 export const statusFuncionarioLabels: Record<StatusFuncionario, string> = {
   ativo: "Ativo",
   inativo: "Inativo",
+  folga: "De folga",
 };
 
 export const turnoOptions: Turno[] = ["manha", "tarde", "noite", "integral"];
@@ -138,6 +139,7 @@ export const emptyFiltrosFuncionarios: FiltrosFuncionarios = {
 export interface ResumoFuncionarios {
   ativos: number;
   inativos: number;
+  deFolga: number;
   presentesHoje: number;
   ausentesHoje: number;
   emIntervalo: number;

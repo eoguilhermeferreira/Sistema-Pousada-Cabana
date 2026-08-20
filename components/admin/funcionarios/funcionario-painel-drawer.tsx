@@ -34,7 +34,12 @@ import {
 import { listPontosPorFuncionario } from "@/services/pontos-service";
 import { listConsumosPorFuncionario } from "@/services/funcionario-consumo-service";
 import { agruparPontosPorDia, formatarStatusPonto } from "@/types/ponto";
-import { turnoLabels, type Funcionario, type FuncionarioHistorico } from "@/types/funcionario";
+import {
+  turnoLabels,
+  type Funcionario,
+  type FuncionarioHistorico,
+  type StatusFuncionario,
+} from "@/types/funcionario";
 import type { Ponto, TipoPonto } from "@/types/ponto";
 import { cargoLabels } from "@/types/usuario";
 import {
@@ -226,7 +231,7 @@ export function FuncionarioPainelDrawer({
                       {cargoLabels[funcionario.cargo]}
                     </span>
                     <FuncionarioStatusBadge
-                      status={funcionario.status as "ativo" | "inativo"}
+                      status={funcionario.status as StatusFuncionario}
                     />
                   </div>
                 </div>

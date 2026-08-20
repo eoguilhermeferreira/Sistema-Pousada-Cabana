@@ -4,11 +4,13 @@ import { statusFuncionarioLabels, type StatusFuncionario } from "@/types/funcion
 const badgeClasses: Record<StatusFuncionario, string> = {
   ativo: "bg-status-disponivel-light text-status-disponivel",
   inativo: "bg-status-cancelada-light text-status-cancelada",
+  folga: "bg-status-checkout-light text-status-checkout",
 };
 
 const dotClasses: Record<StatusFuncionario, string> = {
   ativo: "bg-status-disponivel",
   inativo: "bg-status-cancelada",
+  folga: "bg-status-checkout",
 };
 
 export function FuncionarioStatusBadge({

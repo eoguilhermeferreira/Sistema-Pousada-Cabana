@@ -7,7 +7,7 @@ import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { formatPhone } from "@/lib/phone";
 import { cargoLabels } from "@/types/usuario";
 import { tipoPontoLabels } from "@/types/ponto";
-import { turnoLabels, type Funcionario } from "@/types/funcionario";
+import { turnoLabels, type Funcionario, type StatusFuncionario } from "@/types/funcionario";
 import type { Ponto } from "@/types/ponto";
 
 const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -105,7 +105,7 @@ export function FuncionariosTable({
                     </p>
                   </div>
                   <FuncionarioStatusBadge
-                    status={funcionario.status as "ativo" | "inativo"}
+                    status={funcionario.status as StatusFuncionario}
                   />
                 </div>
 
@@ -208,7 +208,7 @@ export function FuncionariosTable({
                     </td>
                     <td className="px-5 py-3">
                       <FuncionarioStatusBadge
-                        status={funcionario.status as "ativo" | "inativo"}
+                        status={funcionario.status as StatusFuncionario}
                       />
                     </td>
                     <td className="px-5 py-3 text-gray-text">

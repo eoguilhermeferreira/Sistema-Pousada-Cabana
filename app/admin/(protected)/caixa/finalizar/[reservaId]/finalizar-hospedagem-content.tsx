@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { PagamentoFormasEditor } from "@/components/admin/caixa/pagamento-formas-editor";
 import { ComprovantePagamento } from "@/components/admin/caixa/comprovante-pagamento";
@@ -58,6 +59,8 @@ export function FinalizarHospedagemContent({
 
   const [incluirHospedagem, setIncluirHospedagem] = React.useState(true);
   const [incluirConsumo, setIncluirConsumo] = React.useState(true);
+  const [valorHospedagemInput, setValorHospedagemInput] = React.useState("");
+  const [valorConsumoInput, setValorConsumoInput] = React.useState("");
   const [formas, setFormas] = React.useState<FormaPagamentoInput[]>([]);
   const [observacao, setObservacao] = React.useState("");
   const [error, setError] = React.useState("");
@@ -89,21 +92,37 @@ export function FinalizarHospedagemContent({
     : 0;
   const criancas = reserva?.hospedes.filter((h) => h.tipo === "crianca") ?? [];
 
-  const valorHospedagemPendente =
-    reserva && !reserva.hospedagem_paga ? reserva.valor_total : 0;
-  const valorConsumoPendente = consumos.reduce(
-    (total, item) => total + item.valor_total,
-    0,
-  );
-  const valorACobrar =
-    (incluirHospedagem ? valorHospedagemPendente : 0) +
-    (incluirConsumo ? valorConsumoPendente : 0);
+  const valorHospedagemPendente = reserva
+    ? Math.max(reserva.valor_total - reserva.valor_hospedagem_pago, 0)
+    : 0;
+  const consumoBruto = consumos.reduce((total, item) => total + item.valor_total, 0);
+  const valorConsumoPendente = reserva
+    ? Math.max(consumoBruto - reserva.valor_consumo_pago, 0)
+    : 0;
+
+  // Valor que será cobrado agora em cada balde — por padrão o pendente
+  // inteiro (mesmo comportamento de sempre), mas editável pra permitir
+  // pagamento parcial (hóspede paga metade agora, resto depois).
+  const valorHospedagemCobrado = incluirHospedagem
+    ? Math.min(Math.max(Number(valorHospedagemInput) || 0, 0), valorHospedagemPendente)
+    : 0;
+  const valorConsumoCobrado = incluirConsumo
+    ? Math.min(Math.max(Number(valorConsumoInput) || 0, 0), valorConsumoPendente)
+    : 0;
+  const valorACobrar = valorHospedagemCobrado + valorConsumoCobrado;
+
+  const valorEmAbertoDepois =
+    valorHospedagemPendente - valorHospedagemCobrado + (valorConsumoPendente - valorConsumoCobrado);
 
   React.useEffect(() => {
     if (loading) return;
     const timeout = setTimeout(() => {
       setIncluirHospedagem(valorHospedagemPendente > 0);
       setIncluirConsumo(valorConsumoPendente > 0);
+      setValorHospedagemInput(
+        valorHospedagemPendente > 0 ? String(valorHospedagemPendente) : "",
+      );
+      setValorConsumoInput(valorConsumoPendente > 0 ? String(valorConsumoPendente) : "");
     }, 0);
     return () => clearTimeout(timeout);
   }, [loading, valorHospedagemPendente, valorConsumoPendente]);
@@ -124,6 +143,14 @@ export function FinalizarHospedagemContent({
 
     if (!incluirHospedagem && !incluirConsumo) {
       setError("Selecione ao menos hospedagem ou consumo para cobrar.");
+      return;
+    }
+    if (incluirHospedagem && valorHospedagemCobrado <= 0) {
+      setError("Informe um valor de hospedagem maior que zero.");
+      return;
+    }
+    if (incluirConsumo && valorConsumoCobrado <= 0) {
+      setError("Informe um valor de consumo maior que zero.");
       return;
     }
 
@@ -151,6 +178,8 @@ export function FinalizarHospedagemContent({
         incluirConsumo,
         formas,
         observacao: observacao.trim() || undefined,
+        valorHospedagem: incluirHospedagem ? valorHospedagemCobrado : undefined,
+        valorConsumo: incluirConsumo ? valorConsumoCobrado : undefined,
       });
 
       setComprovante({
@@ -427,41 +456,75 @@ export function FinalizarHospedagemContent({
             <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-text">
               Total geral
             </h2>
-            <div className="space-y-2">
-              <label className="flex items-center justify-between gap-2 text-sm">
-                <span className="flex items-center gap-2 text-primary-dark">
-                  <Checkbox
-                    checked={incluirHospedagem}
-                    disabled={valorHospedagemPendente <= 0}
-                    onCheckedChange={(checked) =>
-                      setIncluirHospedagem(checked === true)
-                    }
-                  />
-                  Hospedagem
-                </span>
-                <span className="font-medium text-primary-dark">
-                  {valorHospedagemPendente > 0
-                    ? currency.format(valorHospedagemPendente)
-                    : "Paga"}
-                </span>
-              </label>
-              <label className="flex items-center justify-between gap-2 text-sm">
-                <span className="flex items-center gap-2 text-primary-dark">
-                  <Checkbox
-                    checked={incluirConsumo}
-                    disabled={valorConsumoPendente <= 0}
-                    onCheckedChange={(checked) =>
-                      setIncluirConsumo(checked === true)
-                    }
-                  />
-                  Consumo
-                </span>
-                <span className="font-medium text-primary-dark">
-                  {valorConsumoPendente > 0
-                    ? currency.format(valorConsumoPendente)
-                    : "Sem pendências"}
-                </span>
-              </label>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="flex items-center justify-between gap-2 text-sm">
+                  <span className="flex items-center gap-2 text-primary-dark">
+                    <Checkbox
+                      checked={incluirHospedagem}
+                      disabled={valorHospedagemPendente <= 0}
+                      onCheckedChange={(checked) =>
+                        setIncluirHospedagem(checked === true)
+                      }
+                    />
+                    Hospedagem
+                  </span>
+                  <span className="text-xs text-gray-text">
+                    {valorHospedagemPendente > 0
+                      ? `Pendente: ${currency.format(valorHospedagemPendente)}`
+                      : "Paga"}
+                  </span>
+                </label>
+                {incluirHospedagem && valorHospedagemPendente > 0 && (
+                  <div className="flex items-center gap-2 pl-7">
+                    <span className="text-xs text-gray-text">Pagando agora</span>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={valorHospedagemPendente}
+                      step="0.01"
+                      value={valorHospedagemInput}
+                      onChange={(e) => setValorHospedagemInput(e.target.value)}
+                      className="h-9 flex-1"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="flex items-center justify-between gap-2 text-sm">
+                  <span className="flex items-center gap-2 text-primary-dark">
+                    <Checkbox
+                      checked={incluirConsumo}
+                      disabled={valorConsumoPendente <= 0}
+                      onCheckedChange={(checked) =>
+                        setIncluirConsumo(checked === true)
+                      }
+                    />
+                    Consumo
+                  </span>
+                  <span className="text-xs text-gray-text">
+                    {valorConsumoPendente > 0
+                      ? `Pendente: ${currency.format(valorConsumoPendente)}`
+                      : "Sem pendências"}
+                  </span>
+                </label>
+                {incluirConsumo && valorConsumoPendente > 0 && (
+                  <div className="flex items-center gap-2 pl-7">
+                    <span className="text-xs text-gray-text">Pagando agora</span>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={valorConsumoPendente}
+                      step="0.01"
+                      value={valorConsumoInput}
+                      onChange={(e) => setValorConsumoInput(e.target.value)}
+                      className="h-9 flex-1"
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center justify-between border-t border-gray-light pt-2">
                 <span className="font-semibold text-primary-dark">
                   Valor final
@@ -470,6 +533,13 @@ export function FinalizarHospedagemContent({
                   {currency.format(valorACobrar)}
                 </span>
               </div>
+
+              {valorEmAbertoDepois > 0.004 && (
+                <div className="rounded-xl bg-status-checkout-light px-3 py-2 text-xs font-medium text-status-checkout">
+                  Fica em aberto após este pagamento:{" "}
+                  {currency.format(valorEmAbertoDepois)}
+                </div>
+              )}
             </div>
           </section>
 

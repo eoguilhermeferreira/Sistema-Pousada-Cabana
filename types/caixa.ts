@@ -52,6 +52,10 @@ export interface FinalizarPagamentoParams {
   incluirConsumo: boolean;
   formas: FormaPagamentoInput[];
   observacao?: string;
+  /** Valor pago agora para hospedagem — omitir cobra o valor pendente inteiro (comportamento padrão). */
+  valorHospedagem?: number;
+  /** Valor pago agora para consumo — omitir cobra o valor pendente inteiro (comportamento padrão). */
+  valorConsumo?: number;
 }
 
 export interface ComprovanteData {

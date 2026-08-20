@@ -2025,8 +2025,10 @@ export type Database = {
           quarto_id: string
           status: Database["public"]["Enums"]["status_reserva"]
           updated_at: string
+          valor_consumo_pago: number
           valor_criancas: number
           valor_diaria: number
+          valor_hospedagem_pago: number
           valor_total: number
         }
         Insert: {
@@ -2050,8 +2052,10 @@ export type Database = {
           quarto_id: string
           status?: Database["public"]["Enums"]["status_reserva"]
           updated_at?: string
+          valor_consumo_pago?: number
           valor_criancas?: number
           valor_diaria: number
+          valor_hospedagem_pago?: number
           valor_total: number
         }
         Update: {
@@ -2075,8 +2079,10 @@ export type Database = {
           quarto_id?: string
           status?: Database["public"]["Enums"]["status_reserva"]
           updated_at?: string
+          valor_consumo_pago?: number
           valor_criancas?: number
           valor_diaria?: number
+          valor_hospedagem_pago?: number
           valor_total?: number
         }
         Relationships: [
@@ -2648,6 +2654,8 @@ export type Database = {
           p_incluir_hospedagem: boolean
           p_observacao?: string
           p_reserva_id: string
+          p_valor_consumo?: number
+          p_valor_hospedagem?: number
         }
         Returns: {
           caixa_id: string

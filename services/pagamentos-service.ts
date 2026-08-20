@@ -10,13 +10,19 @@ import type { ReservaComRelacoes } from "@/types/reserva";
 const RESERVA_SELECT =
   "*, hospede_principal:hospedes!reservas_hospede_principal_id_fkey(*), quarto:quartos(*, categoria:categorias_quarto(*))";
 
+/** Reservas que ainda não fizeram check-out sempre aparecem no caixa,
+ * mesmo com tudo pago no momento — podem consumir/receber pagamento
+ * adiantado depois. Depois do check-out, some da lista assim que quitada
+ * (comportamento anterior, preservado). */
+const STATUS_SEMPRE_VISIVEL = new Set(["reservada", "confirmada", "checkin_realizado"]);
+
 export async function listHospedagensPendentes(): Promise<HospedagemPendente[]> {
   const supabase = createClient();
 
   const { data: reservasData, error } = await supabase
     .from("reservas")
     .select(RESERVA_SELECT)
-    .in("status", ["checkin_realizado", "checkout_realizado"])
+    .in("status", ["reservada", "confirmada", "checkin_realizado", "checkout_realizado"])
     .order("data_entrada", { ascending: true });
   if (error) throw error;
 
@@ -31,29 +37,32 @@ export async function listHospedagensPendentes(): Promise<HospedagemPendente[]> 
     .eq("pago", false);
   if (consumosError) throw consumosError;
 
-  const consumoPendentePorReserva = new Map<string, number>();
+  const consumoBrutoPorReserva = new Map<string, number>();
   for (const consumo of consumos ?? []) {
     if (!consumo.reserva_id) continue;
-    consumoPendentePorReserva.set(
+    consumoBrutoPorReserva.set(
       consumo.reserva_id,
-      (consumoPendentePorReserva.get(consumo.reserva_id) ?? 0) +
-        consumo.valor_total,
+      (consumoBrutoPorReserva.get(consumo.reserva_id) ?? 0) + consumo.valor_total,
     );
   }
 
   const pendentes: HospedagemPendente[] = [];
   for (const reserva of reservas) {
-    const valorHospedagemPendente = reserva.hospedagem_paga
-      ? 0
-      : reserva.valor_total;
-    const valorConsumoPendente = consumoPendentePorReserva.get(reserva.id) ?? 0;
-    if (valorHospedagemPendente <= 0 && valorConsumoPendente <= 0) continue;
+    const valorHospedagemPendente = Math.max(
+      reserva.valor_total - reserva.valor_hospedagem_pago,
+      0,
+    );
+    const consumoBruto = consumoBrutoPorReserva.get(reserva.id) ?? 0;
+    const valorConsumoPendente = Math.max(consumoBruto - reserva.valor_consumo_pago, 0);
+    const valorPendenteTotal = valorHospedagemPendente + valorConsumoPendente;
+
+    if (valorPendenteTotal <= 0 && !STATUS_SEMPRE_VISIVEL.has(reserva.status)) continue;
 
     pendentes.push({
       reserva,
       valorHospedagemPendente,
       valorConsumoPendente,
-      valorPendenteTotal: valorHospedagemPendente + valorConsumoPendente,
+      valorPendenteTotal,
     });
   }
 
@@ -77,6 +86,8 @@ export async function finalizarPagamento(
         valor_recebido: forma.valorRecebido,
       })),
       p_observacao: params.observacao || undefined,
+      p_valor_hospedagem: params.valorHospedagem,
+      p_valor_consumo: params.valorConsumo,
     },
   );
 

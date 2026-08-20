@@ -625,6 +625,55 @@ export type Database = {
           },
         ]
       }
+      funcionario_adiantamentos: {
+        Row: {
+          created_at: string
+          funcionario_id: string
+          id: string
+          observacao: string | null
+          registrado_por: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          funcionario_id: string
+          id?: string
+          observacao?: string | null
+          registrado_por?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          funcionario_id?: string
+          id?: string
+          observacao?: string | null
+          registrado_por?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_adiantamentos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_adiantamentos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios_visivel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funcionario_adiantamentos_registrado_por_fkey"
+            columns: ["registrado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funcionario_consumos: {
         Row: {
           created_at: string
@@ -2711,6 +2760,27 @@ export type Database = {
       redefinir_senha_usuario: {
         Args: { p_nova_senha: string; p_usuario_id: string }
         Returns: undefined
+      }
+      registrar_adiantamento_funcionario: {
+        Args: {
+          p_funcionario_id: string
+          p_observacao?: string
+          p_valor: number
+        }
+        Returns: {
+          created_at: string
+          funcionario_id: string
+          id: string
+          observacao: string | null
+          registrado_por: string | null
+          valor: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "funcionario_adiantamentos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       registrar_consumo_funcionario: {
         Args: {

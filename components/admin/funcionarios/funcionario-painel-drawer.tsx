@@ -21,6 +21,7 @@ import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { FuncionarioStatusBadge } from "@/components/admin/funcionarios/funcionario-status-badge";
 import { CorrigirPontoModal } from "@/components/admin/funcionarios/corrigir-ponto-modal";
 import { RegistrarConsumoFuncionarioModal } from "@/components/admin/funcionarios/registrar-consumo-funcionario-modal";
+import { RegistrarAdiantamentoModal } from "@/components/admin/funcionarios/registrar-adiantamento-modal";
 import { useUsuarioAtual } from "@/components/admin/usuario-context";
 import { formatCpf } from "@/lib/cpf";
 import { formatPhone } from "@/lib/phone";
@@ -33,6 +34,7 @@ import {
 } from "@/services/funcionarios-service";
 import { listPontosPorFuncionario } from "@/services/pontos-service";
 import { listConsumosPorFuncionario } from "@/services/funcionario-consumo-service";
+import { listAdiantamentosPorFuncionario } from "@/services/funcionario-adiantamento-service";
 import { agruparPontosPorDia, formatarStatusPonto } from "@/types/ponto";
 import {
   turnoLabels,
@@ -46,6 +48,15 @@ import {
   emptyFiltrosConsumoFuncionario,
   type FuncionarioConsumoComRelacoes,
 } from "@/types/funcionario-consumo";
+import {
+  emptyFiltrosAdiantamento,
+  type FuncionarioAdiantamentoComRelacoes,
+} from "@/types/funcionario-adiantamento";
+
+const currency = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
@@ -74,6 +85,8 @@ const eventoLabels: Record<string, string> = {
   criado: "Funcionário cadastrado",
   editado: "Dados atualizados",
   reconhecimento_facial_atualizado: "Reconhecimento facial atualizado",
+  consumo_registrado: "Consumo registrado",
+  adiantamento_registrado: "Adiantamento registrado",
 };
 
 interface FuncionarioPainelDrawerProps {
@@ -110,6 +123,15 @@ export function FuncionarioPainelDrawer({
     emptyFiltrosConsumoFuncionario,
   );
   const [registrarConsumoOpen, setRegistrarConsumoOpen] = React.useState(false);
+
+  const [adiantamentos, setAdiantamentos] = React.useState<
+    FuncionarioAdiantamentoComRelacoes[]
+  >([]);
+  const [adiantamentosLoading, setAdiantamentosLoading] = React.useState(true);
+  const [filtrosAdiantamento, setFiltrosAdiantamento] = React.useState(
+    emptyFiltrosAdiantamento,
+  );
+  const [registrarAdiantamentoOpen, setRegistrarAdiantamentoOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!open || !funcionarioId) return;
@@ -203,6 +225,47 @@ export function FuncionarioPainelDrawer({
     return () => clearTimeout(timeout);
   }, [open, funcionarioId, loadConsumos]);
 
+  const loadAdiantamentos = React.useCallback(async () => {
+    if (!funcionarioId) return;
+    setAdiantamentosLoading(true);
+    try {
+      const hoje = dateKey(new Date());
+      let dataInicio: string | undefined;
+      let dataFim: string | undefined;
+      if (filtrosAdiantamento.periodo === "hoje") {
+        dataInicio = hoje;
+        dataFim = hoje;
+      } else if (filtrosAdiantamento.periodo === "semana") {
+        const inicio = new Date();
+        inicio.setDate(inicio.getDate() - inicio.getDay());
+        dataInicio = dateKey(inicio);
+        dataFim = hoje;
+      } else if (filtrosAdiantamento.periodo === "mes") {
+        const inicio = new Date();
+        inicio.setDate(1);
+        dataInicio = dateKey(inicio);
+        dataFim = hoje;
+      } else {
+        dataInicio = filtrosAdiantamento.dataInicio || undefined;
+        dataFim = filtrosAdiantamento.dataFim || undefined;
+      }
+
+      setAdiantamentos(
+        await listAdiantamentosPorFuncionario(funcionarioId, dataInicio, dataFim),
+      );
+    } finally {
+      setAdiantamentosLoading(false);
+    }
+  }, [funcionarioId, filtrosAdiantamento]);
+
+  React.useEffect(() => {
+    if (!open || !funcionarioId) return;
+    const timeout = setTimeout(() => {
+      loadAdiantamentos();
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [open, funcionarioId, loadAdiantamentos]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -251,6 +314,7 @@ export function FuncionarioPainelDrawer({
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
               <TabsTrigger value="pontos">Pontos</TabsTrigger>
               <TabsTrigger value="consumo">Consumo</TabsTrigger>
+              <TabsTrigger value="adiantamento">Adiantamento</TabsTrigger>
               <TabsTrigger value="historico">Histórico</TabsTrigger>
               <TabsTrigger value="permissoes">Permissões</TabsTrigger>
             </TabsList>
@@ -564,6 +628,134 @@ export function FuncionarioPainelDrawer({
                 )}
               </TabsContent>
 
+              <TabsContent value="adiantamento" className="space-y-4 px-6 py-6">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs font-medium text-gray-text">
+                      Período
+                    </span>
+                    <select
+                      className="flex h-10 w-full min-w-[180px] rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      value={filtrosAdiantamento.periodo}
+                      onChange={(e) =>
+                        setFiltrosAdiantamento((prev) => ({
+                          ...prev,
+                          periodo: e.target.value as typeof filtrosAdiantamento.periodo,
+                        }))
+                      }
+                    >
+                      <option value="hoje">Hoje</option>
+                      <option value="semana">Esta semana</option>
+                      <option value="mes">Este mês</option>
+                      <option value="personalizado">Período personalizado</option>
+                    </select>
+                  </label>
+
+                  {filtrosAdiantamento.periodo === "personalizado" && (
+                    <>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs font-medium text-gray-text">De</span>
+                        <input
+                          type="date"
+                          className="flex h-10 rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          value={filtrosAdiantamento.dataInicio}
+                          onChange={(e) =>
+                            setFiltrosAdiantamento((prev) => ({
+                              ...prev,
+                              dataInicio: e.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-xs font-medium text-gray-text">Até</span>
+                        <input
+                          type="date"
+                          className="flex h-10 rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          value={filtrosAdiantamento.dataFim}
+                          onChange={(e) =>
+                            setFiltrosAdiantamento((prev) => ({
+                              ...prev,
+                              dataFim: e.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                    </>
+                  )}
+
+                  <Button
+                    size="sm"
+                    className="ml-auto"
+                    onClick={() => setRegistrarAdiantamentoOpen(true)}
+                  >
+                    <Plus className="size-4" />
+                    Registrar adiantamento
+                  </Button>
+                </div>
+
+                {adiantamentosLoading ? (
+                  <p className="text-sm text-gray-text">Carregando...</p>
+                ) : adiantamentos.length === 0 ? (
+                  <EmptyState message="Nenhum adiantamento registrado nesse período." />
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-text">
+                      Total no período:{" "}
+                      <span className="font-semibold text-primary-dark">
+                        {currency.format(
+                          adiantamentos.reduce((total, item) => total + item.valor, 0),
+                        )}
+                      </span>
+                    </p>
+                    <div className="overflow-hidden rounded-2xl border border-gray-light">
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[560px] text-left text-sm">
+                          <thead>
+                            <tr className="border-b border-gray-light bg-admin-bg/60">
+                              {["Data", "Horário", "Valor", "Observação", "Registrado por"].map(
+                                (col) => (
+                                  <th
+                                    key={col}
+                                    className="px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-text"
+                                  >
+                                    {col}
+                                  </th>
+                                ),
+                              )}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {adiantamentos.map((adiantamento) => (
+                              <tr
+                                key={adiantamento.id}
+                                className="border-b border-gray-light last:border-0"
+                              >
+                                <td className="px-3 py-2 text-primary-dark">
+                                  {dateFormatter.format(new Date(adiantamento.created_at))}
+                                </td>
+                                <td className="px-3 py-2 text-gray-text">
+                                  {timeFormatter.format(new Date(adiantamento.created_at))}
+                                </td>
+                                <td className="px-3 py-2 font-medium text-primary-dark">
+                                  {currency.format(adiantamento.valor)}
+                                </td>
+                                <td className="px-3 py-2 text-gray-text">
+                                  {adiantamento.observacao ?? "—"}
+                                </td>
+                                <td className="px-3 py-2 text-gray-text">
+                                  {adiantamento.registradoPor?.nome ?? "—"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </TabsContent>
+
               <TabsContent value="historico" className="px-6 py-6">
                 {historico.length === 0 ? (
                   <EmptyState message="Nenhum histórico disponível." />
@@ -649,6 +841,15 @@ export function FuncionarioPainelDrawer({
           onOpenChange={setRegistrarConsumoOpen}
           funcionarioId={funcionarioId}
           onRegistrado={loadConsumos}
+        />
+      )}
+
+      {funcionarioId && (
+        <RegistrarAdiantamentoModal
+          open={registrarAdiantamentoOpen}
+          onOpenChange={setRegistrarAdiantamentoOpen}
+          funcionarioId={funcionarioId}
+          onRegistrado={loadAdiantamentos}
         />
       )}
     </Sheet>

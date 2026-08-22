@@ -1,7 +1,12 @@
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/database";
 import type { CargoUsuario } from "@/types/usuario";
 
-export type Funcionario = Tables<"funcionarios">;
+// A listagem/leitura na prática vem da view funcionarios_visivel (nunca da
+// tabela direto), que expõe pin_ponto_configurado (bool) no lugar do hash do
+// PIN — o hash em si nunca sai do banco.
+export type Funcionario = Tables<"funcionarios"> & {
+  pin_ponto_configurado?: boolean | null;
+};
 export type FuncionarioInsert = TablesInsert<"funcionarios">;
 export type FuncionarioUpdate = TablesUpdate<"funcionarios">;
 

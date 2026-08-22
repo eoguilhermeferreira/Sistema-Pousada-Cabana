@@ -2,13 +2,21 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { AlertTriangle, CheckCircle2, Fingerprint, X } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Delete,
+  Fingerprint,
+  KeyRound,
+  X,
+} from "lucide-react";
 
 import { FaceCamera } from "@/components/facial/face-camera";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { distanciaDescritores } from "@/lib/face-recognition";
 import {
   reconhecerERegistrarPonto,
+  reconhecerPontoPorPin,
   type ResultadoReconhecimentoServidor,
 } from "@/services/pontos-service";
 import { formatarStatusPonto, tipoPontoLabels, type TipoPonto } from "@/types/ponto";
@@ -54,7 +62,10 @@ function saudacao(data: Date) {
   return "Boa noite";
 }
 
-type Estado = "inicial" | "escaneando" | "sucesso" | "erro";
+type Estado = "inicial" | "escaneando" | "pin" | "sucesso" | "erro";
+
+const PIN_MAX_DIGITOS = 6;
+const PIN_MIN_DIGITOS = 4;
 
 /** Distância máxima entre descritores de frames consecutivos pra considerar
  * o rosto "parado" na câmera — bem mais apertada que um limiar de
@@ -71,10 +82,14 @@ export function BaterPontoContent() {
     React.useState<ResultadoReconhecimentoServidor | null>(null);
   const [erro, setErro] = React.useState("");
   const [erroFalha, setErroFalha] = React.useState("");
+  const [erroOrigem, setErroOrigem] = React.useState<"facial" | "pin">("facial");
   /** Quantos frames seguidos com o rosto parado já foram capturados —
    * mostrado como progresso enquanto aguarda estabilizar pra enviar ao
    * servidor. */
   const [capturasEstaveis, setCapturasEstaveis] = React.useState(0);
+  const [pinDigitos, setPinDigitos] = React.useState("");
+  const [pinEnviando, setPinEnviando] = React.useState(false);
+  const [pinErro, setPinErro] = React.useState("");
 
   const ultimoDescritorRef = React.useRef<number[] | null>(null);
   const contagemEstavelRef = React.useRef(0);
@@ -105,17 +120,67 @@ export function BaterPontoContent() {
     setResultado(null);
     setErroFalha("");
     setCapturasEstaveis(0);
+    setPinDigitos("");
+    setPinErro("");
+    setPinEnviando(false);
     setEstado("inicial");
   }
 
-  function mostrarErro(mensagem: string) {
+  function mostrarErro(mensagem: string, origem: "facial" | "pin" = "facial") {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     ultimoDescritorRef.current = null;
     contagemEstavelRef.current = 0;
     processandoRef.current = false;
     setErroFalha(mensagem);
+    setErroOrigem(origem);
     setEstado("erro");
     successTimeoutRef.current = setTimeout(resetar, AUTO_RETORNO_MS);
+  }
+
+  function abrirTeclaPin() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+    setErro("");
+    setPinDigitos("");
+    setPinErro("");
+    setEstado("pin");
+  }
+
+  function handlePinDigito(digito: string) {
+    if (pinEnviando) return;
+    setPinErro("");
+    setPinDigitos((prev) =>
+      prev.length < PIN_MAX_DIGITOS ? prev + digito : prev,
+    );
+  }
+
+  function handlePinBackspace() {
+    if (pinEnviando) return;
+    setPinErro("");
+    setPinDigitos((prev) => prev.slice(0, -1));
+  }
+
+  async function handlePinConfirmar() {
+    if (pinEnviando) return;
+    if (pinDigitos.length < PIN_MIN_DIGITOS) {
+      setPinErro(`Digite pelo menos ${PIN_MIN_DIGITOS} números.`);
+      return;
+    }
+    setPinEnviando(true);
+    setPinErro("");
+    try {
+      const resultadoServidor = await reconhecerPontoPorPin(pinDigitos);
+      setResultado(resultadoServidor);
+      setEstado("sucesso");
+      successTimeoutRef.current = setTimeout(resetar, AUTO_RETORNO_MS);
+    } catch (err) {
+      mostrarErro(
+        err instanceof Error ? err.message : "Código não reconhecido.",
+        "pin",
+      );
+    } finally {
+      setPinEnviando(false);
+    }
   }
 
   function iniciarEscaneamento() {
@@ -211,6 +276,15 @@ export function BaterPontoContent() {
               {erro}
             </p>
           )}
+
+          <button
+            type="button"
+            onClick={abrirTeclaPin}
+            className="flex items-center gap-1.5 text-sm text-white/60 hover:text-white"
+          >
+            <KeyRound className="size-4" />
+            Não reconheceu? Usar código
+          </button>
         </div>
       )}
 
@@ -236,6 +310,79 @@ export function BaterPontoContent() {
           <button
             type="button"
             onClick={resetar}
+            className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white"
+          >
+            <X className="size-4" />
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {estado === "pin" && (
+        <div className="flex w-full max-w-xs flex-col items-center gap-6 text-center">
+          <p className="text-lg font-semibold">Digite seu código de ponto</p>
+
+          <div className="flex items-center justify-center gap-3">
+            {Array.from({ length: PIN_MAX_DIGITOS }).map((_, index) => (
+              <span
+                key={index}
+                className={`h-3 w-3 rounded-full border border-white/40 transition-colors duration-150 ${
+                  index < pinDigitos.length ? "bg-white" : "bg-transparent"
+                }`}
+              />
+            ))}
+          </div>
+
+          {pinErro && (
+            <p className="text-sm font-medium text-status-ocupado">{pinErro}</p>
+          )}
+
+          <div className="grid grid-cols-3 gap-3">
+            {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((digito) => (
+              <button
+                key={digito}
+                type="button"
+                onClick={() => handlePinDigito(digito)}
+                disabled={pinEnviando}
+                className="flex size-16 items-center justify-center rounded-full bg-white/10 text-xl font-semibold transition-colors duration-150 active:bg-white/20 disabled:opacity-50"
+              >
+                {digito}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={handlePinBackspace}
+              disabled={pinEnviando}
+              className="flex size-16 items-center justify-center rounded-full bg-white/10 transition-colors duration-150 active:bg-white/20 disabled:opacity-50"
+            >
+              <Delete className="size-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePinDigito("0")}
+              disabled={pinEnviando}
+              className="flex size-16 items-center justify-center rounded-full bg-white/10 text-xl font-semibold transition-colors duration-150 active:bg-white/20 disabled:opacity-50"
+            >
+              0
+            </button>
+            <button
+              type="button"
+              onClick={handlePinConfirmar}
+              disabled={pinEnviando || pinDigitos.length < PIN_MIN_DIGITOS}
+              className="flex size-16 items-center justify-center rounded-full bg-primary text-white transition-colors duration-150 active:scale-95 disabled:opacity-40"
+            >
+              {pinEnviando ? (
+                <span className="size-5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              ) : (
+                <CheckCircle2 className="size-6" />
+              )}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={resetar}
+            disabled={pinEnviando}
             className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white"
           >
             <X className="size-4" />
@@ -304,9 +451,20 @@ export function BaterPontoContent() {
             <AlertTriangle className="size-9" />
           </span>
           <p className="font-display text-xl font-semibold">
-            Rosto não reconhecido
+            {erroOrigem === "pin" ? "Código não reconhecido" : "Rosto não reconhecido"}
           </p>
           <p className="text-sm text-white/70">{erroFalha || "Tente novamente."}</p>
+
+          {erroOrigem === "facial" && (
+            <button
+              type="button"
+              onClick={abrirTeclaPin}
+              className="flex items-center gap-1.5 text-sm text-white/60 hover:text-white"
+            >
+              <KeyRound className="size-4" />
+              Usar código em vez disso
+            </button>
+          )}
         </div>
       )}
     </div>

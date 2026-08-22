@@ -144,3 +144,30 @@ export async function reconhecerERegistrarPonto(
     atrasado: linha.atrasado,
   };
 }
+
+/** Plano B do reconhecimento facial: identifica o funcionário pelo código
+ * PIN cadastrado (hash comparado no servidor) e registra o ponto,
+ * reaproveitando a mesma máquina de estados de registrar_ponto_facial. */
+export async function reconhecerPontoPorPin(
+  pin: string,
+): Promise<ResultadoReconhecimentoServidor> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("reconhecer_ponto_por_pin", {
+    p_pin: pin,
+  });
+  if (error) throw error;
+  const linha = data?.[0];
+  if (!linha) throw new Error("Código não reconhecido.");
+
+  return {
+    pontoId: linha.ponto_id,
+    funcionarioId: linha.funcionario_id,
+    nome: linha.nome,
+    cargo: linha.cargo,
+    fotoUrl: linha.foto_url,
+    tipo: linha.tipo as TipoPonto,
+    registradoEm: linha.registrado_em,
+    minutosDiferenca: linha.minutos_diferenca,
+    atrasado: linha.atrasado,
+  };
+}

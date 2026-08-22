@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Camera, Loader2, ScanFace, ShieldCheck } from "lucide-react";
+import { Camera, KeyRound, Loader2, ScanFace, ShieldCheck } from "lucide-react";
 
 import { Modal, ModalContent } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import { permissoesPorCargo } from "@/lib/permissions";
 import {
   cpfExists,
   createFuncionario,
+  definirPinPonto,
+  removerPinPonto,
   salvarTemplatesFaciais,
   updateFuncionario,
   uploadFuncionarioFoto,
@@ -83,6 +85,10 @@ export function FuncionarioFormModal({
 }: FuncionarioFormModalProps) {
   const usuarioAtual = useUsuarioAtual();
   const podeVerSalario = permissoesPorCargo[usuarioAtual.cargo].podeVerSalario;
+  // Mesmo nível de permissão exigido pela RPC definir_pin_ponto_funcionario
+  // (administrador ou gerente) — reaproveita podeCorrigirPonto por ser a
+  // mesma faixa de acesso já usada pra ações sensíveis do ponto.
+  const podeGerenciarPin = permissoesPorCargo[usuarioAtual.cargo].podeCorrigirPonto;
 
   const isEditing = Boolean(funcionario);
   const [values, setValues] = React.useState<FuncionarioFormValues>(
@@ -99,6 +105,10 @@ export function FuncionarioFormModal({
   const [saving, setSaving] = React.useState(false);
   const [checkingCep, setCheckingCep] = React.useState(false);
   const [formError, setFormError] = React.useState("");
+  const [pinConfigurado, setPinConfigurado] = React.useState(false);
+  const [pinInput, setPinInput] = React.useState("");
+  const [pinSaving, setPinSaving] = React.useState(false);
+  const [pinError, setPinError] = React.useState("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -113,6 +123,9 @@ export function FuncionarioFormModal({
       setTemAlmoco(funcionario ? Boolean(funcionario.horario_saida_almoco) : true);
       setErrors({});
       setFormError("");
+      setPinConfigurado(Boolean(funcionario?.pin_ponto_configurado));
+      setPinInput("");
+      setPinError("");
     }, 0);
     return () => clearTimeout(timeout);
   }, [open, funcionario]);
@@ -162,6 +175,48 @@ export function FuncionarioFormModal({
       });
       setFotoFile(file);
       setFotoUrl(URL.createObjectURL(file));
+    }
+  }
+
+  async function handleSalvarPin() {
+    if (!funcionario) return;
+    if (!/^\d{4,6}$/.test(pinInput)) {
+      setPinError("O código precisa ter de 4 a 6 números.");
+      return;
+    }
+    setPinSaving(true);
+    setPinError("");
+    try {
+      await definirPinPonto(funcionario.id, pinInput);
+      setPinConfigurado(true);
+      setPinInput("");
+    } catch (error) {
+      setPinError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível salvar o código.",
+      );
+    } finally {
+      setPinSaving(false);
+    }
+  }
+
+  async function handleRemoverPin() {
+    if (!funcionario) return;
+    setPinSaving(true);
+    setPinError("");
+    try {
+      await removerPinPonto(funcionario.id);
+      setPinConfigurado(false);
+      setPinInput("");
+    } catch (error) {
+      setPinError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível remover o código.",
+      );
+    } finally {
+      setPinSaving(false);
     }
   }
 
@@ -687,6 +742,87 @@ export function FuncionarioFormModal({
                   </Field>
                 </div>
               </div>
+
+              {podeGerenciarPin && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-text">
+                      Código de Ponto (PIN) — opcional
+                    </h3>
+                    <p className="mt-1 text-xs text-gray-text">
+                      Plano B pro Bater Ponto quando o reconhecimento facial
+                      não funcionar. De 4 a 6 números, só administrador ou
+                      gerente pode definir.
+                    </p>
+                  </div>
+
+                  {!isEditing ? (
+                    <p className="text-xs text-gray-text">
+                      Cadastre o funcionário primeiro pra poder definir o
+                      código de ponto.
+                    </p>
+                  ) : (
+                    <div className="space-y-3 rounded-xl border border-gray-text/20 p-4">
+                      <div className="flex items-center gap-2">
+                        <KeyRound className="size-4 text-gray-text" />
+                        {pinConfigurado ? (
+                          <span className="text-sm font-medium text-status-disponivel">
+                            •••• configurado
+                          </span>
+                        ) : (
+                          <span className="text-sm font-medium text-gray-text">
+                            Não configurado
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-end gap-3">
+                        <Field label="Novo código" className="flex flex-col gap-1.5">
+                          <Input
+                            value={pinInput}
+                            onChange={(e) =>
+                              setPinInput(
+                                e.target.value.replace(/\D/g, "").slice(0, 6),
+                              )
+                            }
+                            placeholder="0000"
+                            inputMode="numeric"
+                            className="w-32"
+                          />
+                        </Field>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSalvarPin}
+                          disabled={pinSaving}
+                          className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
+                        >
+                          {pinSaving && <Loader2 className="size-4 animate-spin" />}
+                          {pinConfigurado ? "Atualizar código" : "Salvar código"}
+                        </Button>
+                        {pinConfigurado && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoverPin}
+                            disabled={pinSaving}
+                          >
+                            Remover código
+                          </Button>
+                        )}
+                      </div>
+
+                      {pinError && (
+                        <p className="text-xs font-medium text-status-ocupado">
+                          {pinError}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {formError && (
                 <p className="rounded-xl bg-status-ocupado-light px-4 py-3 text-sm font-medium text-status-ocupado">

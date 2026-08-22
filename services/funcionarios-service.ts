@@ -152,6 +152,28 @@ export async function salvarTemplatesFaciais(
   );
 }
 
+// definir_pin_ponto_funcionario e remover_pin_ponto_funcionario já registram
+// o próprio evento em funcionario_historico (rodam como SECURITY DEFINER).
+
+/** Define/atualiza o código PIN de backup do funcionário pro Bater Ponto. Só administrador/gerente. */
+export async function definirPinPonto(funcionarioId: string, pin: string) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("definir_pin_ponto_funcionario", {
+    p_funcionario_id: funcionarioId,
+    p_pin: pin,
+  });
+  if (error) throw error;
+}
+
+/** Remove o código PIN de backup do funcionário. Só administrador/gerente. */
+export async function removerPinPonto(funcionarioId: string) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("remover_pin_ponto_funcionario", {
+    p_funcionario_id: funcionarioId,
+  });
+  if (error) throw error;
+}
+
 export async function listHistoricoFuncionario(
   funcionarioId: string,
 ): Promise<FuncionarioHistorico[]> {

@@ -846,6 +846,7 @@ export type Database = {
           nome: string
           numero: string | null
           observacoes: string | null
+          pin_ponto_hash: string | null
           rg: string | null
           rua: string | null
           salario: number | null
@@ -876,6 +877,7 @@ export type Database = {
           nome: string
           numero?: string | null
           observacoes?: string | null
+          pin_ponto_hash?: string | null
           rg?: string | null
           rua?: string | null
           salario?: number | null
@@ -906,6 +908,7 @@ export type Database = {
           nome?: string
           numero?: string | null
           observacoes?: string | null
+          pin_ponto_hash?: string | null
           rg?: string | null
           rua?: string | null
           salario?: number | null
@@ -2462,6 +2465,7 @@ export type Database = {
           nome: string | null
           numero: string | null
           observacoes: string | null
+          pin_ponto_configurado: boolean | null
           rg: string | null
           rua: string | null
           salario: number | null
@@ -2492,6 +2496,7 @@ export type Database = {
           nome?: string | null
           numero?: string | null
           observacoes?: string | null
+          pin_ponto_configurado?: never
           rg?: string | null
           rua?: string | null
           salario?: never
@@ -2522,6 +2527,7 @@ export type Database = {
           nome?: string | null
           numero?: string | null
           observacoes?: string | null
+          pin_ponto_configurado?: never
           rg?: string | null
           rua?: string | null
           salario?: never
@@ -3169,8 +3175,30 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      definir_pin_ponto_funcionario: {
+        Args: { p_funcionario_id: string; p_pin: string }
+        Returns: undefined
+      }
+      reconhecer_ponto_por_pin: {
+        Args: { p_pin: string }
+        Returns: {
+          atrasado: boolean
+          cargo: Database["public"]["Enums"]["cargo_usuario"]
+          foto_url: string
+          funcionario_id: string
+          minutos_diferenca: number
+          nome: string
+          ponto_id: string
+          registrado_em: string
+          tipo: string
+        }[]
+      }
       remover_consumo_quarto: {
         Args: { p_consumo_id: string }
+        Returns: undefined
+      }
+      remover_pin_ponto_funcionario: {
+        Args: { p_funcionario_id: string }
         Returns: undefined
       }
       repor_localizacao_estoque: {

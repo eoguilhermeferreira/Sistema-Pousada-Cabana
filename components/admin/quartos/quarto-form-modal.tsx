@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { Loader2, UploadCloud, X } from "lucide-react";
 
 import { Modal, ModalContent } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -93,6 +93,8 @@ export function QuartoFormModal({
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [saving, setSaving] = React.useState(false);
   const [formError, setFormError] = React.useState("");
+  const [uploadingFotos, setUploadingFotos] = React.useState(false);
+  const [isDragOver, setIsDragOver] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -113,6 +115,8 @@ export function QuartoFormModal({
       setStagedFotos([]);
       setErrors({});
       setFormError("");
+      setUploadingFotos(false);
+      setIsDragOver(false);
     }, 0);
     return () => clearTimeout(timeout);
   }, [open, quarto, categorias]);
@@ -139,14 +143,52 @@ export function QuartoFormModal({
     }));
   }
 
+  // Quarto já existe: sobe cada foto pro Storage assim que solta/seleciona,
+  // sem precisar clicar em "Salvar alterações". Quarto novo (ainda sem id)
+  // continua no modo antigo — fica "staged" e só sobe quando o quarto for
+  // criado no submit, porque não existe onde salvar a foto ainda.
+  async function handleNovasFotos(files: File[]) {
+    if (files.length === 0) return;
+    const imagens = files.filter((file) => file.type.startsWith("image/"));
+    if (imagens.length === 0) return;
+
+    if (!quarto) {
+      setStagedFotos((prev) => [
+        ...prev,
+        ...imagens.map((file) => ({
+          file,
+          previewUrl: URL.createObjectURL(file),
+        })),
+      ]);
+      return;
+    }
+
+    setUploadingFotos(true);
+    setFormError("");
+    try {
+      let ordem = existingFotos.length;
+      for (const file of imagens) {
+        const foto = await uploadQuartoFoto(file, quarto.id, ordem);
+        setExistingFotos((prev) => [...prev, foto]);
+        ordem += 1;
+      }
+    } catch {
+      setFormError("Não foi possível enviar uma ou mais fotos.");
+    } finally {
+      setUploadingFotos(false);
+    }
+  }
+
   function handleFotoSelect(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
-    if (files.length === 0) return;
-    setStagedFotos((prev) => [
-      ...prev,
-      ...files.map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
-    ]);
+    handleNovasFotos(files);
     event.target.value = "";
+  }
+
+  function handleFotoDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDragOver(false);
+    handleNovasFotos(Array.from(event.dataTransfer.files ?? []));
   }
 
   function removeStagedFoto(index: number) {
@@ -440,14 +482,36 @@ export function QuartoFormModal({
                     </button>
                   </div>
                 ))}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex size-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-text/30 text-gray-text transition-colors duration-200 hover:border-primary hover:text-primary"
-                >
-                  <ImagePlus className="size-5" />
-                  <span className="text-[11px] font-medium">Adicionar</span>
-                </button>
+                {uploadingFotos && (
+                  <div className="flex size-20 flex-col items-center justify-center gap-1 rounded-xl border border-gray-light text-gray-text">
+                    <Loader2 className="size-5 animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleFotoDrop}
+                className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed px-4 py-6 text-center transition-colors duration-200 ${
+                  isDragOver
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-gray-text/30 text-gray-text hover:border-primary hover:text-primary"
+                }`}
+              >
+                <UploadCloud className="size-6" />
+                <span className="text-sm font-medium">
+                  Arraste as fotos aqui ou clique para selecionar
+                </span>
+                <span className="text-xs text-gray-text">
+                  {quarto
+                    ? "Já salva automaticamente, sem precisar clicar em Salvar."
+                    : "Serão salvas quando o quarto for cadastrado."}
+                </span>
                 <input
                   ref={fileInputRef}
                   type="file"

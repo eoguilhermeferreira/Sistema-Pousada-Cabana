@@ -75,6 +75,8 @@ export const reservaHistoricoEventoLabels: Record<string, string> = {
   status_alterado: "Status alterado",
   checkin_realizado: "Check-in realizado",
   checkout_realizado: "Check-out realizado",
+  pagamento_programado: "Pagamento programado",
+  pagamento_programado_cancelado: "Programação de pagamento cancelada",
 };
 
 export function statusReservaDotClass(status: StatusReserva) {

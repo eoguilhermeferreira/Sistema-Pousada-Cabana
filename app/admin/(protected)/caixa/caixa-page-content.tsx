@@ -80,7 +80,11 @@ export function CaixaPageContent() {
         onFechar={() => setFecharOpen(true)}
       />
 
-      <HospedagensPendentesList pendentes={pendentes} loading={loading} />
+      <HospedagensPendentesList
+        pendentes={pendentes}
+        loading={loading}
+        onAtualizado={load}
+      />
 
       <VendasBalcaoSection caixaAbertoId={caixa?.id ?? null} />
 

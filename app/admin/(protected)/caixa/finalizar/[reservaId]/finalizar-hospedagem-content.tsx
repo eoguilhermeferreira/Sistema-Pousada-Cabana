@@ -19,6 +19,7 @@ import { getCaixaAberto } from "@/services/caixa-service";
 import { finalizarPagamento } from "@/services/pagamentos-service";
 import type { ReservaDetalhada } from "@/types/reserva";
 import type { QuartoConsumoComProduto } from "@/types/produto";
+import { formaPagamentoLabels } from "@/types/caixa";
 import type {
   Caixa,
   ComprovanteData,
@@ -131,11 +132,18 @@ export function FinalizarHospedagemContent({
     if (loading) return;
     const timeout = setTimeout(() => {
       setFormas(
-        valorACobrar > 0 ? [{ forma: "pix", valor: valorACobrar }] : [],
+        valorACobrar > 0
+          ? [
+              {
+                forma: reserva?.pagamento_programado_forma ?? "pix",
+                valor: valorACobrar,
+              },
+            ]
+          : [],
       );
     }, 0);
     return () => clearTimeout(timeout);
-  }, [incluirHospedagem, incluirConsumo, loading, valorACobrar]);
+  }, [incluirHospedagem, incluirConsumo, loading, valorACobrar, reserva]);
 
   async function handleSubmit() {
     if (!reserva || !caixa) return;
@@ -259,6 +267,16 @@ export function FinalizarHospedagemContent({
       {caixa && nadaPendente && (
         <div className="rounded-2xl border border-status-disponivel/30 bg-status-disponivel-light px-5 py-4 text-sm font-medium text-status-disponivel">
           Esta hospedagem já está totalmente paga.
+        </div>
+      )}
+
+      {reserva.pagamento_programado_data && (
+        <div className="rounded-2xl border border-primary/30 bg-primary-light px-5 py-4 text-sm font-medium text-primary">
+          Pagamento programado para{" "}
+          {formatDate(reserva.pagamento_programado_data)} via{" "}
+          {formaPagamentoLabels[reserva.pagamento_programado_forma!]}
+          {reserva.pagamento_programado_observacao &&
+            ` — ${reserva.pagamento_programado_observacao}`}
         </div>
       )}
 

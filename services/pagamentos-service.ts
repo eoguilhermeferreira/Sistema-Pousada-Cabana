@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   FinalizarPagamentoParams,
+  FormaPagamento,
   HospedagemPendente,
   Pagamento,
   PagamentoComRelacoes,
 } from "@/types/caixa";
+import { formaPagamentoLabels } from "@/types/caixa";
 import type { ReservaComRelacoes } from "@/types/reserva";
 
 const RESERVA_SELECT =
@@ -94,6 +96,55 @@ export async function finalizarPagamento(
   if (error) throw error;
   if (!data) throw new Error("Não foi possível finalizar o pagamento.");
   return data;
+}
+
+/** Só agenda um lembrete de pagamento (data + forma combinadas com o
+ * hóspede/empresa) — não lança nada como recebido. A recepção continua
+ * registrando o pagamento de verdade em finalizarPagamento() quando o
+ * dinheiro realmente entrar. */
+export async function programarPagamentoReserva(
+  reservaId: string,
+  data: string,
+  forma: FormaPagamento,
+  observacao?: string,
+): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("reservas")
+    .update({
+      pagamento_programado_data: data,
+      pagamento_programado_forma: forma,
+      pagamento_programado_observacao: observacao || null,
+    })
+    .eq("id", reservaId);
+  if (error) throw error;
+
+  await supabase.from("reserva_historico").insert({
+    reserva_id: reservaId,
+    evento: "pagamento_programado",
+    descricao: `Pagamento programado para ${data.split("-").reverse().join("/")} via ${formaPagamentoLabels[forma]}.`,
+  });
+}
+
+export async function cancelarProgramacaoPagamento(
+  reservaId: string,
+): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("reservas")
+    .update({
+      pagamento_programado_data: null,
+      pagamento_programado_forma: null,
+      pagamento_programado_observacao: null,
+    })
+    .eq("id", reservaId);
+  if (error) throw error;
+
+  await supabase.from("reserva_historico").insert({
+    reserva_id: reservaId,
+    evento: "pagamento_programado_cancelado",
+    descricao: "Programação de pagamento cancelada.",
+  });
 }
 
 export async function getPagamentoById(

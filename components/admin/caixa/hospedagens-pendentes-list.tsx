@@ -1,10 +1,14 @@
+import * as React from "react";
 import Link from "next/link";
-import { CalendarDays, CircleDollarSign, Receipt } from "lucide-react";
+import { CalendarClock, CalendarDays, CircleDollarSign, Receipt } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
+import { ProgramarPagamentoModal } from "@/components/admin/caixa/programar-pagamento-modal";
+import { formaPagamentoLabels } from "@/types/caixa";
 import { statusReservaBadgeClass, statusReservaLabels } from "@/types/reserva";
 import type { HospedagemPendente } from "@/types/caixa";
+import type { ReservaComRelacoes } from "@/types/reserva";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -20,13 +24,20 @@ function formatDate(value: string) {
   return dateFormatter.format(new Date(`${value}T00:00:00`));
 }
 
+const hojeISO = () => new Date().toISOString().slice(0, 10);
+
 export function HospedagensPendentesList({
   pendentes,
   loading,
+  onAtualizado,
 }: {
   pendentes: HospedagemPendente[];
   loading: boolean;
+  onAtualizado: () => void;
 }) {
+  const [reservaProgramando, setReservaProgramando] =
+    React.useState<ReservaComRelacoes | null>(null);
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -99,6 +110,22 @@ export function HospedagensPendentesList({
                         Sem pendências no momento
                       </span>
                     )}
+                    {valorPendenteTotal > 0 && reserva.pagamento_programado_data && (
+                      <span
+                        className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          reserva.pagamento_programado_data < hojeISO()
+                            ? "bg-status-ocupado-light text-status-ocupado"
+                            : "bg-primary-light text-primary"
+                        }`}
+                      >
+                        <CalendarClock className="size-3.5" />
+                        {reserva.pagamento_programado_data < hojeISO()
+                          ? "Atrasado — programado p/ "
+                          : "Programado p/ "}
+                        {formatDate(reserva.pagamento_programado_data)} via{" "}
+                        {formaPagamentoLabels[reserva.pagamento_programado_forma!]}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
@@ -108,17 +135,39 @@ export function HospedagensPendentesList({
                       {currency.format(valorPendenteTotal)}
                     </span>
                   )}
-                  <Button size="sm" asChild variant={valorPendenteTotal > 0 ? "primary" : "outline"}>
-                    <Link href={`/admin/caixa/finalizar/${reserva.id}`}>
-                      {valorPendenteTotal > 0 ? "Finalizar Hospedagem" : "Ver / Registrar pagamento"}
-                    </Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {valorPendenteTotal > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setReservaProgramando(reserva)}
+                      >
+                        {reserva.pagamento_programado_data
+                          ? "Editar programação"
+                          : "Programar pagamento"}
+                      </Button>
+                    )}
+                    <Button size="sm" asChild variant={valorPendenteTotal > 0 ? "primary" : "outline"}>
+                      <Link href={`/admin/caixa/finalizar/${reserva.id}`}>
+                        {valorPendenteTotal > 0 ? "Finalizar Hospedagem" : "Ver / Registrar pagamento"}
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
             ),
           )}
         </div>
       )}
+
+      <ProgramarPagamentoModal
+        open={reservaProgramando !== null}
+        onOpenChange={(next) => {
+          if (!next) setReservaProgramando(null);
+        }}
+        reserva={reservaProgramando}
+        onSalvo={onAtualizado}
+      />
     </div>
   );
 }

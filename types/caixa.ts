@@ -14,6 +14,7 @@ export const formaPagamentoOptions: FormaPagamento[] = [
   "dinheiro",
   "cartao_debito",
   "cartao_credito",
+  "deposito",
 ];
 
 export const formaPagamentoLabels: Record<FormaPagamento, string> = {
@@ -21,6 +22,7 @@ export const formaPagamentoLabels: Record<FormaPagamento, string> = {
   dinheiro: "Dinheiro",
   cartao_debito: "Cartão de Débito",
   cartao_credito: "Cartão de Crédito",
+  deposito: "Depósito",
 };
 
 export interface PagamentoComRelacoes extends Pagamento {

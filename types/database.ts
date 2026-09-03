@@ -2072,6 +2072,11 @@ export type Database = {
           hospede_principal_id: string
           id: string
           observacoes: string | null
+          pagamento_programado_data: string | null
+          pagamento_programado_forma:
+            | Database["public"]["Enums"]["forma_pagamento"]
+            | null
+          pagamento_programado_observacao: string | null
           quantidade_adultos: number
           quantidade_criancas: number
           quarto_id: string
@@ -2099,6 +2104,11 @@ export type Database = {
           hospede_principal_id: string
           id?: string
           observacoes?: string | null
+          pagamento_programado_data?: string | null
+          pagamento_programado_forma?:
+            | Database["public"]["Enums"]["forma_pagamento"]
+            | null
+          pagamento_programado_observacao?: string | null
           quantidade_adultos?: number
           quantidade_criancas?: number
           quarto_id: string
@@ -2126,6 +2136,11 @@ export type Database = {
           hospede_principal_id?: string
           id?: string
           observacoes?: string | null
+          pagamento_programado_data?: string | null
+          pagamento_programado_forma?:
+            | Database["public"]["Enums"]["forma_pagamento"]
+            | null
+          pagamento_programado_observacao?: string | null
           quantidade_adultos?: number
           quantidade_criancas?: number
           quarto_id?: string
@@ -3240,7 +3255,12 @@ export type Database = {
         | "gerente"
         | "cozinha"
         | "lavanderia"
-      forma_pagamento: "pix" | "dinheiro" | "cartao_debito" | "cartao_credito"
+      forma_pagamento:
+        | "pix"
+        | "dinheiro"
+        | "cartao_debito"
+        | "cartao_credito"
+        | "deposito"
       localizacao_estoque: "geladeira" | "prateleira"
       sexo_hospede: "masculino" | "feminino" | "outro"
       status_hospede: "ativo" | "inativo"
@@ -3403,7 +3423,13 @@ export const Constants = {
         "cozinha",
         "lavanderia",
       ],
-      forma_pagamento: ["pix", "dinheiro", "cartao_debito", "cartao_credito"],
+      forma_pagamento: [
+        "pix",
+        "dinheiro",
+        "cartao_debito",
+        "cartao_credito",
+        "deposito",
+      ],
       localizacao_estoque: ["geladeira", "prateleira"],
       sexo_hospede: ["masculino", "feminino", "outro"],
       status_hospede: ["ativo", "inativo"],

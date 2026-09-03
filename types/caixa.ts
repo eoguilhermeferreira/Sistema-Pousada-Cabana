@@ -82,3 +82,19 @@ export interface ResumoCaixa {
   saldo: number;
   valorEsperado: number;
 }
+
+export interface FechamentoCaixaFormaResumo {
+  forma: FormaPagamento;
+  valor: number;
+}
+
+/** Dados prontos pro relatório de fechamento (tela + impressão/PDF) — soma
+ * pagamentos de hospedagem e vendas no balcão por forma de pagamento,
+ * dentro do período em que este caixa esteve aberto. */
+export interface FechamentoCaixaData {
+  caixa: Caixa;
+  formas: FechamentoCaixaFormaResumo[];
+  totalEntradas: number;
+  totalSaidas: number;
+  saidas: CaixaMovimentacao[];
+}

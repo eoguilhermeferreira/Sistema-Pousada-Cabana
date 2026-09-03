@@ -1,5 +1,10 @@
-import { History } from "lucide-react";
+"use client";
 
+import * as React from "react";
+import { History, Loader2, Printer } from "lucide-react";
+
+import { getFechamentoCaixa } from "@/services/caixa-service";
+import { imprimirCaixaFechamentoPdf } from "@/lib/caixa-fechamento-pdf";
 import type { Caixa } from "@/types/caixa";
 
 const currency = new Intl.NumberFormat("pt-BR", {
@@ -22,6 +27,18 @@ export function HistoricoCaixas({
   historico: Caixa[];
   loading: boolean;
 }) {
+  const [imprimindoId, setImprimindoId] = React.useState<string | null>(null);
+
+  async function handleImprimir(caixaId: string) {
+    setImprimindoId(caixaId);
+    try {
+      const dados = await getFechamentoCaixa(caixaId);
+      await imprimirCaixaFechamentoPdf(dados);
+    } finally {
+      setImprimindoId(null);
+    }
+  }
+
   return (
     <div className="space-y-3">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-primary-dark">
@@ -38,7 +55,7 @@ export function HistoricoCaixas({
       ) : (
         <div className="overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[780px] text-left text-sm">
               <thead>
                 <tr className="border-b border-gray-light bg-admin-bg/60">
                   {[
@@ -57,6 +74,7 @@ export function HistoricoCaixas({
                       {col}
                     </th>
                   ))}
+                  <th className="px-4 py-2.5" />
                 </tr>
               </thead>
               <tbody>
@@ -102,6 +120,21 @@ export function HistoricoCaixas({
                       >
                         {diferenca > 0 ? "+ " : diferenca < 0 ? "− " : ""}
                         {currency.format(Math.abs(diferenca))}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleImprimir(caixa.id)}
+                          disabled={imprimindoId === caixa.id}
+                          className="inline-flex size-7 items-center justify-center rounded-lg text-gray-text transition-colors duration-200 hover:bg-gray-light hover:text-primary-dark disabled:opacity-50"
+                          title="Imprimir relatório de fechamento"
+                        >
+                          {imprimindoId === caixa.id ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <Printer className="size-3.5" />
+                          )}
+                        </button>
                       </td>
                     </tr>
                   );

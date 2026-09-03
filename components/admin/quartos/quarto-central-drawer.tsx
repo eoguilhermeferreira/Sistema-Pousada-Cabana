@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  ArrowRightLeft,
   History,
   ImageOff,
   Loader2,
@@ -19,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { QuartoStatusBadge } from "@/components/admin/quartos/quarto-status-badge";
 import { ReservaStatusBadge } from "@/components/admin/reservas/reserva-status-badge";
 import { AdicionarConsumoModal } from "@/components/admin/estoque/adicionar-consumo-modal";
+import { TrocarQuartoModal } from "@/components/admin/quartos/trocar-quarto-modal";
 import { getQuartoById } from "@/services/quartos-service";
 import { getReservaRelevantePorQuarto } from "@/services/reservas-service";
 import {
@@ -141,6 +143,7 @@ export function QuartoCentralDrawer({
   );
   const [loadingConsumo, setLoadingConsumo] = React.useState(true);
   const [adicionarConsumoOpen, setAdicionarConsumoOpen] = React.useState(false);
+  const [trocarQuartoOpen, setTrocarQuartoOpen] = React.useState(false);
   const [removingId, setRemovingId] = React.useState<string | null>(null);
 
   // Só se pode lançar consumo com o hóspede já hospedado (check-in feito) —
@@ -148,23 +151,36 @@ export function QuartoCentralDrawer({
   const reservaAtivaId =
     reservaRelevante?.status === "checkin_realizado" ? reservaRelevante.id : null;
 
+  // Só é possível trocar de quarto antes do check-out (mesma regra da RPC
+  // trocar_quarto_reserva).
+  const podeTrocarQuarto =
+    reservaRelevante != null &&
+    ["reservada", "confirmada", "checkin_realizado"].includes(
+      reservaRelevante.status,
+    );
+
+  const loadQuarto = React.useCallback(async () => {
+    if (!quartoId) return;
+    setLoading(true);
+    try {
+      const [data, reserva] = await Promise.all([
+        getQuartoById(quartoId),
+        getReservaRelevantePorQuarto(quartoId),
+      ]);
+      setQuarto(data);
+      setReservaRelevante(reserva);
+    } finally {
+      setLoading(false);
+    }
+  }, [quartoId]);
+
   React.useEffect(() => {
     if (!open || !quartoId) return;
-    const timeout = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const [data, reserva] = await Promise.all([
-          getQuartoById(quartoId),
-          getReservaRelevantePorQuarto(quartoId),
-        ]);
-        setQuarto(data);
-        setReservaRelevante(reserva);
-      } finally {
-        setLoading(false);
-      }
+    const timeout = setTimeout(() => {
+      loadQuarto();
     }, 0);
     return () => clearTimeout(timeout);
-  }, [open, quartoId]);
+  }, [open, quartoId, loadQuarto]);
 
   const loadConsumo = React.useCallback(async () => {
     if (!quartoId) return;
@@ -382,7 +398,20 @@ export function QuartoCentralDrawer({
                           {formatDate(reservaRelevante.data_entrada)} — {formatDate(reservaRelevante.data_saida)}
                         </p>
                       </div>
-                      <ReservaStatusBadge status={reservaRelevante.status} />
+                      <div className="flex items-center gap-2">
+                        <ReservaStatusBadge status={reservaRelevante.status} />
+                        {podeTrocarQuarto && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setTrocarQuartoOpen(true)}
+                            className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
+                          >
+                            <ArrowRightLeft className="size-4" />
+                            Trocar de quarto
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -652,6 +681,13 @@ export function QuartoCentralDrawer({
           </Tabs>
         )}
       </SheetContent>
+
+      <TrocarQuartoModal
+        open={trocarQuartoOpen}
+        onOpenChange={setTrocarQuartoOpen}
+        reserva={reservaRelevante}
+        onTrocado={loadQuarto}
+      />
     </Sheet>
   );
 }

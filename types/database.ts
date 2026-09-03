@@ -3245,6 +3245,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      trocar_quarto_reserva: {
+        Args: { p_novo_quarto_id: string; p_reserva_id: string }
+        Returns: {
+          checkin_em: string | null
+          checkin_por: string | null
+          checkout_em: string | null
+          checkout_por: string | null
+          cliente_id: string | null
+          codigo: string
+          confirmada_em: string | null
+          confirmada_por: string | null
+          created_at: string
+          data_entrada: string
+          data_saida: string
+          hospedagem_paga: boolean
+          hospede_principal_id: string
+          id: string
+          observacoes: string | null
+          pagamento_programado_data: string | null
+          pagamento_programado_forma:
+            | Database["public"]["Enums"]["forma_pagamento"]
+            | null
+          pagamento_programado_observacao: string | null
+          quantidade_adultos: number
+          quantidade_criancas: number
+          quarto_id: string
+          status: Database["public"]["Enums"]["status_reserva"]
+          updated_at: string
+          valor_consumo_pago: number
+          valor_criancas: number
+          valor_diaria: number
+          valor_hospedagem_pago: number
+          valor_total: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reservas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       cargo_usuario:

@@ -352,3 +352,21 @@ export async function realizarCheckout(id: string) {
   });
   if (error) throw error;
 }
+
+/** Move a reserva pra outro quarto — o quarto antigo libera (vai pra
+ * limpeza se o hóspede já estava ocupando, ou direto pra disponível se
+ * ainda não tinha check-in) e o novo assume o status equivalente ao
+ * estágio atual da reserva. Valor da diária/total não muda sozinho. */
+export async function trocarQuartoReserva(
+  reservaId: string,
+  novoQuartoId: string,
+): Promise<Reserva> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("trocar_quarto_reserva", {
+    p_reserva_id: reservaId,
+    p_novo_quarto_id: novoQuartoId,
+  });
+  if (error) throw error;
+  if (!data) throw new Error("Não foi possível trocar o quarto da reserva.");
+  return data;
+}

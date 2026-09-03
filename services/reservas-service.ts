@@ -131,7 +131,10 @@ export async function getReservaById(id: string): Promise<ReservaDetalhada> {
   };
 }
 
-/** Ids dos quartos com alguma reserva ativa que conflita com o período informado. */
+/** Ids dos quartos com alguma reserva ativa que conflita com o período
+ * informado. Reserva cancelada/no-show nunca ocupou o quarto de verdade, e
+ * uma reserva com check-out já realizado libera o quarto na hora — mesmo
+ * que o check-out tenha sido antecipado (antes da data_saida prevista). */
 async function getQuartoIdsConflitantes(
   dataEntrada: string,
   dataSaida: string,
@@ -141,7 +144,7 @@ async function getQuartoIdsConflitantes(
   let query = supabase
     .from("reservas")
     .select("quarto_id")
-    .not("status", "in", "(cancelada,no_show)")
+    .not("status", "in", "(cancelada,no_show,checkout_realizado)")
     .lt("data_entrada", dataSaida)
     .gt("data_saida", dataEntrada);
 

@@ -1,4 +1,4 @@
-import { Clock, User, Wallet } from "lucide-react";
+import { ArrowDownCircle, Clock, User, Wallet } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ interface CaixaStatusCardProps {
   saidas: number;
   onAbrir: () => void;
   onFechar: () => void;
+  onRegistrarSaida: () => void;
 }
 
 export function CaixaStatusCard({
@@ -31,6 +32,7 @@ export function CaixaStatusCard({
   saidas,
   onAbrir,
   onFechar,
+  onRegistrarSaida,
 }: CaixaStatusCardProps) {
   const aberto = caixa?.status === "aberto";
   const saldoAtual = (caixa?.valor_inicial ?? 0) + entradas - saidas;
@@ -75,12 +77,22 @@ export function CaixaStatusCard({
 
           <div className="flex items-center gap-2">
             {aberto ? (
-              <Button
-                onClick={onFechar}
-                className="bg-status-ocupado text-white hover:bg-status-ocupado/90"
-              >
-                Fechar Caixa
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={onRegistrarSaida}
+                  className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
+                >
+                  <ArrowDownCircle className="size-4" />
+                  Registrar Saída
+                </Button>
+                <Button
+                  onClick={onFechar}
+                  className="bg-status-ocupado text-white hover:bg-status-ocupado/90"
+                >
+                  Fechar Caixa
+                </Button>
+              </>
             ) : (
               <Button onClick={onAbrir}>Abrir Caixa</Button>
             )}

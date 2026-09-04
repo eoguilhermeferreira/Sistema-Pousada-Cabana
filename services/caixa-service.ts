@@ -53,6 +53,25 @@ export async function fecharCaixa(
   return data;
 }
 
+/** Registra uma saída manual do caixa (ex: retirada de dinheiro pra
+ * comprar algo, sangria) — entra no total de saídas e no relatório de
+ * fechamento igual qualquer outra movimentação. */
+export async function registrarSaidaCaixa(
+  caixaId: string,
+  valor: number,
+  descricao: string,
+): Promise<CaixaMovimentacao> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("registrar_saida_caixa", {
+    p_caixa_id: caixaId,
+    p_valor: valor,
+    p_descricao: descricao,
+  });
+  if (error) throw error;
+  if (!data) throw new Error("Não foi possível registrar a saída.");
+  return data;
+}
+
 export async function listMovimentacoesPorCaixa(
   caixaId: string,
 ): Promise<CaixaMovimentacao[]> {

@@ -3245,6 +3245,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      registrar_saida_caixa: {
+        Args: { p_caixa_id: string; p_descricao: string; p_valor: number }
+        Returns: {
+          caixa_id: string
+          created_at: string
+          descricao: string | null
+          id: string
+          origem: string
+          pagamento_id: string | null
+          tipo: string
+          usuario_id: string | null
+          valor: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "caixa_movimentacoes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       trocar_quarto_reserva: {
         Args: { p_novo_quarto_id: string; p_reserva_id: string }
         Returns: {

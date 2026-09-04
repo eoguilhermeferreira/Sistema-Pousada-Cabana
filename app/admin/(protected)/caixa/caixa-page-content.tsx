@@ -5,6 +5,7 @@ import * as React from "react";
 import { CaixaStatusCard } from "@/components/admin/caixa/caixa-status-card";
 import { AbrirCaixaModal } from "@/components/admin/caixa/abrir-caixa-modal";
 import { FecharCaixaModal } from "@/components/admin/caixa/fechar-caixa-modal";
+import { RegistrarSaidaModal } from "@/components/admin/caixa/registrar-saida-modal";
 import { HospedagensPendentesList } from "@/components/admin/caixa/hospedagens-pendentes-list";
 import { HistoricoCaixas } from "@/components/admin/caixa/historico-caixas";
 import { VendasBalcaoSection } from "@/components/admin/caixa/vendas-balcao-section";
@@ -27,6 +28,7 @@ export function CaixaPageContent() {
 
   const [abrirOpen, setAbrirOpen] = React.useState(false);
   const [fecharOpen, setFecharOpen] = React.useState(false);
+  const [saidaOpen, setSaidaOpen] = React.useState(false);
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -78,6 +80,7 @@ export function CaixaPageContent() {
         saidas={saidas}
         onAbrir={() => setAbrirOpen(true)}
         onFechar={() => setFecharOpen(true)}
+        onRegistrarSaida={() => setSaidaOpen(true)}
       />
 
       <HospedagensPendentesList
@@ -103,6 +106,13 @@ export function CaixaPageContent() {
         entradas={entradas}
         saidas={saidas}
         onSaved={load}
+      />
+
+      <RegistrarSaidaModal
+        open={saidaOpen}
+        onOpenChange={setSaidaOpen}
+        caixaId={caixa?.id ?? null}
+        onRegistrado={load}
       />
     </div>
   );

@@ -41,8 +41,16 @@ function ontem() {
 
 export function VendasBalcaoSection({
   caixaAbertoId,
+  onCaixaAtualizado,
 }: {
   caixaAbertoId: string | null;
+  /** Chamado depois de registrar ou cancelar uma venda — o valor entra/sai
+   * do caixa (caixa_movimentacoes), então o card de "Status do Caixa" (que
+   * vive num componente pai, com seu próprio load()) precisa recarregar
+   * também. Sem isso, a venda aparece certinho na tabela aqui embaixo, mas
+   * as Entradas/Saldo do card lá em cima ficam desatualizadas até a
+   * página ser recarregada. */
+  onCaixaAtualizado: () => void;
 }) {
   const [vendas, setVendas] = React.useState<VendaBalcaoComRelacoes[]>([]);
   const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
@@ -104,6 +112,7 @@ export function VendasBalcaoSection({
       await cancelarVendaBalcao(cancelando.id);
       setCancelando(null);
       await load();
+      onCaixaAtualizado();
     } catch (err) {
       setCancelError(getErrorMessage(err) || "Não foi possível cancelar a venda.");
     } finally {
@@ -323,7 +332,10 @@ export function VendasBalcaoSection({
           open={novaVendaOpen}
           onOpenChange={setNovaVendaOpen}
           caixaId={caixaAbertoId}
-          onFinalizada={load}
+          onFinalizada={() => {
+            load();
+            onCaixaAtualizado();
+          }}
         />
       )}
 

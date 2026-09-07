@@ -89,7 +89,10 @@ export function CaixaPageContent() {
         onAtualizado={load}
       />
 
-      <VendasBalcaoSection caixaAbertoId={caixa?.id ?? null} />
+      <VendasBalcaoSection
+        caixaAbertoId={caixa?.id ?? null}
+        onCaixaAtualizado={load}
+      />
 
       <HistoricoCaixas historico={historico} loading={loading} />
 

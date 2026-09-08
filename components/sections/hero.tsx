@@ -122,7 +122,12 @@ export function Hero() {
           <Button asChild size="lg">
             <Link href="/#reservar">Reservar Agora</Link>
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="border-white/70 text-white hover:bg-white hover:text-primary-dark"
+          >
             <Link href="/quartos">Conhecer Quartos</Link>
           </Button>
         </motion.div>

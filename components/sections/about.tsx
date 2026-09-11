@@ -29,7 +29,7 @@ export function About() {
               alt="Fachada da Pousada Cabana"
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
+              className="object-cover object-[50%_20%]"
             />
           </div>
         </motion.div>

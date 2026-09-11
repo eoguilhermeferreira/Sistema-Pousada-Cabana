@@ -1,5 +1,8 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CalendarClock, CalendarDays, CircleDollarSign, Receipt } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +40,7 @@ export function HospedagensPendentesList({
 }) {
   const [reservaProgramando, setReservaProgramando] =
     React.useState<ReservaComRelacoes | null>(null);
+  const router = useRouter();
 
   return (
     <div className="space-y-3">
@@ -67,7 +71,16 @@ export function HospedagensPendentesList({
             }) => (
               <div
                 key={reserva.id}
-                className="flex flex-wrap items-center gap-4 rounded-2xl border border-gray-light bg-white p-4 shadow-sm"
+                role="button"
+                tabIndex={0}
+                onClick={() => router.push(`/admin/caixa/finalizar/${reserva.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    router.push(`/admin/caixa/finalizar/${reserva.id}`);
+                  }
+                }}
+                className="flex cursor-pointer flex-wrap items-center gap-4 rounded-2xl border border-gray-light bg-white p-4 shadow-sm transition-colors duration-200 hover:border-primary/40 hover:shadow-md"
               >
                 <HospedeAvatar
                   nome={reserva.hospede_principal.nome}
@@ -140,15 +153,25 @@ export function HospedagensPendentesList({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setReservaProgramando(reserva)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReservaProgramando(reserva);
+                        }}
                       >
                         {reserva.pagamento_programado_data
                           ? "Editar programação"
                           : "Programar pagamento"}
                       </Button>
                     )}
-                    <Button size="sm" asChild variant={valorPendenteTotal > 0 ? "primary" : "outline"}>
-                      <Link href={`/admin/caixa/finalizar/${reserva.id}`}>
+                    <Button
+                      size="sm"
+                      asChild
+                      variant={valorPendenteTotal > 0 ? "primary" : "outline"}
+                    >
+                      <Link
+                        href={`/admin/caixa/finalizar/${reserva.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {valorPendenteTotal > 0 ? "Finalizar Hospedagem" : "Ver / Registrar pagamento"}
                       </Link>
                     </Button>

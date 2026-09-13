@@ -370,3 +370,21 @@ export async function trocarQuartoReserva(
   if (!data) throw new Error("Não foi possível trocar o quarto da reserva.");
   return data;
 }
+
+/** Estende a estadia — joga a data de saída pra frente e já soma o valor
+ * das diárias extras na hospedagem (mesma diária/valor de criança já
+ * usados na reserva). O valor extra vira pendente e aparece pra cobrar
+ * no Caixa normalmente. */
+export async function renovarReserva(
+  reservaId: string,
+  novaDataSaida: string,
+): Promise<Reserva> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("renovar_reserva", {
+    p_reserva_id: reservaId,
+    p_nova_data_saida: novaDataSaida,
+  });
+  if (error) throw error;
+  if (!data) throw new Error("Não foi possível renovar a reserva.");
+  return data;
+}

@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   ArrowRightLeft,
+  CalendarPlus,
   History,
   ImageOff,
   Loader2,
@@ -21,6 +22,7 @@ import { QuartoStatusBadge } from "@/components/admin/quartos/quarto-status-badg
 import { ReservaStatusBadge } from "@/components/admin/reservas/reserva-status-badge";
 import { AdicionarConsumoModal } from "@/components/admin/estoque/adicionar-consumo-modal";
 import { TrocarQuartoModal } from "@/components/admin/quartos/trocar-quarto-modal";
+import { RenovarReservaModal } from "@/components/admin/quartos/renovar-reserva-modal";
 import { getQuartoById } from "@/services/quartos-service";
 import { getReservaRelevantePorQuarto } from "@/services/reservas-service";
 import {
@@ -144,6 +146,7 @@ export function QuartoCentralDrawer({
   const [loadingConsumo, setLoadingConsumo] = React.useState(true);
   const [adicionarConsumoOpen, setAdicionarConsumoOpen] = React.useState(false);
   const [trocarQuartoOpen, setTrocarQuartoOpen] = React.useState(false);
+  const [renovarReservaOpen, setRenovarReservaOpen] = React.useState(false);
   const [removingId, setRemovingId] = React.useState<string | null>(null);
 
   // Só se pode lançar consumo com o hóspede já hospedado (check-in feito) —
@@ -400,6 +403,17 @@ export function QuartoCentralDrawer({
                       </div>
                       <div className="flex items-center gap-2">
                         <ReservaStatusBadge status={reservaRelevante.status} />
+                        {podeTrocarQuarto && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setRenovarReservaOpen(true)}
+                            className="border-gray-text/30 text-primary-dark hover:bg-gray-light hover:text-primary-dark"
+                          >
+                            <CalendarPlus className="size-4" />
+                            Renovar Reserva
+                          </Button>
+                        )}
                         {podeTrocarQuarto && (
                           <Button
                             size="sm"
@@ -687,6 +701,13 @@ export function QuartoCentralDrawer({
         onOpenChange={setTrocarQuartoOpen}
         reserva={reservaRelevante}
         onTrocado={loadQuarto}
+      />
+
+      <RenovarReservaModal
+        open={renovarReservaOpen}
+        onOpenChange={setRenovarReservaOpen}
+        reserva={reservaRelevante}
+        onRenovado={loadQuarto}
       />
     </Sheet>
   );

@@ -44,6 +44,7 @@ export function ReservaWizardModal({
   const [quarto, setQuarto] = React.useState<QuartoDetalhado | null>(null);
   const [adultos, setAdultos] = React.useState(1);
   const [criancas, setCriancas] = React.useState<CriancaWizard[]>([]);
+  const [temPet, setTemPet] = React.useState(false);
   const [observacoes, setObservacoes] = React.useState("");
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -68,6 +69,7 @@ export function ReservaWizardModal({
               idade: h.idade !== null ? String(h.idade) : "",
             })),
         );
+        setTemPet(reserva.tem_pet ?? false);
         setObservacoes(reserva.observacoes ?? "");
       } else {
         setHospede(null);
@@ -76,6 +78,7 @@ export function ReservaWizardModal({
         setQuarto(null);
         setAdultos(1);
         setCriancas([]);
+        setTemPet(false);
         setObservacoes("");
       }
     }, 0);
@@ -126,6 +129,7 @@ export function ReservaWizardModal({
         valorPessoaAdicional: quarto.valor_pessoa_adicional,
         adultos,
         criancas: criancasValidas.map((c) => ({ idade: c.idadeNum })),
+        temPet,
       });
 
       const reservaPayload: ReservaInsert = {
@@ -137,6 +141,8 @@ export function ReservaWizardModal({
         quantidade_criancas: criancasValidas.length,
         valor_diaria: quarto.valor_diaria,
         valor_criancas: valores.valorCriancas,
+        tem_pet: temPet,
+        valor_pet: valores.valorPet,
         valor_total: valores.valorTotal,
         observacoes: observacoes.trim() || null,
       };
@@ -203,6 +209,8 @@ export function ReservaWizardModal({
                 onChangeCriancas={setCriancas}
                 capacidadeMaxima={quarto.capacidade_maxima}
                 noites={noites}
+                temPet={temPet}
+                onChangeTemPet={setTemPet}
               />
             )}
             {step === 5 && hospede && quarto && (
@@ -214,6 +222,7 @@ export function ReservaWizardModal({
                 noites={noites}
                 adultos={adultos}
                 criancas={criancas}
+                temPet={temPet}
                 observacoes={observacoes}
                 onChangeObservacoes={setObservacoes}
               />

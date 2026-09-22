@@ -128,6 +128,8 @@ export interface CriarReservaClienteParams {
   dataSaida: string;
   acompanhantesAdultos: AcompanhanteAdulto[];
   criancas: CriancaReserva[];
+  /** Pet de porte pequeno — único porte aceito, taxa fixa por diária. */
+  temPet?: boolean;
   observacoes?: string;
   /** Dados adicionais do hóspede — pedidos na hora da reserva pra já
    * alimentar a Nota Fiscal depois (empresa é o único opcional). */
@@ -162,6 +164,7 @@ export async function criarReservaCliente(
       nome: c.nome ?? null,
       idade: c.idade,
     })),
+    p_tem_pet: params.temPet ?? false,
     p_observacoes: params.observacoes,
     p_empresa: params.empresa,
     p_cep: params.cep,

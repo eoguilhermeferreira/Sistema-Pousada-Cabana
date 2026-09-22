@@ -1,5 +1,8 @@
 export const VALOR_CRIANCA_5_11 = 75;
 
+/** Taxa fixa por diária pra pet de porte pequeno — único porte aceito. */
+export const VALOR_PET = 40;
+
 export type FaixaEtariaCrianca = "isento" | "paga" | "adulto";
 
 /** Regras de cobrança por idade: 0–4 isento, 5–11 paga taxa fixa, 12+ conta como adulto. */
@@ -34,11 +37,14 @@ export interface CalcularValoresParams {
    * comportamento de "uma diária fixa" para quem não informa ocupação. */
   adultos?: number;
   criancas: { idade: number }[];
+  /** Hóspede leva pet de porte pequeno — cobra VALOR_PET por diária. */
+  temPet?: boolean;
 }
 
 export interface ValoresReserva {
   valorHospedagem: number;
   valorCriancas: number;
+  valorPet: number;
   valorTotal: number;
   /** Adultos + crianças de 12 anos ou mais (que pagam como adulto). */
   adultosEquivalentes: number;
@@ -58,6 +64,7 @@ export function calcularValores({
   valorPessoaAdicional,
   adultos = 1,
   criancas,
+  temPet = false,
 }: CalcularValoresParams): ValoresReserva {
   const criancasComoAdulto = criancas.filter(
     (c) => faixaEtariaCrianca(c.idade) === "adulto",
@@ -78,10 +85,12 @@ export function calcularValores({
     (total, crianca) => total + valorCriancaPorNoite(crianca.idade) * noites,
     0,
   );
+  const valorPet = temPet ? VALOR_PET * noites : 0;
   return {
     valorHospedagem,
     valorCriancas,
-    valorTotal: valorHospedagem + valorCriancas,
+    valorPet,
+    valorTotal: valorHospedagem + valorCriancas + valorPet,
     adultosEquivalentes,
   };
 }

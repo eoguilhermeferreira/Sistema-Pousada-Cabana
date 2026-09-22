@@ -1,8 +1,14 @@
-import { Minus, Plus, Trash2, UserPlus } from "lucide-react";
+import { Minus, PawPrint, Plus, Trash2, UserPlus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { faixaEtariaCrianca, valorCriancaPorNoite } from "@/lib/reserva-pricing";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  faixaEtariaCrianca,
+  valorCriancaPorNoite,
+  VALOR_PET,
+} from "@/lib/reserva-pricing";
+import { petPolicyRules } from "@/lib/pet-policy";
 import { cn } from "@/lib/utils";
 
 const currency = new Intl.NumberFormat("pt-BR", {
@@ -23,6 +29,8 @@ interface StepHospedesProps {
   onChangeCriancas: (criancas: CriancaWizard[]) => void;
   capacidadeMaxima: number;
   noites: number;
+  temPet: boolean;
+  onChangeTemPet: (value: boolean) => void;
 }
 
 function faixaLabel(idade: number) {
@@ -39,6 +47,8 @@ export function StepHospedes({
   onChangeCriancas,
   capacidadeMaxima,
   noites,
+  temPet,
+  onChangeTemPet,
 }: StepHospedesProps) {
   const totalHospedes = adultos + criancas.length;
   const excedeCapacidade = totalHospedes > capacidadeMaxima;
@@ -152,6 +162,31 @@ export function StepHospedes({
               );
             })}
           </div>
+        )}
+      </div>
+
+      <div className="space-y-2 rounded-xl border border-gray-light p-3">
+        <label className="flex items-center gap-2.5">
+          <Checkbox
+            checked={temPet}
+            onCheckedChange={(checked) => onChangeTemPet(checked === true)}
+          />
+          <span className="flex items-center gap-1.5 text-sm text-primary-dark">
+            <PawPrint className="size-4 text-gray-text" />
+            Hóspede vai trazer pet
+          </span>
+          {temPet && (
+            <span className="ml-auto text-xs font-medium text-gray-text">
+              {currency.format(VALOR_PET * noites)}
+            </span>
+          )}
+        </label>
+        {temPet && (
+          <ul className="space-y-0.5 pl-7 text-xs text-gray-text">
+            {petPolicyRules.map((rule) => (
+              <li key={rule}>{rule}</li>
+            ))}
+          </ul>
         )}
       </div>
 

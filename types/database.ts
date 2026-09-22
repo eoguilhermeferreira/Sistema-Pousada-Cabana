@@ -2081,11 +2081,13 @@ export type Database = {
           quantidade_criancas: number
           quarto_id: string
           status: Database["public"]["Enums"]["status_reserva"]
+          tem_pet: boolean
           updated_at: string
           valor_consumo_pago: number
           valor_criancas: number
           valor_diaria: number
           valor_hospedagem_pago: number
+          valor_pet: number
           valor_total: number
         }
         Insert: {
@@ -2113,11 +2115,13 @@ export type Database = {
           quantidade_criancas?: number
           quarto_id: string
           status?: Database["public"]["Enums"]["status_reserva"]
+          tem_pet?: boolean
           updated_at?: string
           valor_consumo_pago?: number
           valor_criancas?: number
           valor_diaria: number
           valor_hospedagem_pago?: number
+          valor_pet?: number
           valor_total: number
         }
         Update: {
@@ -2145,11 +2149,13 @@ export type Database = {
           quantidade_criancas?: number
           quarto_id?: string
           status?: Database["public"]["Enums"]["status_reserva"]
+          tem_pet?: boolean
           updated_at?: string
           valor_consumo_pago?: number
           valor_criancas?: number
           valor_diaria?: number
           valor_hospedagem_pago?: number
+          valor_pet?: number
           valor_total?: number
         }
         Relationships: [
@@ -2605,8 +2611,10 @@ export type Database = {
           p_observacoes?: string
           p_quantidade_adultos: number
           p_quarto_id: string
+          p_tem_pet?: boolean
           p_valor_criancas: number
           p_valor_diaria: number
+          p_valor_pet?: number
           p_valor_total: number
         }
         Returns: {
@@ -2630,6 +2638,7 @@ export type Database = {
           p_observacoes?: string
           p_quarto_id: string
           p_rua?: string
+          p_tem_pet?: boolean
         }
         Returns: {
           codigo: string
@@ -3292,11 +3301,13 @@ export type Database = {
           quantidade_criancas: number
           quarto_id: string
           status: Database["public"]["Enums"]["status_reserva"]
+          tem_pet: boolean
           updated_at: string
           valor_consumo_pago: number
           valor_criancas: number
           valor_diaria: number
           valor_hospedagem_pago: number
+          valor_pet: number
           valor_total: number
         }
         SetofOptions: {
@@ -3333,11 +3344,13 @@ export type Database = {
           quantidade_criancas: number
           quarto_id: string
           status: Database["public"]["Enums"]["status_reserva"]
+          tem_pet: boolean
           updated_at: string
           valor_consumo_pago: number
           valor_criancas: number
           valor_diaria: number
           valor_hospedagem_pago: number
+          valor_pet: number
           valor_total: number
         }
         SetofOptions: {

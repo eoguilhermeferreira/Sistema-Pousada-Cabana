@@ -1,16 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, LogIn, UserPlus } from "lucide-react";
+import { Loader2, LogIn, PawPrint, UserPlus } from "lucide-react";
 
 import { Modal, ModalContent } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatCpf, isValidCpf, onlyDigits } from "@/lib/cpf";
 import { formatPhone, isValidPhone } from "@/lib/phone";
 import { formatCep, isValidCep, fetchEnderecoPorCep } from "@/lib/cep";
-import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
+import { calcularNoites, calcularValores, VALOR_PET } from "@/lib/reserva-pricing";
 import { childrenPolicyRules } from "@/lib/children-policy";
+import { petPolicyRules } from "@/lib/pet-policy";
 import { checkinCheckoutTexto } from "@/lib/checkin-checkout";
 import {
   cadastrarCliente,
@@ -70,6 +72,7 @@ export function ReservationModal({
   const [nomesCriancas, setNomesCriancas] = React.useState<string[]>(
     criancasIdades.map(() => ""),
   );
+  const [temPet, setTemPet] = React.useState(false);
   const [observacoes, setObservacoes] = React.useState("");
   const [empresa, setEmpresa] = React.useState("");
   const [cep, setCep] = React.useState("");
@@ -100,6 +103,7 @@ export function ReservationModal({
     valorPessoaAdicional: quarto.valor_pessoa_adicional,
     adultos,
     criancas: criancasIdades.map((idade) => ({ idade })),
+    temPet,
   });
 
   React.useEffect(() => {
@@ -112,6 +116,7 @@ export function ReservationModal({
       setDataSaida(initialDataSaida || "");
       setNomesAdultos(Array(Math.max(0, adultos - 1)).fill(""));
       setNomesCriancas(criancasIdades.map(() => ""));
+      setTemPet(false);
       setObservacoes("");
       setEmpresa("");
       setCep("");
@@ -243,6 +248,7 @@ export function ReservationModal({
           nome: nomesCriancas[i]?.trim() || undefined,
           idade,
         })),
+        temPet,
         observacoes: observacoes.trim() || undefined,
         empresa: empresa.trim() || undefined,
         cep: onlyDigits(cep) || undefined,
@@ -513,6 +519,29 @@ export function ReservationModal({
                   <li key={rule}>{rule}</li>
                 ))}
               </ul>
+
+              <div className="space-y-2 rounded-xl border border-gray-light p-3">
+                <label className="flex items-center gap-2.5">
+                  <Checkbox
+                    checked={temPet}
+                    onCheckedChange={(checked) => setTemPet(checked === true)}
+                  />
+                  <span className="flex items-center gap-1.5 text-sm text-primary-dark">
+                    <PawPrint className="size-4 text-gray-text" />
+                    Vou levar meu pet
+                  </span>
+                  {temPet && noites > 0 && (
+                    <span className="ml-auto text-xs font-medium text-gray-text">
+                      {currency.format(VALOR_PET * noites)}
+                    </span>
+                  )}
+                </label>
+                <ul className="space-y-0.5 pl-7 text-xs text-gray-text">
+                  {petPolicyRules.map((rule) => (
+                    <li key={rule}>{rule}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             <div className="space-y-3">

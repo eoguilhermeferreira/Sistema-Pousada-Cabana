@@ -386,7 +386,9 @@ export function FinalizarHospedagemContent({
                   {currency.format(reserva.valor_diaria)})
                 </span>
                 <span className="font-medium text-primary-dark">
-                  {currency.format(reserva.valor_total - reserva.valor_criancas)}
+                  {currency.format(
+                    reserva.valor_total - reserva.valor_criancas - reserva.valor_pet,
+                  )}
                 </span>
               </div>
               {criancas.map((crianca) => (
@@ -399,6 +401,14 @@ export function FinalizarHospedagemContent({
                   </span>
                 </div>
               ))}
+              {reserva.tem_pet && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-text">Pet (porte pequeno)</span>
+                  <span className="font-medium text-primary-dark">
+                    {currency.format(reserva.valor_pet)}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between border-t border-gray-light pt-1.5">
                 <span className="font-semibold text-primary-dark">
                   Subtotal hospedagem

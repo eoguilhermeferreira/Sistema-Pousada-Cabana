@@ -117,6 +117,10 @@ function montarDetalhamentoHospedagem(reserva: ReservaDetalhada): ItemHospedagem
     });
   });
 
+  if (reserva.tem_pet) {
+    itens.push({ label: "Pet (porte pequeno)", valor: reserva.valor_pet });
+  }
+
   return itens;
 }
 

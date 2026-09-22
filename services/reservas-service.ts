@@ -242,6 +242,8 @@ export async function createReserva({
     p_valor_total: reserva.valor_total,
     p_observacoes: reserva.observacoes ?? undefined,
     p_hospedes_extra: hospedesExtra,
+    p_tem_pet: reserva.tem_pet ?? false,
+    p_valor_pet: reserva.valor_pet ?? 0,
   });
   if (error) throw error;
 

@@ -29,6 +29,7 @@ interface StepResumoProps {
   noites: number;
   adultos: number;
   criancas: CriancaWizard[];
+  temPet: boolean;
   observacoes: string;
   onChangeObservacoes: (value: string) => void;
 }
@@ -44,6 +45,7 @@ export function StepResumo({
   noites,
   adultos,
   criancas,
+  temPet,
   observacoes,
   onChangeObservacoes,
 }: StepResumoProps) {
@@ -58,6 +60,7 @@ export function StepResumo({
     valorPessoaAdicional: quarto.valor_pessoa_adicional,
     adultos,
     criancas: criancasValidas.map((c) => ({ idade: c.idadeNum })),
+    temPet,
   });
 
   return (
@@ -103,6 +106,7 @@ export function StepResumo({
           {adultos} {adultos === 1 ? "adulto" : "adultos"}
           {criancasValidas.length > 0 &&
             ` · ${criancasValidas.length} ${criancasValidas.length === 1 ? "criança" : "crianças"}`}
+          {temPet && " · pet de porte pequeno"}
         </p>
         {criancasValidas.length > 0 && (
           <ul className="space-y-1">
@@ -135,6 +139,14 @@ export function StepResumo({
             {currency.format(valores.valorCriancas)}
           </span>
         </div>
+        {temPet && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-text">Pet (porte pequeno)</span>
+            <span className="font-medium text-primary-dark">
+              {currency.format(valores.valorPet)}
+            </span>
+          </div>
+        )}
         <div className="flex items-center justify-between border-t border-gray-light pt-2 text-sm">
           <span className="font-semibold text-primary-dark">Valor total</span>
           <span className="font-sans text-base font-semibold text-primary-dark">

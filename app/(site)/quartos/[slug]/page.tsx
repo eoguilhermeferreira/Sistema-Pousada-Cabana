@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { RoomGallery } from "@/components/quartos/room-gallery";
 import { RoomName } from "@/components/quartos/room-name";
 import { ChildrenPolicyNotice } from "@/components/quartos/children-policy-notice";
+import { PetPolicyNotice } from "@/components/quartos/pet-policy-notice";
 import { GuestSummary } from "@/components/quartos/guest-summary";
 import { RoomPriceAside } from "@/components/quartos/room-price-aside";
 
@@ -111,8 +112,9 @@ export default async function RoomPage({
             </div>
           )}
 
-          <div className="mt-8">
+          <div className="mt-8 space-y-4">
             <ChildrenPolicyNotice />
+            <PetPolicyNotice />
           </div>
         </div>
 

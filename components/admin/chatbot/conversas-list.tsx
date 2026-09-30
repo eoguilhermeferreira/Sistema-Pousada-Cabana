@@ -71,15 +71,18 @@ export function ConversasList({
                 <p className="truncate font-medium text-primary-dark">
                   {conversa.hospede_nome || conversa.hospede_telefone || "Hóspede"}
                 </p>
-                {conversa.aguardando_humano && (
-                  <span className="size-2 shrink-0 rounded-full bg-status-ocupado" />
-                )}
               </div>
               <p className="truncate text-xs text-gray-text">
                 {conversa.ultima_mensagem || "Sem mensagens ainda"}
               </p>
               <div className="flex items-center justify-between gap-2">
-                <ChatbotStatusBadge status={conversa.status} />
+                {conversa.aguardando_humano ? (
+                  <span className="rounded-full bg-status-ocupado px-2.5 py-1 text-xs font-bold text-white">
+                    Precisa de atendimento
+                  </span>
+                ) : (
+                  <ChatbotStatusBadge status={conversa.status} />
+                )}
                 <span className="flex items-center gap-1 text-[11px] text-gray-text">
                   <MessageCircle className="size-3" />
                   {conversa.ultima_mensagem_em

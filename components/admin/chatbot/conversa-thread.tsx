@@ -85,7 +85,13 @@ export function ConversaThread({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <ChatbotStatusBadge status={conversa.status} />
+          {conversa.aguardando_humano ? (
+            <span className="rounded-full bg-status-ocupado px-2.5 py-1 text-xs font-bold text-white">
+              Precisa de atendimento
+            </span>
+          ) : (
+            <ChatbotStatusBadge status={conversa.status} />
+          )}
           {conversa.atendente && (
             <span className="flex items-center gap-1 text-xs text-gray-text">
               <UserCheck className="size-3.5" />

@@ -16,9 +16,23 @@ import { Input } from "@/components/ui/input";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { ProgramarPagamentoModal } from "@/components/admin/caixa/programar-pagamento-modal";
 import { formaPagamentoLabels } from "@/types/caixa";
-import { statusReservaBadgeClass, statusReservaLabels } from "@/types/reserva";
+import { statusReservaLabels } from "@/types/reserva";
 import type { HospedagemPendente } from "@/types/caixa";
-import type { ReservaComRelacoes } from "@/types/reserva";
+import type { ReservaComRelacoes, StatusReserva } from "@/types/reserva";
+
+// Etiqueta de status própria pra esta lista, maior e com fundo sólido
+// (em vez do badge padrão, pequeno e discreto) — a cliente relatou que a
+// recepção às vezes cobra/"finaliza" sem querer um hóspede que ainda nem
+// fez check-in, porque não reparava que estava escrito "Reservada" ou
+// "Confirmada". Cores fortes de propósito, pra chamar atenção antes do clique.
+const statusEtiquetaClasses: Record<StatusReserva, string> = {
+  reservada: "bg-status-reservado text-white",
+  confirmada: "bg-status-confirmada text-white",
+  checkin_realizado: "bg-status-checkin text-white",
+  checkout_realizado: "bg-status-checkout text-white",
+  cancelada: "bg-status-cancelada text-white",
+  no_show: "bg-status-noshow text-white",
+};
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -121,7 +135,7 @@ export function HospedagensPendentesList({
                       {reserva.hospede_principal.nome}
                     </p>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusReservaBadgeClass(reserva.status)}`}
+                      className={`rounded-full px-3 py-1 text-sm font-bold tracking-wide ${statusEtiquetaClasses[reserva.status]}`}
                     >
                       {statusReservaLabels[reserva.status]}
                     </span>

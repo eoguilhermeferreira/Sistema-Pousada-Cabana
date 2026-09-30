@@ -15,6 +15,7 @@ import {
   listMovimentacoesPorCaixa,
 } from "@/services/caixa-service";
 import { listHospedagensPendentes } from "@/services/pagamentos-service";
+import { getErrorMessage } from "@/lib/supabase-error";
 import type { Caixa, CaixaMovimentacao, HospedagemPendente } from "@/types/caixa";
 
 export function CaixaPageContent() {
@@ -25,11 +26,16 @@ export function CaixaPageContent() {
   const [pendentes, setPendentes] = React.useState<HospedagemPendente[]>([]);
   const [historico, setHistorico] = React.useState<Caixa[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
 
   const [abrirOpen, setAbrirOpen] = React.useState(false);
   const [fecharOpen, setFecharOpen] = React.useState(false);
   const [saidaOpen, setSaidaOpen] = React.useState(false);
 
+  // Se qualquer uma das consultas abaixo falhar (rede instável, sessão
+  // expirando, etc.), NÃO zera o que já estava na tela — isso fazia parecer
+  // que o caixa tinha fechado sozinho e sumido com as hospedagens pendentes,
+  // quando na verdade só a atualização falhou silenciosamente.
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
@@ -43,6 +49,12 @@ export function CaixaPageContent() {
       setHistorico(historicoData);
       setMovimentacoes(
         caixaAberto ? await listMovimentacoesPorCaixa(caixaAberto.id) : [],
+      );
+      setError("");
+    } catch (err) {
+      setError(
+        getErrorMessage(err) ||
+          "Não foi possível atualizar o caixa. Verifique sua conexão e tente novamente.",
       );
     } finally {
       setLoading(false);
@@ -73,6 +85,19 @@ export function CaixaPageContent() {
           Controle do caixa e fechamento das hospedagens.
         </p>
       </div>
+
+      {error && (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-status-ocupado/30 bg-status-ocupado-light px-5 py-4 text-sm font-medium text-status-ocupado">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={load}
+            className="shrink-0 rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-status-ocupado hover:bg-white/80"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )}
 
       <CaixaStatusCard
         caixa={caixa}

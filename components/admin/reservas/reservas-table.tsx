@@ -1,11 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarX2, CheckCircle2, Eye, Loader2, Pencil, XCircle } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  CalendarX2,
+  CheckCircle2,
+  Eye,
+  Loader2,
+  Pencil,
+  XCircle,
+} from "lucide-react";
 
 import { ReservaStatusBadge } from "@/components/admin/reservas/reserva-status-badge";
 import { formatCpf } from "@/lib/cpf";
+import { cn } from "@/lib/utils";
 import type { ReservaComRelacoes } from "@/types/reserva";
+
+export type SortField =
+  | "codigo"
+  | "hospede"
+  | "quarto"
+  | "categoria"
+  | "data_entrada"
+  | "data_saida"
+  | "valor_total"
+  | "status";
+
+export interface SortState {
+  field: SortField;
+  direction: "asc" | "desc";
+}
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -29,19 +55,21 @@ interface ReservasTableProps {
   onCancel: (reserva: ReservaComRelacoes) => void;
   onConfirm: (reserva: ReservaComRelacoes) => void;
   confirmingId?: string | null;
+  sort: SortState;
+  onSort: (field: SortField) => void;
 }
 
-const columns = [
-  "Código",
-  "Hóspede principal",
-  "Quarto",
-  "Categoria",
-  "Entrada",
-  "Saída",
-  "Hóspedes",
-  "Valor total",
-  "Status",
-  "",
+const columns: { label: string; field?: SortField }[] = [
+  { label: "Código", field: "codigo" },
+  { label: "Hóspede principal", field: "hospede" },
+  { label: "Quarto", field: "quarto" },
+  { label: "Categoria", field: "categoria" },
+  { label: "Entrada", field: "data_entrada" },
+  { label: "Saída", field: "data_saida" },
+  { label: "Hóspedes" },
+  { label: "Valor total", field: "valor_total" },
+  { label: "Status", field: "status" },
+  { label: "" },
 ];
 
 export function ReservasTable({
@@ -51,6 +79,8 @@ export function ReservasTable({
   onCancel,
   onConfirm,
   confirmingId,
+  sort,
+  onSort,
 }: ReservasTableProps) {
   if (!loading && reservas.length === 0) {
     return (
@@ -74,14 +104,38 @@ export function ReservasTable({
         <table className="w-full min-w-[1080px] text-left text-sm">
           <thead>
             <tr className="border-b border-gray-light bg-admin-bg/60">
-              {columns.map((column) => (
-                <th
-                  key={column}
-                  className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-text"
-                >
-                  {column}
-                </th>
-              ))}
+              {columns.map((column) => {
+                const isSorted = column.field && sort.field === column.field;
+                const Icon = !column.field
+                  ? null
+                  : isSorted
+                    ? sort.direction === "asc"
+                      ? ArrowUp
+                      : ArrowDown
+                    : ArrowUpDown;
+                return (
+                  <th
+                    key={column.label || "acoes"}
+                    className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-text"
+                  >
+                    {column.field ? (
+                      <button
+                        type="button"
+                        onClick={() => onSort(column.field!)}
+                        className={cn(
+                          "flex items-center gap-1 transition-colors duration-200 hover:text-primary-dark",
+                          isSorted && "text-primary-dark",
+                        )}
+                      >
+                        {column.label}
+                        {Icon && <Icon className="size-3.5" strokeWidth={2} />}
+                      </button>
+                    ) : (
+                      column.label
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

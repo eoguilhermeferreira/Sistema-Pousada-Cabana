@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ReservasResumoCards } from "@/components/admin/reservas/reservas-resumo-cards";
 import { ReservasFilters } from "@/components/admin/reservas/reservas-filters";
-import { ReservasTable } from "@/components/admin/reservas/reservas-table";
+import { ReservasTable, type SortField, type SortState } from "@/components/admin/reservas/reservas-table";
 import { ReservaWizardModal } from "@/components/admin/reservas/wizard/reserva-wizard-modal";
 import {
   cancelarReserva,
@@ -39,6 +39,23 @@ export function ReservasPageContent() {
 
   const [confirmingId, setConfirmingId] = React.useState<string | null>(null);
   const [confirmError, setConfirmError] = React.useState("");
+
+  // Ordem padrão: data de entrada mais próxima primeiro — dá pra clicar em
+  // qualquer coluna da tabela pra reordenar, em vez de ficar preso na ordem
+  // fixa (antes era só data de entrada decrescente, misturando hospedagem
+  // futura distante com hospedagem já encerrada há meses).
+  const [sort, setSort] = React.useState<SortState>({
+    field: "data_entrada",
+    direction: "asc",
+  });
+
+  function handleSort(field: SortField) {
+    setSort((prev) =>
+      prev.field === field
+        ? { field, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { field, direction: "asc" },
+    );
+  }
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -146,6 +163,33 @@ export function ReservasPageContent() {
     });
   }, [reservas, filtros]);
 
+  const sorted = React.useMemo(() => {
+    const dir = sort.direction === "asc" ? 1 : -1;
+    const list = [...filtered];
+    list.sort((a, b) => {
+      switch (sort.field) {
+        case "codigo":
+          return a.codigo.localeCompare(b.codigo) * dir;
+        case "hospede":
+          return a.hospede_principal.nome.localeCompare(b.hospede_principal.nome) * dir;
+        case "quarto":
+          return a.quarto.numero.localeCompare(b.quarto.numero, "pt-BR", { numeric: true }) * dir;
+        case "categoria":
+          return a.quarto.categoria.nome.localeCompare(b.quarto.categoria.nome) * dir;
+        case "data_saida":
+          return a.data_saida.localeCompare(b.data_saida) * dir;
+        case "valor_total":
+          return (a.valor_total - b.valor_total) * dir;
+        case "status":
+          return a.status.localeCompare(b.status) * dir;
+        case "data_entrada":
+        default:
+          return a.data_entrada.localeCompare(b.data_entrada) * dir;
+      }
+    });
+    return list;
+  }, [filtered, sort]);
+
   function handleNew() {
     setEditingReserva(null);
     setWizardOpen(true);
@@ -226,12 +270,14 @@ export function ReservasPageContent() {
       )}
 
       <ReservasTable
-        reservas={filtered}
+        reservas={sorted}
         loading={loading}
         onEdit={handleEdit}
         onCancel={handleCancelRequest}
         onConfirm={handleConfirmar}
         confirmingId={confirmingId}
+        sort={sort}
+        onSort={handleSort}
       />
 
       <ReservaWizardModal

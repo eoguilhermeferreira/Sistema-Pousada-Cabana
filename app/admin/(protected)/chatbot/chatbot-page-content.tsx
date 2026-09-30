@@ -191,7 +191,12 @@ export function ChatbotPageContent() {
   }
 
   return (
-    <div className="flex h-full flex-col space-y-6">
+    // Altura presa ao que sobra da tela (abaixo da barra do topo), em vez
+    // de crescer com o conteúdo — igual WhatsApp Web: só a lista de
+    // conversas e as mensagens rolam por dentro, o resto (cabeçalho, caixa
+    // de digitar, botão de encerrar) fica sempre visível sem precisar
+    // descer a página inteira.
+    <div className="flex h-[calc(100dvh-6rem)] flex-col space-y-6 sm:h-[calc(100dvh-7rem)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold text-primary-dark">
@@ -210,8 +215,8 @@ export function ChatbotPageContent() {
         </Link>
       </div>
 
-      <div className="grid min-h-[65vh] flex-1 grid-cols-1 overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm lg:grid-cols-[320px_1fr]">
-        <div className="flex flex-col border-b border-gray-light lg:border-b-0 lg:border-r">
+      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm lg:grid-cols-[320px_1fr]">
+        <div className="flex min-h-0 flex-col border-b border-gray-light lg:border-b-0 lg:border-r">
           <ConversasList
             conversas={conversas}
             loading={loadingConversas}

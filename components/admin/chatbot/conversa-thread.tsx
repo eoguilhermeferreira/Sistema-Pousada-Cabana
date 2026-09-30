@@ -73,7 +73,7 @@ export function ConversaThread({
   }
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-light px-5 py-4">
         <div>
           <p className="font-medium text-primary-dark">
@@ -101,7 +101,7 @@ export function ConversaThread({
         </p>
       )}
 
-      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+      <div ref={listRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
         {loading ? (
           <p className="text-center text-sm text-gray-text">Carregando mensagens...</p>
         ) : mensagens.length === 0 ? (

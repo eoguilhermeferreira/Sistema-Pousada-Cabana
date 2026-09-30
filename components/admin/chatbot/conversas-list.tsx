@@ -54,7 +54,7 @@ export function ConversasList({
   }
 
   return (
-    <ul className="divide-y divide-gray-light overflow-y-auto">
+    <ul className="min-h-0 flex-1 divide-y divide-gray-light overflow-y-auto">
       {conversas.map((conversa) => {
         const ativa = conversa.id === selecionadaId;
         return (

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, ShoppingBag, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, ShoppingBag, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -33,6 +33,11 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
 const selectClass =
   "flex h-10 w-full rounded-xl border border-gray-text/20 bg-white px-3 text-sm text-primary-dark transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
+// Só as mais recentes ficam visíveis de cara — a lista de vendas do dia
+// podia empurrar a seção de Hospedagens lá pra baixo. "Ver mais" expande
+// pra lista inteira.
+const VENDAS_VISIVEIS_INICIAL = 3;
+
 function ontem() {
   const data = new Date();
   data.setDate(data.getDate() - 1);
@@ -62,9 +67,11 @@ export function VendasBalcaoSection({
   );
   const [cancelError, setCancelError] = React.useState("");
   const [cancelLoading, setCancelLoading] = React.useState(false);
+  const [mostrarTodas, setMostrarTodas] = React.useState(false);
 
   const load = React.useCallback(async () => {
     setLoading(true);
+    setMostrarTodas(false);
     try {
       const hoje = dateKey(new Date());
       let dataInicio: string | undefined;
@@ -123,6 +130,11 @@ export function VendasBalcaoSection({
   const totalPeriodo = vendas
     .filter((v) => v.status === "finalizada")
     .reduce((total, v) => total + v.valor_total, 0);
+
+  const vendasVisiveis = mostrarTodas
+    ? vendas
+    : vendas.slice(0, VENDAS_VISIVEIS_INICIAL);
+  const temMais = vendas.length > VENDAS_VISIVEIS_INICIAL;
 
   return (
     <div className="space-y-3">
@@ -268,7 +280,7 @@ export function VendasBalcaoSection({
                 </tr>
               </thead>
               <tbody>
-                {vendas.map((venda) => (
+                {vendasVisiveis.map((venda) => (
                   <tr
                     key={venda.id}
                     className="border-b border-gray-light last:border-0"
@@ -324,6 +336,25 @@ export function VendasBalcaoSection({
               </tbody>
             </table>
           </div>
+          {temMais && (
+            <button
+              type="button"
+              onClick={() => setMostrarTodas((atual) => !atual)}
+              className="flex w-full items-center justify-center gap-1.5 border-t border-gray-light py-2.5 text-sm font-medium text-primary transition-colors duration-200 hover:bg-admin-bg/60"
+            >
+              {mostrarTodas ? (
+                <>
+                  Ver menos
+                  <ChevronUp className="size-4" />
+                </>
+              ) : (
+                <>
+                  Ver mais ({vendas.length - VENDAS_VISIVEIS_INICIAL})
+                  <ChevronDown className="size-4" />
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
 

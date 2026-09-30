@@ -128,6 +128,9 @@ export async function getFechamentoCaixa(
     totaisPorForma.set(row.forma, (totaisPorForma.get(row.forma) ?? 0) + row.valor);
   }
 
+  const totalHospedagem = (pagFormas ?? []).reduce((total, row) => total + row.valor, 0);
+  const totalVendaBalcao = (balcaoFormas ?? []).reduce((total, row) => total + row.valor, 0);
+
   const todasMovimentacoes = movimentacoes ?? [];
   const totalEntradas = todasMovimentacoes
     .filter((m) => m.tipo === "entrada")
@@ -143,6 +146,8 @@ export async function getFechamentoCaixa(
     })),
     totalEntradas,
     totalSaidas,
+    totalHospedagem,
+    totalVendaBalcao,
     saidas,
   };
 }

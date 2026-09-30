@@ -12,6 +12,8 @@ export interface CaixaFechamentoPdfData {
   formas: { forma: FormaPagamento; valor: number }[];
   totalEntradas: number;
   totalSaidas: number;
+  totalHospedagem: number;
+  totalVendaBalcao: number;
   saidas: CaixaMovimentacao[];
 }
 
@@ -140,6 +142,21 @@ async function montarDocumento(dados: CaixaFechamentoPdfData) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
   }
+
+  tabelaHeader("Entradas por origem", [
+    ["Origem", 0],
+    ["Valor", 1],
+  ]);
+  doc.text("Hospedagem", margem + 1.5, y);
+  doc.text(currency.format(dados.totalHospedagem), largura - margem - 1.5, y, {
+    align: "right",
+  });
+  y += 5.5;
+  doc.text("Venda de Produtos (balcão)", margem + 1.5, y);
+  doc.text(currency.format(dados.totalVendaBalcao), largura - margem - 1.5, y, {
+    align: "right",
+  });
+  y += 9;
 
   tabelaHeader("Entradas por forma de pagamento", [
     ["Forma", 0],

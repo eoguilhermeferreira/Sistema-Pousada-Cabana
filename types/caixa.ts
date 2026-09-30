@@ -96,5 +96,11 @@ export interface FechamentoCaixaData {
   formas: FechamentoCaixaFormaResumo[];
   totalEntradas: number;
   totalSaidas: number;
+  /** Quanto das entradas veio de pagamento de hospedagem/consumo de quarto. */
+  totalHospedagem: number;
+  /** Quanto das entradas veio de Venda no Balcão (produtos avulsos) — antes
+   * ficava escondido dentro do total por forma de pagamento, sem uma linha
+   * separada pra conferir. */
+  totalVendaBalcao: number;
   saidas: CaixaMovimentacao[];
 }

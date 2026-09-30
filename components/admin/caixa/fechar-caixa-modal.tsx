@@ -136,6 +136,25 @@ export function FecharCaixaModal({
             </div>
 
             <div className="space-y-1.5 rounded-xl border border-gray-light p-4 text-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-text">
+                Entradas por origem
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-text">Hospedagem</span>
+                <span className="font-medium text-primary-dark">
+                  {currency.format(fechamento.totalHospedagem)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-text">Venda de Produtos (balcão)</span>
+                <span className="font-medium text-primary-dark">
+                  {currency.format(fechamento.totalVendaBalcao)}
+                </span>
+              </div>
+
+              <p className="pt-2 text-xs font-semibold uppercase tracking-wide text-gray-text">
+                Entradas por forma de pagamento
+              </p>
               {fechamento.formas.map((item) => (
                 <div key={item.forma} className="flex items-center justify-between">
                   <span className="text-gray-text">

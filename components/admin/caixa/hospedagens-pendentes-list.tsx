@@ -3,9 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarClock, CalendarDays, CircleDollarSign, Receipt } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarDays,
+  CircleDollarSign,
+  Receipt,
+  Search,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { ProgramarPagamentoModal } from "@/components/admin/caixa/programar-pagamento-modal";
 import { formaPagamentoLabels } from "@/types/caixa";
@@ -40,29 +47,51 @@ export function HospedagensPendentesList({
 }) {
   const [reservaProgramando, setReservaProgramando] =
     React.useState<ReservaComRelacoes | null>(null);
+  const [search, setSearch] = React.useState("");
   const router = useRouter();
+
+  const termo = search.trim().toLowerCase();
+  const pendentesFiltradas = termo
+    ? pendentes.filter(
+        ({ reserva }) =>
+          reserva.hospede_principal.nome.toLowerCase().includes(termo) ||
+          reserva.codigo.toLowerCase().includes(termo) ||
+          reserva.quarto.numero.toLowerCase().includes(termo),
+      )
+    : pendentes;
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-primary-dark">
           <Receipt className="size-4 text-primary" />
           Hospedagens
+          <span className="text-xs font-normal text-gray-text">
+            ({pendentesFiltradas.length})
+          </span>
         </h2>
-        <span className="text-xs font-normal text-gray-text">
-          ({pendentes.length})
-        </span>
+        <div className="relative w-full max-w-xs">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-text" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por hóspede, quarto ou código..."
+            className="pl-9"
+          />
+        </div>
       </div>
 
       {loading ? (
         <p className="text-sm text-gray-text">Carregando...</p>
-      ) : pendentes.length === 0 ? (
+      ) : pendentesFiltradas.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-gray-light px-4 py-8 text-center text-sm text-gray-text">
-          Nenhuma hospedagem no momento.
+          {termo
+            ? "Nenhuma hospedagem encontrada pra essa busca."
+            : "Nenhuma hospedagem no momento."}
         </p>
       ) : (
         <div className="space-y-3">
-          {pendentes.map(
+          {pendentesFiltradas.map(
             ({
               reserva,
               valorHospedagemPendente,

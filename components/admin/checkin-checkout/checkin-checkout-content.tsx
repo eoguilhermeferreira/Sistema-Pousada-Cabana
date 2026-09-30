@@ -5,6 +5,7 @@ import { LogIn, LogOut, Search, Users } from "lucide-react";
 
 import { StatCard } from "@/components/admin/stat-card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { OperacaoCard } from "@/components/admin/checkin-checkout/operacao-card";
 import {
   ConfirmarOperacaoModal,
@@ -23,6 +24,7 @@ export function CheckinCheckoutContent() {
   const [reservas, setReservas] = React.useState<ReservaComRelacoes[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [search, setSearch] = React.useState("");
+  const [aba, setAba] = React.useState<"chegadas" | "saidas">("chegadas");
   const [operacao, setOperacao] = React.useState<Operacao | null>(null);
   const [processando, setProcessando] = React.useState(false);
   const [erroOperacao, setErroOperacao] = React.useState("");
@@ -160,15 +162,43 @@ export function CheckinCheckoutContent() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="flex gap-2 border-b border-gray-light">
+        <button
+          type="button"
+          onClick={() => setAba("chegadas")}
+          className={cn(
+            "flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors duration-200",
+            aba === "chegadas"
+              ? "border-status-checkin text-status-checkin"
+              : "border-transparent text-gray-text hover:text-primary-dark",
+          )}
+        >
+          <LogIn className="size-4" />
+          Check-in
+          <span className="text-xs font-normal">
+            ({chegadasFiltradas.length})
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setAba("saidas")}
+          className={cn(
+            "flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors duration-200",
+            aba === "saidas"
+              ? "border-status-checkout text-status-checkout"
+              : "border-transparent text-gray-text hover:text-primary-dark",
+          )}
+        >
+          <LogOut className="size-4" />
+          Check-out
+          <span className="text-xs font-normal">
+            ({saidasFiltradas.length})
+          </span>
+        </button>
+      </div>
+
+      {aba === "chegadas" ? (
         <section className="space-y-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-primary-dark">
-            <LogIn className="size-4 text-status-checkin" />
-            Chegadas pendentes
-            <span className="text-xs font-normal text-gray-text">
-              ({chegadasFiltradas.length})
-            </span>
-          </h2>
           {loading ? (
             <p className="text-sm text-gray-text">Carregando...</p>
           ) : chegadasFiltradas.length === 0 ? (
@@ -192,15 +222,8 @@ export function CheckinCheckoutContent() {
             </div>
           )}
         </section>
-
+      ) : (
         <section className="space-y-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-primary-dark">
-            <LogOut className="size-4 text-status-checkout" />
-            Saídas pendentes
-            <span className="text-xs font-normal text-gray-text">
-              ({saidasFiltradas.length})
-            </span>
-          </h2>
           {loading ? (
             <p className="text-sm text-gray-text">Carregando...</p>
           ) : saidasFiltradas.length === 0 ? (
@@ -224,7 +247,7 @@ export function CheckinCheckoutContent() {
             </div>
           )}
         </section>
-      </div>
+      )}
 
       <ConfirmarOperacaoModal
         operacao={operacao}

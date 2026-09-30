@@ -12,6 +12,13 @@ import type { ReservaComRelacoes } from "@/types/reserva";
 const RESERVA_SELECT =
   "*, hospede_principal:hospedes!reservas_hospede_principal_id_fkey(*), quarto:quartos(*, categoria:categorias_quarto(*))";
 
+// Traz os consumos não pagos já embutidos na mesma consulta (em vez de uma
+// segunda consulta com .in("reserva_id", ids)) — com o hotel já passando de
+// 600+ reservas, aquele "ids" virava uma URL com centenas de UUIDs e o
+// PostgREST passou a rejeitar com 400 (URI grande demais), derrubando a
+// lista inteira de hospedagens pendentes no Caixa.
+const RESERVA_SELECT_COM_CONSUMOS = `${RESERVA_SELECT}, quarto_consumos(valor_total)`;
+
 /** Reservas que ainda não fizeram check-out sempre aparecem no caixa,
  * mesmo com tudo pago no momento — podem consumir/receber pagamento
  * adiantado depois. Depois do check-out, some da lista assim que quitada
@@ -23,30 +30,16 @@ export async function listHospedagensPendentes(): Promise<HospedagemPendente[]> 
 
   const { data: reservasData, error } = await supabase
     .from("reservas")
-    .select(RESERVA_SELECT)
+    .select(RESERVA_SELECT_COM_CONSUMOS)
+    .eq("quarto_consumos.pago", false)
     .in("status", ["reservada", "confirmada", "checkin_realizado", "checkout_realizado"])
     .order("data_entrada", { ascending: true });
   if (error) throw error;
 
-  const reservas = (reservasData ?? []) as unknown as ReservaComRelacoes[];
+  const reservas = (reservasData ?? []) as unknown as (ReservaComRelacoes & {
+    quarto_consumos: { valor_total: number }[] | null;
+  })[];
   if (reservas.length === 0) return [];
-
-  const ids = reservas.map((r) => r.id);
-  const { data: consumos, error: consumosError } = await supabase
-    .from("quarto_consumos")
-    .select("reserva_id, valor_total")
-    .in("reserva_id", ids)
-    .eq("pago", false);
-  if (consumosError) throw consumosError;
-
-  const consumoBrutoPorReserva = new Map<string, number>();
-  for (const consumo of consumos ?? []) {
-    if (!consumo.reserva_id) continue;
-    consumoBrutoPorReserva.set(
-      consumo.reserva_id,
-      (consumoBrutoPorReserva.get(consumo.reserva_id) ?? 0) + consumo.valor_total,
-    );
-  }
 
   const pendentes: HospedagemPendente[] = [];
   for (const reserva of reservas) {
@@ -54,7 +47,10 @@ export async function listHospedagensPendentes(): Promise<HospedagemPendente[]> 
       reserva.valor_total - reserva.valor_hospedagem_pago,
       0,
     );
-    const consumoBruto = consumoBrutoPorReserva.get(reserva.id) ?? 0;
+    const consumoBruto = (reserva.quarto_consumos ?? []).reduce(
+      (total, consumo) => total + consumo.valor_total,
+      0,
+    );
     const valorConsumoPendente = Math.max(consumoBruto - reserva.valor_consumo_pago, 0);
     const valorPendenteTotal = valorHospedagemPendente + valorConsumoPendente;
 

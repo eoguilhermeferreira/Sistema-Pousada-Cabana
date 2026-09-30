@@ -108,15 +108,19 @@ export function CaixaPageContent() {
         onRegistrarSaida={() => setSaidaOpen(true)}
       />
 
+      {/* Venda no Balcão subiu pra logo abaixo do status do caixa — a
+       * cliente relatou que ficava lá embaixo, depois da lista de
+       * hospedagens, e queria mais perto do topo pra registrar mais
+       * rápido. */}
+      <VendasBalcaoSection
+        caixaAbertoId={caixa?.id ?? null}
+        onCaixaAtualizado={load}
+      />
+
       <HospedagensPendentesList
         pendentes={pendentes}
         loading={loading}
         onAtualizado={load}
-      />
-
-      <VendasBalcaoSection
-        caixaAbertoId={caixa?.id ?? null}
-        onCaixaAtualizado={load}
       />
 
       <HistoricoCaixas historico={historico} loading={loading} />

@@ -1,4 +1,5 @@
 import type { Tables } from "@/types/database";
+import { dateKey } from "@/lib/calendar-grid";
 
 export type Ponto = Tables<"pontos">;
 export type TipoPonto = "entrada" | "saida_almoco" | "retorno_almoco" | "saida";
@@ -109,11 +110,17 @@ function diffHoras(inicio: string, fim: string) {
 }
 
 /** Agrupa os pontos de um funcionário por dia e calcula as horas trabalhadas
- * (entrada→saída, descontando o intervalo de almoço quando registrado). */
+ * (entrada→saída, descontando o intervalo de almoço quando registrado).
+ *
+ * `registrado_em` vem do banco em UTC — quem bate o ponto depois das ~21h
+ * (horário de Brasília, UTC-3) já virou o dia seguinte em UTC. Pegar os
+ * 10 primeiros caracteres da string (data em UTC) jogava esse ponto pro
+ * dia errado; agora usa a data local do navegador de quem está vendo a
+ * tela (sempre o horário da pousada). */
 export function agruparPontosPorDia(pontos: Ponto[]): DiaPonto[] {
   const porDia = new Map<string, Ponto[]>();
   for (const ponto of pontos) {
-    const dia = ponto.registrado_em.slice(0, 10);
+    const dia = dateKey(new Date(ponto.registrado_em));
     const lista = porDia.get(dia) ?? [];
     lista.push(ponto);
     porDia.set(dia, lista);

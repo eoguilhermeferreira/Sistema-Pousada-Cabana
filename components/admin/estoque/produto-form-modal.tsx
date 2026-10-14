@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   codigoExists,
   createProduto,
+  registrarMovimentacaoEstoque,
   updateProduto,
   uploadProdutoImagem,
 } from "@/services/produtos-service";
@@ -81,8 +82,11 @@ export function ProdutoFormModal({
   const [imagemUrl, setImagemUrl] = React.useState<string | null>(null);
   const [imagemFile, setImagemFile] = React.useState<File | null>(null);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [motivoAjuste, setMotivoAjuste] = React.useState("");
   const [saving, setSaving] = React.useState(false);
   const [formError, setFormError] = React.useState("");
+  const quantidadeAlterada =
+    isEditing && produto != null && Number(values.quantidade) !== produto.quantidade;
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -96,6 +100,7 @@ export function ProdutoFormModal({
       setImagemUrl(produto?.imagem_url ?? null);
       setImagemFile(null);
       setErrors({});
+      setMotivoAjuste("");
       setFormError("");
     }, 0);
     return () => clearTimeout(timeout);
@@ -134,11 +139,9 @@ export function ProdutoFormModal({
     const venda = Number(values.valor_venda);
     if (Number.isNaN(venda) || venda < 0)
       nextErrors.valor_venda = "Valor inválido.";
-    if (!isEditing) {
-      const quantidade = Number(values.quantidade);
-      if (!Number.isInteger(quantidade) || quantidade < 0)
-        nextErrors.quantidade = "Quantidade inválida.";
-    }
+    const quantidade = Number(values.quantidade);
+    if (!Number.isInteger(quantidade) || quantidade < 0)
+      nextErrors.quantidade = "Quantidade inválida.";
     return nextErrors;
   }
 
@@ -181,6 +184,25 @@ export function ProdutoFormModal({
       const saved = produto
         ? await updateProduto(produto.id, payload)
         : await createProduto(payload);
+
+      // Editar a quantidade não grava ela direto na tabela — registra um
+      // "ajuste" de estoque (mesma ação de "Movimentar estoque"), pra
+      // manter o histórico de movimentações coerente com o número final.
+      // Antes, esse campo ficava travado na edição, e quem errasse a
+      // quantidade (ex: lançou entrada em dobro) só conseguia corrigir
+      // excluindo o produto e cadastrando tudo de novo.
+      if (produto) {
+        const quantidadeNova = Number(values.quantidade);
+        const delta = quantidadeNova - produto.quantidade;
+        if (delta !== 0) {
+          await registrarMovimentacaoEstoque(
+            produto.id,
+            "ajuste",
+            delta,
+            motivoAjuste.trim() || "Ajuste manual pela edição do produto",
+          );
+        }
+      }
 
       if (imagemFile) {
         const url = await uploadProdutoImagem(imagemFile, saved.id);
@@ -302,7 +324,7 @@ export function ProdutoFormModal({
               </Field>
               <Field
                 label={isEditing ? "Quantidade atual" : "Quantidade inicial"}
-                required={!isEditing}
+                required
                 error={errors.quantidade}
               >
                 <Input
@@ -311,16 +333,25 @@ export function ProdutoFormModal({
                   step="1"
                   value={values.quantidade}
                   onChange={(e) => setField("quantidade", e.target.value)}
-                  disabled={isEditing}
                   className={inputClass}
                 />
               </Field>
             </div>
-            {isEditing && (
-              <p className="-mt-3 text-xs text-gray-text">
-                Para alterar a quantidade, use a ação &quot;Movimentar
-                estoque&quot; na listagem de produtos.
-              </p>
+            {quantidadeAlterada && (
+              <>
+                <p className="-mt-3 text-xs text-gray-text">
+                  Mudar esse número registra um ajuste de estoque automático
+                  (fica no histórico de movimentações, igual à ação
+                  &quot;Movimentar estoque&quot;).
+                </p>
+                <Field label="Motivo do ajuste (opcional)">
+                  <Input
+                    value={motivoAjuste}
+                    onChange={(e) => setMotivoAjuste(e.target.value)}
+                    placeholder="Ex: contagem de inventário, correção de lançamento em dobro..."
+                  />
+                </Field>
+              </>
             )}
 
             <div className="grid grid-cols-2 gap-4">

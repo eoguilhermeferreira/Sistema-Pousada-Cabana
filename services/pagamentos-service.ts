@@ -12,12 +12,21 @@ import type { ReservaComRelacoes } from "@/types/reserva";
 const RESERVA_SELECT =
   "*, hospede_principal:hospedes!reservas_hospede_principal_id_fkey(*), quarto:quartos(*, categoria:categorias_quarto(*))";
 
-// Traz os consumos não pagos já embutidos na mesma consulta (em vez de uma
-// segunda consulta com .in("reserva_id", ids)) — com o hotel já passando de
-// 600+ reservas, aquele "ids" virava uma URL com centenas de UUIDs e o
+// Traz os consumos já embutidos na mesma consulta (em vez de uma segunda
+// consulta com .in("reserva_id", ids)) — com o hotel já passando de 600+
+// reservas, aquele "ids" virava uma URL com centenas de UUIDs e o
 // PostgREST passou a rejeitar com 400 (URI grande demais), derrubando a
 // lista inteira de hospedagens pendentes no Caixa.
-const RESERVA_SELECT_COM_CONSUMOS = `${RESERVA_SELECT}, quarto_consumos(valor_total)`;
+//
+// O filtro "pago=false" é aplicado aqui no JavaScript, não como
+// .eq("quarto_consumos.pago", false) na query — isso parecia equivalente
+// (e corrigia o 400), mas o PostgREST aplica esse filtro como se fosse um
+// INNER JOIN: reserva que acabou de fazer check-in e ainda não tem NENHUM
+// consumo lançado some da lista inteira (não só o consumo, a reserva
+// toda), porque não existe nenhuma linha de quarto_consumos pra comparar
+// com "pago=false". Foi exatamente isso que fez hóspede recém chegado
+// desaparecer da busca no Caixa.
+const RESERVA_SELECT_COM_CONSUMOS = `${RESERVA_SELECT}, quarto_consumos(valor_total, pago)`;
 
 /** Reservas que ainda não fizeram check-out sempre aparecem no caixa,
  * mesmo com tudo pago no momento — podem consumir/receber pagamento
@@ -31,13 +40,12 @@ export async function listHospedagensPendentes(): Promise<HospedagemPendente[]> 
   const { data: reservasData, error } = await supabase
     .from("reservas")
     .select(RESERVA_SELECT_COM_CONSUMOS)
-    .eq("quarto_consumos.pago", false)
     .in("status", ["reservada", "confirmada", "checkin_realizado", "checkout_realizado"])
     .order("data_entrada", { ascending: true });
   if (error) throw error;
 
   const reservas = (reservasData ?? []) as unknown as (ReservaComRelacoes & {
-    quarto_consumos: { valor_total: number }[] | null;
+    quarto_consumos: { valor_total: number; pago: boolean }[] | null;
   })[];
   if (reservas.length === 0) return [];
 
@@ -47,10 +55,9 @@ export async function listHospedagensPendentes(): Promise<HospedagemPendente[]> 
       reserva.valor_total - reserva.valor_hospedagem_pago,
       0,
     );
-    const consumoBruto = (reserva.quarto_consumos ?? []).reduce(
-      (total, consumo) => total + consumo.valor_total,
-      0,
-    );
+    const consumoBruto = (reserva.quarto_consumos ?? [])
+      .filter((consumo) => !consumo.pago)
+      .reduce((total, consumo) => total + consumo.valor_total, 0);
     const valorConsumoPendente = Math.max(consumoBruto - reserva.valor_consumo_pago, 0);
     const valorPendenteTotal = valorHospedagemPendente + valorConsumoPendente;
 

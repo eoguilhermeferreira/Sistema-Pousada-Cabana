@@ -18,6 +18,7 @@ import {
 import { listCategorias } from "@/services/quartos-service";
 import { createClient } from "@/lib/supabase/client";
 import { dateKey } from "@/lib/calendar-grid";
+import { normalizarBusca } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/supabase-error";
 import { enviarConfirmacaoWhatsapp } from "@/lib/whatsapp-confirmacao";
 import { emptyFiltrosReservas, type FiltrosReservas, type ReservaComRelacoes, type ReservaDetalhada } from "@/types/reserva";
@@ -132,16 +133,16 @@ export function ReservasPageContent() {
   }, [reservas]);
 
   const filtered = React.useMemo(() => {
-    const term = filtros.search.trim().toLowerCase();
+    const term = normalizarBusca(filtros.search);
     return reservas.filter((reserva) => {
       if (term) {
         const matches =
-          reserva.codigo.toLowerCase().includes(term) ||
-          reserva.hospede_principal.nome.toLowerCase().includes(term) ||
-          (reserva.hospede_principal.cpf ?? "").includes(term) ||
-          (reserva.hospede_principal.telefone ?? "").includes(term) ||
-          (reserva.hospede_principal.empresa ?? "").toLowerCase().includes(term) ||
-          reserva.quarto.numero.toLowerCase().includes(term);
+          normalizarBusca(reserva.codigo).includes(term) ||
+          normalizarBusca(reserva.hospede_principal.nome).includes(term) ||
+          normalizarBusca(reserva.hospede_principal.cpf ?? "").includes(term) ||
+          normalizarBusca(reserva.hospede_principal.telefone ?? "").includes(term) ||
+          normalizarBusca(reserva.hospede_principal.empresa ?? "").includes(term) ||
+          normalizarBusca(reserva.quarto.numero).includes(term);
         if (!matches) return false;
       }
       if (filtros.status && reserva.status !== filtros.status) return false;
@@ -156,9 +157,9 @@ export function ReservasPageContent() {
         return false;
       if (
         filtros.empresa &&
-        !(reserva.hospede_principal.empresa ?? "")
-          .toLowerCase()
-          .includes(filtros.empresa.toLowerCase())
+        !normalizarBusca(reserva.hospede_principal.empresa ?? "").includes(
+          normalizarBusca(filtros.empresa),
+        )
       )
         return false;
       return true;

@@ -5,7 +5,7 @@ import { LogIn, LogOut, Search, Users } from "lucide-react";
 
 import { StatCard } from "@/components/admin/stat-card";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn, normalizarBusca } from "@/lib/utils";
 import { OperacaoCard } from "@/components/admin/checkin-checkout/operacao-card";
 import {
   ConfirmarOperacaoModal,
@@ -66,13 +66,13 @@ export function CheckinCheckoutContent() {
     [reservas],
   );
 
-  const termo = search.trim().toLowerCase();
+  const termo = normalizarBusca(search);
   function matchesSearch(reserva: ReservaComRelacoes) {
     if (!termo) return true;
     return (
-      reserva.codigo.toLowerCase().includes(termo) ||
-      reserva.hospede_principal.nome.toLowerCase().includes(termo) ||
-      reserva.quarto.numero.toLowerCase().includes(termo)
+      normalizarBusca(reserva.codigo).includes(termo) ||
+      normalizarBusca(reserva.hospede_principal.nome).includes(termo) ||
+      normalizarBusca(reserva.quarto.numero).includes(termo)
     );
   }
 

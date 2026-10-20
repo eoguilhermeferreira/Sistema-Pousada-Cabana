@@ -13,6 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { normalizarBusca } from "@/lib/utils";
 import { HospedeAvatar } from "@/components/admin/hospedes/hospede-avatar";
 import { ProgramarPagamentoModal } from "@/components/admin/caixa/programar-pagamento-modal";
 import { formaPagamentoLabels } from "@/types/caixa";
@@ -64,13 +65,13 @@ export function HospedagensPendentesList({
   const [search, setSearch] = React.useState("");
   const router = useRouter();
 
-  const termo = search.trim().toLowerCase();
+  const termo = normalizarBusca(search);
   const pendentesFiltradas = termo
     ? pendentes.filter(
         ({ reserva }) =>
-          reserva.hospede_principal.nome.toLowerCase().includes(termo) ||
-          reserva.codigo.toLowerCase().includes(termo) ||
-          reserva.quarto.numero.toLowerCase().includes(termo),
+          normalizarBusca(reserva.hospede_principal.nome).includes(termo) ||
+          normalizarBusca(reserva.codigo).includes(termo) ||
+          normalizarBusca(reserva.quarto.numero).includes(termo),
       )
     : pendentes;
 

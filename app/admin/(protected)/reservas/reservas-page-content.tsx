@@ -40,13 +40,15 @@ export function ReservasPageContent() {
   const [confirmingId, setConfirmingId] = React.useState<string | null>(null);
   const [confirmError, setConfirmError] = React.useState("");
 
-  // Ordem padrão: data de entrada mais próxima primeiro — dá pra clicar em
-  // qualquer coluna da tabela pra reordenar, em vez de ficar preso na ordem
-  // fixa (antes era só data de entrada decrescente, misturando hospedagem
-  // futura distante com hospedagem já encerrada há meses).
+  // Ordem padrão: reserva mais recente primeiro — é assim que a recepção
+  // enxerga rapidinho o que acabou de chegar pelo site pra confirmar. Antes
+  // era por data de entrada (a mais próxima primeiro), mas aí uma reserva
+  // feita agora pra uma data mais distante caía lá no final da lista,
+  // atrás de reservas antigas com check-in mais próximo. Quem quiser pode
+  // clicar em "Entrada" pra reordenar cronologicamente por data de estadia.
   const [sort, setSort] = React.useState<SortState>({
-    field: "data_entrada",
-    direction: "asc",
+    field: "created_at",
+    direction: "desc",
   });
 
   function handleSort(field: SortField) {
@@ -182,6 +184,8 @@ export function ReservasPageContent() {
           return (a.valor_total - b.valor_total) * dir;
         case "status":
           return a.status.localeCompare(b.status) * dir;
+        case "created_at":
+          return a.created_at.localeCompare(b.created_at) * dir;
         case "data_entrada":
         default:
           return a.data_entrada.localeCompare(b.data_entrada) * dir;

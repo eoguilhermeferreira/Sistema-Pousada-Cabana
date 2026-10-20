@@ -26,7 +26,8 @@ export type SortField =
   | "data_entrada"
   | "data_saida"
   | "valor_total"
-  | "status";
+  | "status"
+  | "created_at";
 
 export interface SortState {
   field: SortField;
@@ -44,8 +45,19 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   year: "numeric",
 });
 
+const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 function formatDate(value: string) {
   return dateFormatter.format(new Date(`${value}T00:00:00`));
+}
+
+function formatDateTime(value: string) {
+  return dateTimeFormatter.format(new Date(value));
 }
 
 interface ReservasTableProps {
@@ -60,6 +72,7 @@ interface ReservasTableProps {
 }
 
 const columns: { label: string; field?: SortField }[] = [
+  { label: "Criada em", field: "created_at" },
   { label: "Código", field: "codigo" },
   { label: "Hóspede principal", field: "hospede" },
   { label: "Quarto", field: "quarto" },
@@ -158,6 +171,9 @@ export function ReservasTable({
                     key={reserva.id}
                     className="border-b border-gray-light last:border-0 hover:bg-admin-bg/40"
                   >
+                    <td className="px-5 py-3 text-gray-text">
+                      {formatDateTime(reserva.created_at)}
+                    </td>
                     <td className="px-5 py-3">
                       <Link
                         href={`/admin/reservas/${reserva.id}`}

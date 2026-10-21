@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Users } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,7 +13,7 @@ import { ComprovantePagamento } from "@/components/admin/caixa/comprovante-pagam
 import { formatCpf } from "@/lib/cpf";
 import { formatPhone } from "@/lib/phone";
 import { calcularNoites } from "@/lib/reserva-pricing";
-import { getReservaById } from "@/services/reservas-service";
+import { getReservaById, realizarCheckout } from "@/services/reservas-service";
 import { listConsumosPendentesPorReserva } from "@/services/consumo-service";
 import { getCaixaAberto } from "@/services/caixa-service";
 import { finalizarPagamento } from "@/services/pagamentos-service";
@@ -69,6 +69,9 @@ export function FinalizarHospedagemContent({
   const [comprovante, setComprovante] = React.useState<ComprovanteData | null>(
     null,
   );
+  const [checkoutError, setCheckoutError] = React.useState("");
+  const [confirmandoCheckout, setConfirmandoCheckout] = React.useState(false);
+  const [checkoutFeito, setCheckoutFeito] = React.useState(false);
 
   React.useEffect(() => {
     const timeout = setTimeout(async () => {
@@ -221,6 +224,24 @@ export function FinalizarHospedagemContent({
     }
   }
 
+  async function handleConfirmarCheckout() {
+    if (!reserva) return;
+    setCheckoutError("");
+    setConfirmandoCheckout(true);
+    try {
+      await realizarCheckout(reserva.id);
+      setCheckoutFeito(true);
+    } catch (err) {
+      setCheckoutError(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível confirmar o check-out.",
+      );
+    } finally {
+      setConfirmandoCheckout(false);
+    }
+  }
+
   if (comprovante) {
     return <ComprovantePagamento comprovante={comprovante} reservaId={reserva?.id} />;
   }
@@ -265,8 +286,48 @@ export function FinalizarHospedagemContent({
       )}
 
       {caixa && nadaPendente && (
-        <div className="rounded-2xl border border-status-disponivel/30 bg-status-disponivel-light px-5 py-4 text-sm font-medium text-status-disponivel">
-          Esta hospedagem já está totalmente paga.
+        <div className="space-y-3 rounded-2xl border border-status-disponivel/30 bg-status-disponivel-light px-5 py-4">
+          <p className="text-sm font-medium text-status-disponivel">
+            Esta hospedagem já está totalmente paga.
+          </p>
+          {/* Pagar e dar check-out são ações separadas no sistema — quem
+           * chega aqui já com tudo pago (ex: pagamento adiantado) não tinha
+           * nenhum botão pra concluir a saída do hóspede nessa tela, só essa
+           * mensagem, sem indicar que o check-out ainda precisa ser feito em
+           * outro lugar (Check-in/Check-out). Oferece aqui direto. */}
+          {reserva.status === "checkin_realizado" &&
+            (checkoutFeito ? (
+              <p className="flex items-center gap-1.5 text-sm font-medium text-status-disponivel">
+                <CheckCircle2 className="size-4" />
+                Check-out confirmado.{" "}
+                <Link href="/admin/caixa" className="underline">
+                  Voltar para o Caixa
+                </Link>
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-xs text-status-disponivel/80">
+                  O pagamento está em dia, mas o check-out deste hóspede ainda
+                  não foi registrado.
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleConfirmarCheckout}
+                  disabled={confirmandoCheckout}
+                >
+                  {confirmandoCheckout && (
+                    <Loader2 className="size-4 animate-spin" />
+                  )}
+                  Confirmar Check-out
+                </Button>
+                {checkoutError && (
+                  <p className="text-xs font-medium text-status-ocupado">
+                    {checkoutError}
+                  </p>
+                )}
+              </div>
+            ))}
         </div>
       )}
 

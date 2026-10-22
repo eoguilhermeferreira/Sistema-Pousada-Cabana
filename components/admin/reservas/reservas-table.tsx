@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import {
   ArrowDown,
@@ -99,6 +100,37 @@ export function ReservasTable({
   sort,
   onSort,
 }: ReservasTableProps) {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const topScrollRef = React.useRef<HTMLDivElement>(null);
+  const [scrollWidth, setScrollWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () =>
+      setScrollWidth(el.scrollWidth > el.clientWidth ? el.scrollWidth : 0);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    if (el.firstElementChild) observer.observe(el.firstElementChild);
+    return () => observer.disconnect();
+  }, [loading, reservas.length]);
+
+  React.useEffect(() => {
+    if (topScrollRef.current && scrollRef.current) {
+      topScrollRef.current.scrollLeft = scrollRef.current.scrollLeft;
+    }
+  }, [scrollWidth]);
+
+  function syncScroll(
+    source: HTMLDivElement,
+    target: HTMLDivElement | null,
+  ) {
+    if (target && target.scrollLeft !== source.scrollLeft) {
+      target.scrollLeft = source.scrollLeft;
+    }
+  }
+
   if (!loading && reservas.length === 0) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-light bg-white text-center">
@@ -117,7 +149,23 @@ export function ReservasTable({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-light bg-white shadow-sm">
-      <div className="overflow-x-auto">
+      {/* Barra de rolagem lateral duplicada no topo: a nativa só existe no
+       * fim da tabela, e a recepção precisava descer a página inteira pra
+       * conseguir arrastar e ver Valor total. */}
+      {scrollWidth > 0 && (
+        <div
+          ref={topScrollRef}
+          onScroll={(e) => syncScroll(e.currentTarget, scrollRef.current)}
+          className="overflow-x-auto border-b border-gray-light"
+        >
+          <div style={{ width: scrollWidth, height: 1 }} />
+        </div>
+      )}
+      <div
+        ref={scrollRef}
+        onScroll={(e) => syncScroll(e.currentTarget, topScrollRef.current)}
+        className="overflow-x-auto"
+      >
         <table className="w-full min-w-[1080px] text-left text-sm">
           <thead>
             <tr className="border-b border-gray-light bg-admin-bg/60">
@@ -225,7 +273,7 @@ export function ReservasTable({
                     <td className="px-5 py-3 font-medium text-primary-dark">
                       {currency.format(reserva.valor_total)}
                     </td>
-                    <td className="sticky right-0 z-10 w-[220px] bg-white px-5 py-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-admin-bg/40">
+                    <td className="sticky right-0 z-10 w-[220px] bg-white px-5 py-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-[color-mix(in_srgb,var(--color-admin-bg)_40%,white)]">
                       <div className="flex flex-col items-end gap-2">
                         <ReservaStatusBadge status={reserva.status} />
                         <div className="flex items-center gap-1.5">

@@ -126,10 +126,22 @@ export function ReservasTable({
                       ? ArrowUp
                       : ArrowDown
                     : ArrowUpDown;
+                const isAcoes = !column.field;
+                const isStatus = column.label === "Status";
                 return (
                   <th
                     key={column.label || "acoes"}
-                    className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-text"
+                    className={cn(
+                      "px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-text",
+                      // Status e Ações ficam grudados na borda direita da
+                      // tabela, por cima do conteúdo que rola — numa tela
+                      // menor (ou com muitas colunas, como depois que
+                      // "Criada em" foi adicionada), esses dois ficavam
+                      // escondidos fora da área visível e só apareciam
+                      // rolando a tabela pro lado, o que ninguém reparava.
+                      isAcoes && "sticky right-0 z-10 w-[150px] bg-admin-bg",
+                      isStatus && "sticky right-[150px] z-10 w-[130px] bg-admin-bg",
+                    )}
                   >
                     {column.field ? (
                       <button
@@ -169,7 +181,7 @@ export function ReservasTable({
                 return (
                   <tr
                     key={reserva.id}
-                    className="border-b border-gray-light last:border-0 hover:bg-admin-bg/40"
+                    className="group border-b border-gray-light last:border-0 hover:bg-admin-bg/40"
                   >
                     <td className="px-5 py-3 text-gray-text">
                       {formatDateTime(reserva.created_at)}
@@ -210,10 +222,10 @@ export function ReservasTable({
                     <td className="px-5 py-3 font-medium text-primary-dark">
                       {currency.format(reserva.valor_total)}
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="sticky right-[150px] z-10 w-[130px] bg-white px-5 py-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-admin-bg/40">
                       <ReservaStatusBadge status={reserva.status} />
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="sticky right-0 z-10 w-[150px] bg-white px-5 py-3 group-hover:bg-admin-bg/40">
                       <div className="flex items-center justify-end gap-1.5">
                         {reserva.status === "reservada" && (
                           <button

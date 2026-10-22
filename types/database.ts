@@ -479,7 +479,9 @@ export type Database = {
           created_at?: string
           funcionario_id?: string | null
           id?: string
-          localizacao?: Database["public"]["Enums"]["localizacao_estoque"] | null
+          localizacao?:
+            | Database["public"]["Enums"]["localizacao_estoque"]
+            | null
           motivo?: string | null
           produto_id: string
           quantidade: number
@@ -496,7 +498,9 @@ export type Database = {
           created_at?: string
           funcionario_id?: string | null
           id?: string
-          localizacao?: Database["public"]["Enums"]["localizacao_estoque"] | null
+          localizacao?:
+            | Database["public"]["Enums"]["localizacao_estoque"]
+            | null
           motivo?: string | null
           produto_id?: string
           quantidade?: number
@@ -510,6 +514,20 @@ export type Database = {
           venda_balcao_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "estoque_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estoque_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios_visivel"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "estoque_produto_id_fkey"
             columns: ["produto_id"]
@@ -536,13 +554,6 @@ export type Database = {
             columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "estoque_funcionario_id_fkey"
-            columns: ["funcionario_id"]
-            isOneToOne: false
-            referencedRelation: "funcionarios"
             referencedColumns: ["id"]
           },
           {
@@ -2318,63 +2329,40 @@ export type Database = {
         }
         Relationships: []
       }
-      vendas_balcao: {
+      venda_balcao_formas: {
         Row: {
-          cancelada_em: string | null
-          cancelada_por: string | null
-          caixa_id: string
           created_at: string
+          forma: Database["public"]["Enums"]["forma_pagamento"]
           id: string
-          observacao: string | null
-          status: string
-          updated_at: string
-          usuario_id: string | null
-          valor_total: number
+          troco: number | null
+          valor: number
+          valor_recebido: number | null
+          venda_id: string
         }
         Insert: {
-          cancelada_em?: string | null
-          cancelada_por?: string | null
-          caixa_id: string
           created_at?: string
+          forma: Database["public"]["Enums"]["forma_pagamento"]
           id?: string
-          observacao?: string | null
-          status?: string
-          updated_at?: string
-          usuario_id?: string | null
-          valor_total: number
+          troco?: number | null
+          valor: number
+          valor_recebido?: number | null
+          venda_id: string
         }
         Update: {
-          cancelada_em?: string | null
-          cancelada_por?: string | null
-          caixa_id?: string
           created_at?: string
+          forma?: Database["public"]["Enums"]["forma_pagamento"]
           id?: string
-          observacao?: string | null
-          status?: string
-          updated_at?: string
-          usuario_id?: string | null
-          valor_total?: number
+          troco?: number | null
+          valor?: number
+          valor_recebido?: number | null
+          venda_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "vendas_balcao_caixa_id_fkey"
-            columns: ["caixa_id"]
+            foreignKeyName: "venda_balcao_formas_venda_id_fkey"
+            columns: ["venda_id"]
             isOneToOne: false
-            referencedRelation: "caixa"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendas_balcao_usuario_id_fkey"
-            columns: ["usuario_id"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendas_balcao_cancelada_por_fkey"
-            columns: ["cancelada_por"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
+            referencedRelation: "vendas_balcao"
             referencedColumns: ["id"]
           },
         ]
@@ -2424,40 +2412,63 @@ export type Database = {
           },
         ]
       }
-      venda_balcao_formas: {
+      vendas_balcao: {
         Row: {
+          caixa_id: string
+          cancelada_em: string | null
+          cancelada_por: string | null
           created_at: string
-          forma: Database["public"]["Enums"]["forma_pagamento"]
           id: string
-          troco: number | null
-          valor: number
-          valor_recebido: number | null
-          venda_id: string
+          observacao: string | null
+          status: string
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number
         }
         Insert: {
+          caixa_id: string
+          cancelada_em?: string | null
+          cancelada_por?: string | null
           created_at?: string
-          forma: Database["public"]["Enums"]["forma_pagamento"]
           id?: string
-          troco?: number | null
-          valor: number
-          valor_recebido?: number | null
-          venda_id: string
+          observacao?: string | null
+          status?: string
+          updated_at?: string
+          usuario_id?: string | null
+          valor_total: number
         }
         Update: {
+          caixa_id?: string
+          cancelada_em?: string | null
+          cancelada_por?: string | null
           created_at?: string
-          forma?: Database["public"]["Enums"]["forma_pagamento"]
           id?: string
-          troco?: number | null
-          valor?: number
-          valor_recebido?: number | null
-          venda_id?: string
+          observacao?: string | null
+          status?: string
+          updated_at?: string
+          usuario_id?: string | null
+          valor_total?: number
         }
         Relationships: [
           {
-            foreignKeyName: "venda_balcao_formas_venda_id_fkey"
-            columns: ["venda_id"]
+            foreignKeyName: "vendas_balcao_caixa_id_fkey"
+            columns: ["caixa_id"]
             isOneToOne: false
-            referencedRelation: "vendas_balcao"
+            referencedRelation: "caixa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendas_balcao_cancelada_por_fkey"
+            columns: ["cancelada_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendas_balcao_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -2601,51 +2612,158 @@ export type Database = {
         }
       }
       cancelar_reserva: { Args: { p_reserva_id: string }; Returns: undefined }
+      cancelar_venda_balcao: {
+        Args: { p_venda_id: string }
+        Returns: undefined
+      }
+      confirmar_emissao_nota: {
+        Args: {
+          p_ambiente: string
+          p_codigo_autenticacao: string
+          p_nota_id: string
+          p_protocolo: string
+          p_xml_retorno?: string
+        }
+        Returns: {
+          ambiente_emissao: string | null
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
+          created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
+          id: string
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
+          updated_at: string
+          valor_final: number
+          valor_produtos: number
+          xml_retorno: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "notas_fiscais"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       confirmar_reserva: { Args: { p_reserva_id: string }; Returns: undefined }
-      criar_reserva_admin: {
-        Args: {
-          p_data_entrada: string
-          p_data_saida: string
-          p_hospede_principal_id: string
-          p_hospedes_extra?: Json
-          p_observacoes?: string
-          p_quantidade_adultos: number
-          p_quarto_id: string
-          p_tem_pet?: boolean
-          p_valor_criancas: number
-          p_valor_diaria: number
-          p_valor_pet?: number
-          p_valor_total: number
-        }
-        Returns: {
-          codigo: string
-          id: string
-        }[]
-      }
-      criar_reserva_cliente: {
-        Args: {
-          p_acompanhantes_adultos?: Json
-          p_bairro?: string
-          p_cep?: string
-          p_cidade?: string
-          p_complemento?: string
-          p_criancas?: Json
-          p_data_entrada: string
-          p_data_saida: string
-          p_empresa?: string
-          p_estado?: string
-          p_numero?: string
-          p_observacoes?: string
-          p_quarto_id: string
-          p_rua?: string
-          p_tem_pet?: boolean
-        }
-        Returns: {
-          codigo: string
-          id: string
-          valor_total: number
-        }[]
-      }
+      criar_reserva_admin:
+        | {
+            Args: {
+              p_data_entrada: string
+              p_data_saida: string
+              p_hospede_principal_id: string
+              p_hospedes_extra?: Json
+              p_observacoes?: string
+              p_quantidade_adultos: number
+              p_quarto_id: string
+              p_valor_criancas: number
+              p_valor_diaria: number
+              p_valor_total: number
+            }
+            Returns: {
+              codigo: string
+              id: string
+            }[]
+          }
+        | {
+            Args: {
+              p_data_entrada: string
+              p_data_saida: string
+              p_hospede_principal_id: string
+              p_hospedes_extra?: Json
+              p_observacoes?: string
+              p_quantidade_adultos: number
+              p_quarto_id: string
+              p_tem_pet?: boolean
+              p_valor_criancas: number
+              p_valor_diaria: number
+              p_valor_pet?: number
+              p_valor_total: number
+            }
+            Returns: {
+              codigo: string
+              id: string
+            }[]
+          }
+      criar_reserva_cliente:
+        | {
+            Args: {
+              p_acompanhantes_adultos?: Json
+              p_bairro?: string
+              p_cep?: string
+              p_cidade?: string
+              p_complemento?: string
+              p_criancas?: Json
+              p_data_entrada: string
+              p_data_saida: string
+              p_empresa?: string
+              p_estado?: string
+              p_numero?: string
+              p_observacoes?: string
+              p_quarto_id: string
+              p_rua?: string
+            }
+            Returns: {
+              codigo: string
+              id: string
+              valor_total: number
+            }[]
+          }
+        | {
+            Args: {
+              p_acompanhantes_adultos?: Json
+              p_bairro?: string
+              p_cep?: string
+              p_cidade?: string
+              p_complemento?: string
+              p_criancas?: Json
+              p_data_entrada: string
+              p_data_saida: string
+              p_empresa?: string
+              p_estado?: string
+              p_numero?: string
+              p_observacoes?: string
+              p_quarto_id: string
+              p_rua?: string
+              p_tem_pet?: boolean
+            }
+            Returns: {
+              codigo: string
+              id: string
+              valor_total: number
+            }[]
+          }
       criar_usuario_admin: {
         Args: {
           p_cargo: Database["public"]["Enums"]["cargo_usuario"]
@@ -2678,6 +2796,10 @@ export type Database = {
       current_cargo: {
         Args: never
         Returns: Database["public"]["Enums"]["cargo_usuario"]
+      }
+      definir_pin_ponto_funcionario: {
+        Args: { p_funcionario_id: string; p_pin: string }
+        Returns: undefined
       }
       distancia_descritores_jsonb: {
         Args: { a: Json; b: Json }
@@ -2725,39 +2847,124 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      finalizar_pagamento_hospedagem: {
-        Args: {
-          p_caixa_id: string
-          p_formas: Json
-          p_incluir_consumo: boolean
-          p_incluir_hospedagem: boolean
-          p_observacao?: string
-          p_reserva_id: string
-          p_valor_consumo?: number
-          p_valor_hospedagem?: number
-        }
+      finalizar_pagamento_hospedagem:
+        | {
+            Args: {
+              p_caixa_id: string
+              p_formas: Json
+              p_incluir_consumo: boolean
+              p_incluir_hospedagem: boolean
+              p_observacao?: string
+              p_reserva_id: string
+            }
+            Returns: {
+              caixa_id: string
+              created_at: string
+              id: string
+              inclui_consumo: boolean
+              inclui_hospedagem: boolean
+              observacao: string | null
+              quarto_id: string
+              reserva_id: string
+              usuario_id: string | null
+              valor_consumo: number
+              valor_hospedagem: number
+              valor_total: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "pagamentos"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              p_caixa_id: string
+              p_formas: Json
+              p_incluir_consumo: boolean
+              p_incluir_hospedagem: boolean
+              p_observacao?: string
+              p_reserva_id: string
+              p_valor_consumo?: number
+              p_valor_hospedagem?: number
+            }
+            Returns: {
+              caixa_id: string
+              created_at: string
+              id: string
+              inclui_consumo: boolean
+              inclui_hospedagem: boolean
+              observacao: string | null
+              quarto_id: string
+              reserva_id: string
+              usuario_id: string | null
+              valor_consumo: number
+              valor_hospedagem: number
+              valor_total: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "pagamentos"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      informacoes_sistema: { Args: never; Returns: Json }
+      iniciar_emissao_nota: {
+        Args: { p_nota_id: string }
         Returns: {
-          caixa_id: string
+          ambiente_emissao: string | null
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
           created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
           id: string
-          inclui_consumo: boolean
-          inclui_hospedagem: boolean
-          observacao: string | null
-          quarto_id: string
-          reserva_id: string
-          usuario_id: string | null
-          valor_consumo: number
-          valor_hospedagem: number
-          valor_total: number
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
+          updated_at: string
+          valor_final: number
+          valor_produtos: number
+          xml_retorno: string | null
         }
         SetofOptions: {
           from: "*"
-          to: "pagamentos"
+          to: "notas_fiscais"
           isOneToOne: true
           isSetofReturn: false
         }
       }
-      informacoes_sistema: { Args: never; Returns: Json }
       is_staff: { Args: never; Returns: boolean }
       listar_dados_reconhecimento_facial: {
         Args: never
@@ -2769,12 +2976,89 @@ export type Database = {
           nome: string
         }[]
       }
+      listar_hospedagens_pendentes: {
+        Args: never
+        Returns: {
+          reserva_id: string
+          valor_consumo_pendente: number
+          valor_hospedagem_pendente: number
+          valor_pendente_total: number
+        }[]
+      }
       marcar_no_show_reserva: {
         Args: { p_reserva_id: string }
         Returns: undefined
       }
+      reabrir_nota_rejeitada: {
+        Args: { p_nota_id: string }
+        Returns: {
+          ambiente_emissao: string | null
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          codigo_autenticacao: string | null
+          competencia: string
+          created_at: string
+          criada_por: string | null
+          data_emissao: string
+          desconto: number
+          emitida_em: string | null
+          emitida_por: string | null
+          erro_codigo: string | null
+          erro_em: string | null
+          erro_mensagem: string | null
+          id: string
+          iss_aliquota: number
+          iss_valor: number
+          numero: number
+          observacoes: string | null
+          protocolo_prefeitura: string | null
+          reserva_id: string | null
+          serie: string
+          servico_descricao: string
+          servico_quantidade: number
+          servico_valor_total: number
+          servico_valor_unitario: number
+          status: string
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_complemento: string | null
+          tomador_documento: string
+          tomador_email: string | null
+          tomador_empresa: string | null
+          tomador_estado: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_rua: string | null
+          tomador_telefone: string | null
+          updated_at: string
+          valor_final: number
+          valor_produtos: number
+          xml_retorno: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "notas_fiscais"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reconhecer_e_registrar_ponto: {
         Args: { p_descritor: Json }
+        Returns: {
+          atrasado: boolean
+          cargo: Database["public"]["Enums"]["cargo_usuario"]
+          foto_url: string
+          funcionario_id: string
+          minutos_diferenca: number
+          nome: string
+          ponto_id: string
+          registrado_em: string
+          tipo: string
+        }[]
+      }
+      reconhecer_ponto_por_pin: {
+        Args: { p_pin: string }
         Returns: {
           atrasado: boolean
           cargo: Database["public"]["Enums"]["cargo_usuario"]
@@ -2862,243 +3146,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      registrar_evento_chatbot: {
-        Args: {
-          p_aguardando_humano?: boolean
-          p_chave_api: string
-          p_hospede_nome?: string
-          p_mensagem?: string
-          p_remetente?: string
-          p_remote_jid: string
-        }
-        Returns: string
-      }
-      registrar_movimentacao_estoque: {
-        Args: {
-          p_motivo?: string
-          p_produto_id: string
-          p_quantidade: number
-          p_tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
-        }
-        Returns: {
-          created_at: string
-          id: string
-          motivo: string | null
-          produto_id: string
-          quantidade: number
-          quarto_id: string | null
-          reserva_id: string | null
-          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
-          updated_at: string
-          usuario_id: string | null
-          valor_total: number | null
-          valor_unitario: number | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "estoque"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      registrar_venda_balcao: {
-        Args: {
-          p_caixa_id: string
-          p_formas: Json
-          p_itens: Json
-          p_observacao?: string
-        }
-        Returns: {
-          cancelada_em: string | null
-          cancelada_por: string | null
-          caixa_id: string
-          created_at: string
-          id: string
-          observacao: string | null
-          status: string
-          updated_at: string
-          usuario_id: string | null
-          valor_total: number
-        }
-        SetofOptions: {
-          from: "*"
-          to: "vendas_balcao"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      cancelar_venda_balcao: {
-        Args: { p_venda_id: string }
-        Returns: undefined
-      }
-      confirmar_emissao_nota: {
-        Args: {
-          p_ambiente: string
-          p_codigo_autenticacao: string
-          p_nota_id: string
-          p_protocolo: string
-          p_xml_retorno?: string
-        }
-        Returns: {
-          ambiente_emissao: string | null
-          cancelada_em: string | null
-          cancelada_motivo: string | null
-          codigo_autenticacao: string | null
-          competencia: string
-          created_at: string
-          criada_por: string | null
-          data_emissao: string
-          desconto: number
-          emitida_em: string | null
-          emitida_por: string | null
-          erro_codigo: string | null
-          erro_em: string | null
-          erro_mensagem: string | null
-          id: string
-          iss_aliquota: number
-          iss_valor: number
-          numero: number
-          observacoes: string | null
-          protocolo_prefeitura: string | null
-          reserva_id: string | null
-          serie: string
-          servico_descricao: string
-          servico_quantidade: number
-          servico_valor_total: number
-          servico_valor_unitario: number
-          status: string
-          tomador_bairro: string | null
-          tomador_cep: string | null
-          tomador_cidade: string | null
-          tomador_complemento: string | null
-          tomador_documento: string
-          tomador_email: string | null
-          tomador_empresa: string | null
-          tomador_estado: string | null
-          tomador_nome: string
-          tomador_numero: string | null
-          tomador_rua: string | null
-          tomador_telefone: string | null
-          updated_at: string
-          valor_final: number
-          valor_produtos: number
-          xml_retorno: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "notas_fiscais"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      iniciar_emissao_nota: {
-        Args: { p_nota_id: string }
-        Returns: {
-          ambiente_emissao: string | null
-          cancelada_em: string | null
-          cancelada_motivo: string | null
-          codigo_autenticacao: string | null
-          competencia: string
-          created_at: string
-          criada_por: string | null
-          data_emissao: string
-          desconto: number
-          emitida_em: string | null
-          emitida_por: string | null
-          erro_codigo: string | null
-          erro_em: string | null
-          erro_mensagem: string | null
-          id: string
-          iss_aliquota: number
-          iss_valor: number
-          numero: number
-          observacoes: string | null
-          protocolo_prefeitura: string | null
-          reserva_id: string | null
-          serie: string
-          servico_descricao: string
-          servico_quantidade: number
-          servico_valor_total: number
-          servico_valor_unitario: number
-          status: string
-          tomador_bairro: string | null
-          tomador_cep: string | null
-          tomador_cidade: string | null
-          tomador_complemento: string | null
-          tomador_documento: string
-          tomador_email: string | null
-          tomador_empresa: string | null
-          tomador_estado: string | null
-          tomador_nome: string
-          tomador_numero: string | null
-          tomador_rua: string | null
-          tomador_telefone: string | null
-          updated_at: string
-          valor_final: number
-          valor_produtos: number
-          xml_retorno: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "notas_fiscais"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      reabrir_nota_rejeitada: {
-        Args: { p_nota_id: string }
-        Returns: {
-          ambiente_emissao: string | null
-          cancelada_em: string | null
-          cancelada_motivo: string | null
-          codigo_autenticacao: string | null
-          competencia: string
-          created_at: string
-          criada_por: string | null
-          data_emissao: string
-          desconto: number
-          emitida_em: string | null
-          emitida_por: string | null
-          erro_codigo: string | null
-          erro_em: string | null
-          erro_mensagem: string | null
-          id: string
-          iss_aliquota: number
-          iss_valor: number
-          numero: number
-          observacoes: string | null
-          protocolo_prefeitura: string | null
-          reserva_id: string | null
-          serie: string
-          servico_descricao: string
-          servico_quantidade: number
-          servico_valor_total: number
-          servico_valor_unitario: number
-          status: string
-          tomador_bairro: string | null
-          tomador_cep: string | null
-          tomador_cidade: string | null
-          tomador_complemento: string | null
-          tomador_documento: string
-          tomador_email: string | null
-          tomador_empresa: string | null
-          tomador_estado: string | null
-          tomador_nome: string
-          tomador_numero: string | null
-          tomador_rua: string | null
-          tomador_telefone: string | null
-          updated_at: string
-          valor_final: number
-          valor_produtos: number
-          xml_retorno: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "notas_fiscais"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       registrar_erro_emissao_nota: {
         Args: {
           p_ambiente: string
@@ -3158,23 +3205,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      remover_certificado_digital_nfse: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      salvar_certificado_digital_nfse: {
+      registrar_evento_chatbot: {
         Args: {
-          p_arquivo_base64: string
-          p_nome_arquivo: string
-          p_senha: string
-          p_titular_cnpj?: string
-          p_validade_ate?: string
+          p_aguardando_humano?: boolean
+          p_chave_api: string
+          p_hospede_nome?: string
+          p_mensagem?: string
+          p_remetente?: string
+          p_remote_jid: string
         }
-        Returns: undefined
+        Returns: string
       }
-      status_certificado_digital_nfse: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
+      registrar_movimentacao_estoque: {
+        Args: {
+          p_motivo?: string
+          p_produto_id: string
+          p_quantidade: number
+          p_tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
+        }
+        Returns: {
+          created_at: string
+          funcionario_id: string | null
+          id: string
+          localizacao: Database["public"]["Enums"]["localizacao_estoque"] | null
+          motivo: string | null
+          produto_id: string
+          quantidade: number
+          quarto_id: string | null
+          reserva_id: string | null
+          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number | null
+          valor_unitario: number | null
+          venda_balcao_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "estoque"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       registrar_ponto_facial: {
         Args: { p_confianca?: number; p_funcionario_id: string }
@@ -3199,61 +3270,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      definir_pin_ponto_funcionario: {
-        Args: { p_funcionario_id: string; p_pin: string }
-        Returns: undefined
-      }
-      reconhecer_ponto_por_pin: {
-        Args: { p_pin: string }
-        Returns: {
-          atrasado: boolean
-          cargo: Database["public"]["Enums"]["cargo_usuario"]
-          foto_url: string
-          funcionario_id: string
-          minutos_diferenca: number
-          nome: string
-          ponto_id: string
-          registrado_em: string
-          tipo: string
-        }[]
-      }
-      remover_consumo_quarto: {
-        Args: { p_consumo_id: string }
-        Returns: undefined
-      }
-      remover_pin_ponto_funcionario: {
-        Args: { p_funcionario_id: string }
-        Returns: undefined
-      }
-      repor_localizacao_estoque: {
-        Args: {
-          p_localizacao: Database["public"]["Enums"]["localizacao_estoque"]
-          p_motivo?: string
-          p_produto_id: string
-          p_quantidade: number
-        }
-        Returns: {
-          created_at: string
-          id: string
-          localizacao: Database["public"]["Enums"]["localizacao_estoque"] | null
-          motivo: string | null
-          produto_id: string
-          quantidade: number
-          quarto_id: string | null
-          reserva_id: string | null
-          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
-          updated_at: string
-          usuario_id: string | null
-          valor_total: number | null
-          valor_unitario: number | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "estoque"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       registrar_saida_caixa: {
         Args: { p_caixa_id: string; p_descricao: string; p_valor: number }
         Returns: {
@@ -3273,6 +3289,41 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      registrar_venda_balcao: {
+        Args: {
+          p_caixa_id: string
+          p_formas: Json
+          p_itens: Json
+          p_observacao?: string
+        }
+        Returns: {
+          caixa_id: string
+          cancelada_em: string | null
+          cancelada_por: string | null
+          created_at: string
+          id: string
+          observacao: string | null
+          status: string
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendas_balcao"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      remover_certificado_digital_nfse: { Args: never; Returns: undefined }
+      remover_consumo_quarto: {
+        Args: { p_consumo_id: string }
+        Returns: undefined
+      }
+      remover_pin_ponto_funcionario: {
+        Args: { p_funcionario_id: string }
+        Returns: undefined
       }
       renovar_reserva: {
         Args: { p_nova_data_saida: string; p_reserva_id: string }
@@ -3317,6 +3368,48 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      repor_localizacao_estoque: {
+        Args: {
+          p_localizacao: Database["public"]["Enums"]["localizacao_estoque"]
+          p_motivo?: string
+          p_produto_id: string
+          p_quantidade: number
+        }
+        Returns: {
+          created_at: string
+          funcionario_id: string | null
+          id: string
+          localizacao: Database["public"]["Enums"]["localizacao_estoque"] | null
+          motivo: string | null
+          produto_id: string
+          quantidade: number
+          quarto_id: string | null
+          reserva_id: string | null
+          tipo: Database["public"]["Enums"]["tipo_movimentacao_estoque"]
+          updated_at: string
+          usuario_id: string | null
+          valor_total: number | null
+          valor_unitario: number | null
+          venda_balcao_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "estoque"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      salvar_certificado_digital_nfse: {
+        Args: {
+          p_arquivo_base64: string
+          p_nome_arquivo: string
+          p_senha: string
+          p_titular_cnpj?: string
+          p_validade_ate?: string
+        }
+        Returns: undefined
+      }
+      status_certificado_digital_nfse: { Args: never; Returns: Json }
       trocar_quarto_reserva: {
         Args: { p_novo_quarto_id: string; p_reserva_id: string }
         Returns: {
@@ -3417,12 +3510,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -3446,11 +3539,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -3471,11 +3564,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -3496,11 +3589,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -3513,11 +3606,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

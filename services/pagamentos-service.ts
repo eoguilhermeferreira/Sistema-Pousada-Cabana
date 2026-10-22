@@ -12,62 +12,62 @@ import type { ReservaComRelacoes } from "@/types/reserva";
 const RESERVA_SELECT =
   "*, hospede_principal:hospedes!reservas_hospede_principal_id_fkey(*), quarto:quartos(*, categoria:categorias_quarto(*))";
 
-// Traz os consumos já embutidos na mesma consulta (em vez de uma segunda
-// consulta com .in("reserva_id", ids)) — com o hotel já passando de 600+
-// reservas, aquele "ids" virava uma URL com centenas de UUIDs e o
-// PostgREST passou a rejeitar com 400 (URI grande demais), derrubando a
-// lista inteira de hospedagens pendentes no Caixa.
-//
-// O filtro "pago=false" é aplicado aqui no JavaScript, não como
-// .eq("quarto_consumos.pago", false) na query — isso parecia equivalente
-// (e corrigia o 400), mas o PostgREST aplica esse filtro como se fosse um
-// INNER JOIN: reserva que acabou de fazer check-in e ainda não tem NENHUM
-// consumo lançado some da lista inteira (não só o consumo, a reserva
-// toda), porque não existe nenhuma linha de quarto_consumos pra comparar
-// com "pago=false". Foi exatamente isso que fez hóspede recém chegado
-// desaparecer da busca no Caixa.
-const RESERVA_SELECT_COM_CONSUMOS = `${RESERVA_SELECT}, quarto_consumos(valor_total, pago)`;
-
-/** Reservas que ainda não fizeram check-out sempre aparecem no caixa,
- * mesmo com tudo pago no momento — podem consumir/receber pagamento
- * adiantado depois. Depois do check-out, some da lista assim que quitada
- * (comportamento anterior, preservado). */
-const STATUS_SEMPRE_VISIVEL = new Set(["reservada", "confirmada", "checkin_realizado"]);
+interface LinhaPendente {
+  reserva_id: string;
+  valor_hospedagem_pendente: number;
+  valor_consumo_pendente: number;
+  valor_pendente_total: number;
+}
 
 export async function listHospedagensPendentes(): Promise<HospedagemPendente[]> {
   const supabase = createClient();
 
-  const { data: reservasData, error } = await supabase
-    .from("reservas")
-    .select(RESERVA_SELECT_COM_CONSUMOS)
-    .in("status", ["reservada", "confirmada", "checkin_realizado", "checkout_realizado"])
-    .order("data_entrada", { ascending: true });
-  if (error) throw error;
+  // O filtro de quem está pendente (ou sempre visível por ainda não ter
+  // feito check-out) é calculado dentro do banco, pela função abaixo —
+  // não aqui no JavaScript depois de buscar TODAS as reservas com esses
+  // status. Esse "buscar tudo e filtrar depois" foi o que causou o bug
+  // mais grave já visto no sistema: o hotel já passa de 1000 reservas com
+  // status reservada/confirmada/checkin_realizado/checkout_realizado (a
+  // maioria check-outs antigos e já pagos, que nunca saem dessa lista), e
+  // o PostgREST só devolve as primeiras 1000 linhas de qualquer consulta
+  // por padrão — sem erro nenhum, só corta o resto em silêncio. Hóspedes
+  // como o Severino (quarto 3) e vários outros citados pela Rose caíam
+  // exatamente depois desse corte e nunca apareciam no Caixa, por mais
+  // que estivessem com pagamento pendente de verdade. Calculando a
+  // pendência no SQL, o resultado fica limitado aos poucos que realmente
+  // têm algo pendente (hoje, ~86 — bem abaixo do limite), e nunca mais
+  // cresce junto com o histórico do hotel.
+  const { data: pendenciasData, error: pendenciasError } = await supabase.rpc(
+    "listar_hospedagens_pendentes",
+  );
+  if (pendenciasError) throw pendenciasError;
 
-  const reservas = (reservasData ?? []) as unknown as (ReservaComRelacoes & {
-    quarto_consumos: { valor_total: number; pago: boolean }[] | null;
-  })[];
-  if (reservas.length === 0) return [];
+  const pendencias = (pendenciasData ?? []) as LinhaPendente[];
+  if (pendencias.length === 0) return [];
+
+  const ids = pendencias.map((p) => p.reserva_id);
+  const { data: reservasData, error: reservasError } = await supabase
+    .from("reservas")
+    .select(RESERVA_SELECT)
+    .in("id", ids);
+  if (reservasError) throw reservasError;
+
+  const reservasPorId = new Map(
+    (reservasData ?? []).map((reserva) => [
+      (reserva as unknown as ReservaComRelacoes).id,
+      reserva as unknown as ReservaComRelacoes,
+    ]),
+  );
 
   const pendentes: HospedagemPendente[] = [];
-  for (const reserva of reservas) {
-    const valorHospedagemPendente = Math.max(
-      reserva.valor_total - reserva.valor_hospedagem_pago,
-      0,
-    );
-    const consumoBruto = (reserva.quarto_consumos ?? [])
-      .filter((consumo) => !consumo.pago)
-      .reduce((total, consumo) => total + consumo.valor_total, 0);
-    const valorConsumoPendente = Math.max(consumoBruto - reserva.valor_consumo_pago, 0);
-    const valorPendenteTotal = valorHospedagemPendente + valorConsumoPendente;
-
-    if (valorPendenteTotal <= 0 && !STATUS_SEMPRE_VISIVEL.has(reserva.status)) continue;
-
+  for (const p of pendencias) {
+    const reserva = reservasPorId.get(p.reserva_id);
+    if (!reserva) continue;
     pendentes.push({
       reserva,
-      valorHospedagemPendente,
-      valorConsumoPendente,
-      valorPendenteTotal,
+      valorHospedagemPendente: p.valor_hospedagem_pendente,
+      valorConsumoPendente: p.valor_consumo_pendente,
+      valorPendenteTotal: p.valor_pendente_total,
     });
   }
 

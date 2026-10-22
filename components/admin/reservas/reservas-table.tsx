@@ -81,8 +81,12 @@ const columns: { label: string; field?: SortField }[] = [
   { label: "Saída", field: "data_saida" },
   { label: "Hóspedes" },
   { label: "Valor total", field: "valor_total" },
+  // Status e os botões de ação (ver/editar/cancelar) vivem numa única
+  // célula fixa na borda direita — duas colunas sticky separadas (uma
+  // versão anterior desta tela) dependiam de larguras combinarem
+  // perfeitamente entre cabeçalho e corpo, e qualquer divergência fazia
+  // uma sobrepor a outra e tampar "Saída"/"Valor total" por trás.
   { label: "Status", field: "status" },
-  { label: "" },
 ];
 
 export function ReservasTable({
@@ -126,21 +130,20 @@ export function ReservasTable({
                       ? ArrowUp
                       : ArrowDown
                     : ArrowUpDown;
-                const isAcoes = !column.field;
-                const isStatus = column.label === "Status";
+                const isStatusAcoes = column.label === "Status";
                 return (
                   <th
                     key={column.label || "acoes"}
                     className={cn(
                       "px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-text",
-                      // Status e Ações ficam grudados na borda direita da
-                      // tabela, por cima do conteúdo que rola — numa tela
-                      // menor (ou com muitas colunas, como depois que
-                      // "Criada em" foi adicionada), esses dois ficavam
-                      // escondidos fora da área visível e só apareciam
-                      // rolando a tabela pro lado, o que ninguém reparava.
-                      isAcoes && "sticky right-0 z-10 w-[150px] bg-admin-bg",
-                      isStatus && "sticky right-[150px] z-10 w-[130px] bg-admin-bg",
+                      // Fica grudada na borda direita da tabela, por cima do
+                      // conteúdo que rola — numa tela menor (ou com muitas
+                      // colunas, como depois que "Criada em" foi
+                      // adicionada), status e ações ficavam escondidos fora
+                      // da área visível e só apareciam rolando a tabela pro
+                      // lado, o que ninguém reparava.
+                      isStatusAcoes &&
+                        "sticky right-0 z-10 w-[220px] bg-admin-bg text-right",
                     )}
                   >
                     {column.field ? (
@@ -222,11 +225,10 @@ export function ReservasTable({
                     <td className="px-5 py-3 font-medium text-primary-dark">
                       {currency.format(reserva.valor_total)}
                     </td>
-                    <td className="sticky right-[150px] z-10 w-[130px] bg-white px-5 py-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-admin-bg/40">
-                      <ReservaStatusBadge status={reserva.status} />
-                    </td>
-                    <td className="sticky right-0 z-10 w-[150px] bg-white px-5 py-3 group-hover:bg-admin-bg/40">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="sticky right-0 z-10 w-[220px] bg-white px-5 py-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-admin-bg/40">
+                      <div className="flex flex-col items-end gap-2">
+                        <ReservaStatusBadge status={reserva.status} />
+                        <div className="flex items-center gap-1.5">
                         {reserva.status === "reservada" && (
                           <button
                             type="button"
@@ -271,6 +273,7 @@ export function ReservasTable({
                             <span className="sr-only">Cancelar</span>
                           </button>
                         )}
+                        </div>
                       </div>
                     </td>
                   </tr>

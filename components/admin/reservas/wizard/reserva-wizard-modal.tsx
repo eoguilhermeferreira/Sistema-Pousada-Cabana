@@ -47,6 +47,7 @@ export function ReservaWizardModal({
   const [temPet, setTemPet] = React.useState(false);
   const [observacoes, setObservacoes] = React.useState("");
   const [saving, setSaving] = React.useState(false);
+  const salvandoRef = React.useRef(false);
   const [error, setError] = React.useState("");
 
   React.useEffect(() => {
@@ -119,6 +120,10 @@ export function ReservaWizardModal({
 
   async function handleConfirm() {
     if (!hospede || !quarto) return;
+    // O "disabled={saving}" só vale depois que a tela redesenha; um clique
+    // duplo rápido passava antes disso e criava a mesma reserva duas vezes.
+    if (salvandoRef.current) return;
+    salvandoRef.current = true;
     setSaving(true);
     setError("");
     try {
@@ -169,6 +174,7 @@ export function ReservaWizardModal({
     } catch (err) {
       setError(getErrorMessage(err) || "Não foi possível salvar a reserva.");
     } finally {
+      salvandoRef.current = false;
       setSaving(false);
     }
   }

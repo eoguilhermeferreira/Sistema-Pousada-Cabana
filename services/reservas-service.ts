@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { dateKey } from "@/lib/calendar-grid";
 import type {
   Reserva,
   ReservaComRelacoes,
@@ -72,6 +73,35 @@ export async function getReservaRelevantePorQuarto(
   quartoId: string,
 ): Promise<ReservaDetalhada | null> {
   const supabase = createClient();
+  const hoje = dateKey(new Date());
+
+  // Prioriza quem está no quarto hoje. Um check-in antigo que ninguém
+  // fechou (hóspede já foi embora) não pode passar na frente do hóspede
+  // novo, senão o consumo do novo vai pra conta do antigo.
+  const { data: checkinHoje, error: checkinHojeError } = await supabase
+    .from("reservas")
+    .select("id")
+    .eq("quarto_id", quartoId)
+    .eq("status", "checkin_realizado")
+    .gte("data_saida", hoje)
+    .order("data_entrada", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (checkinHojeError) throw checkinHojeError;
+  if (checkinHoje) return getReservaById(checkinHoje.id);
+
+  const { data: confirmadaHoje, error: confirmadaHojeError } = await supabase
+    .from("reservas")
+    .select("id")
+    .eq("quarto_id", quartoId)
+    .eq("status", "confirmada")
+    .lte("data_entrada", hoje)
+    .gte("data_saida", hoje)
+    .order("data_entrada", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (confirmadaHojeError) throw confirmadaHojeError;
+  if (confirmadaHoje) return getReservaById(confirmadaHoje.id);
 
   const { data: checkinAtivo, error: checkinError } = await supabase
     .from("reservas")

@@ -135,6 +135,12 @@ export function AdicionarConsumoModal({
       setError("Adicione ao menos um produto.");
       return;
     }
+    if (!reservaId) {
+      setError(
+        "Nenhum hóspede hospedado neste quarto. Faça o check-in antes de lançar consumo.",
+      );
+      return;
+    }
 
     setSaving(true);
     try {

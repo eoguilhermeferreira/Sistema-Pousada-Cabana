@@ -31,6 +31,7 @@ import {
   removerConsumoQuarto,
 } from "@/services/consumo-service";
 import { calcularNoites, calcularValores } from "@/lib/reserva-pricing";
+import { dateKey } from "@/lib/calendar-grid";
 import { formatPhone } from "@/lib/phone";
 import { getComodidadeIcon, type QuartoDetalhado } from "@/types/quarto";
 import { reservaHistoricoEventoLabels, type ReservaDetalhada } from "@/types/reserva";
@@ -153,10 +154,19 @@ export function QuartoCentralDrawer({
   const [renovarReservaOpen, setRenovarReservaOpen] = React.useState(false);
   const [removingId, setRemovingId] = React.useState<string | null>(null);
 
-  // Só se pode lançar consumo com o hóspede já hospedado (check-in feito) —
-  // uma reserva apenas confirmada, aguardando chegada, não conta.
+  // Consumo sem reserva vinculada aparece aqui (que lista por quarto), mas
+  // nunca no Caixa (que cobra por reserva). Por isso também vale a reserva
+  // confirmada cujo período inclui hoje (hóspede no quarto, check-in ainda
+  // não clicado), e sem nenhuma reserva o lançamento fica bloqueado.
+  const hoje = dateKey(new Date());
   const reservaAtivaId =
-    reservaRelevante?.status === "checkin_realizado" ? reservaRelevante.id : null;
+    reservaRelevante &&
+    (reservaRelevante.status === "checkin_realizado" ||
+      (reservaRelevante.status === "confirmada" &&
+        reservaRelevante.data_entrada <= hoje &&
+        hoje <= reservaRelevante.data_saida))
+      ? reservaRelevante.id
+      : null;
 
   // Só é possível trocar de quarto antes do check-out (mesma regra da RPC
   // trocar_quarto_reserva).
@@ -491,11 +501,23 @@ export function QuartoCentralDrawer({
                   <p className="text-xs font-semibold uppercase tracking-wide text-gray-text">
                     Produtos consumidos
                   </p>
-                  <Button size="sm" onClick={() => setAdicionarConsumoOpen(true)}>
+                  <Button
+                    size="sm"
+                    onClick={() => setAdicionarConsumoOpen(true)}
+                    disabled={!reservaAtivaId}
+                  >
                     <Plus className="size-4" />
                     Adicionar Produto
                   </Button>
                 </div>
+
+                {!reservaAtivaId && (
+                  <p className="rounded-xl bg-status-manutencao-light px-4 py-3 text-sm text-status-manutencao">
+                    Nenhum hóspede hospedado neste quarto hoje. Faça o check-in
+                    do hóspede antes de lançar consumo, para que ele apareça no
+                    Caixa na hora de cobrar.
+                  </p>
+                )}
 
                 {loadingConsumo ? (
                   <div className="flex min-h-[20vh] items-center justify-center">
